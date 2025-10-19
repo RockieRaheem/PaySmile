@@ -86,7 +86,7 @@ export default function SettingsPage() {
         userName: userProfile.userName || '',
         email: userProfile.email || user?.email || '',
       });
-    } else if (user && !isProfileLoading) {
+    } else if (user && !isProfileLoading && !userProfile) {
         // Create a default profile if one doesn't exist
         const defaultProfile = {
             userName: user.displayName || 'Anonymous User',
@@ -342,3 +342,5 @@ export default function SettingsPage() {
     </div>
   );
 }
+
+    

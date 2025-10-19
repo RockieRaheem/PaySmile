@@ -221,7 +221,7 @@
       "schema": {
         "$ref": "#/entities/UserProfile"
       },
-      "description": "Stores user profile data, owned by the user. The userId parameter matches the authenticated user's UID."
+      "description": "Stores user profile data. Users can read and write their own profile."
     },
     "/users/{userId}/settings/{settingsId}": {
       "schema": {
@@ -255,3 +255,5 @@
     }
   }
 }
+
+    
