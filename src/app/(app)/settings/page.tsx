@@ -32,7 +32,7 @@ import { Label } from '@/components/ui/label';
 
 const profileSchema = z.object({
   userName: z.string().min(2, 'Username must be at least 2 characters.'),
-  email: z.string().email('Please enter a valid email address.'),
+  email: z.string().email('Please enter a valid email address.').or(z.literal('')),
 });
 
 const settingsSchema = z.object({
@@ -52,7 +52,7 @@ export default function SettingsPage() {
   const router = useRouter();
 
   const userProfileRef = useMemoFirebase(
-    () => (user ? doc(firestore, `users/${user.uid}/userProfile`, user.uid) : null),
+    () => (user ? doc(firestore, 'users', user.uid) : null),
     [user, firestore]
   );
   
@@ -86,13 +86,23 @@ export default function SettingsPage() {
         userName: userProfile.userName || '',
         email: userProfile.email || user?.email || '',
       });
+    } else if (user && !isProfileLoading) {
+        // Create a default profile if one doesn't exist
+        const defaultProfile = {
+            userName: 'Anonymous User',
+            email: user.email || '',
+        };
+        if (userProfileRef) {
+            setDocumentNonBlocking(userProfileRef, defaultProfile, { merge: true });
+        }
     }
+
     if (userSettings) {
       settingsForm.reset({
         notificationsEnabled: userSettings.notificationsEnabled || false,
       });
     }
-  }, [userProfile, user, profileForm, userSettings, settingsForm]);
+  }, [user, userProfile, isProfileLoading, userProfileRef, userSettings, profileForm, settingsForm]);
   
   const handleClaimBadge = async () => {
     setIsGeneratingNFT(true);
@@ -143,7 +153,9 @@ export default function SettingsPage() {
   };
 
   const handleLogout = async () => {
-    await auth.signOut();
+    if (auth) {
+      await auth.signOut();
+    }
     router.push('/');
   };
 

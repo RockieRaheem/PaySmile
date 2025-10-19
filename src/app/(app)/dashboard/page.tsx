@@ -42,13 +42,15 @@ export default function DashboardPage() {
   const router = useRouter();
 
   const userProfileRef = useMemoFirebase(
-    () => (user ? doc(firestore, `users/${user.uid}/userProfile`, user.uid) : null),
+    () => (user ? doc(firestore, 'users', user.uid) : null),
     [user, firestore]
   );
   const { data: userProfile } = useDoc(userProfileRef);
 
   const handleLogout = async () => {
-    await auth.signOut();
+    if (auth) {
+      await auth.signOut();
+    }
     router.push('/');
   };
 
