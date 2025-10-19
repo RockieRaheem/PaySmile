@@ -1,0 +1,193 @@
+/**
+ * @fileoverview Firestore Security Rules for PaySmile.
+ *
+ * Core Philosophy:
+ * This ruleset enforces a strict user-ownership model for data stored under `/users/{userId}`,
+ * ensuring that only the authenticated user can access their own profile information, settings,
+ * donations, smile badges, and project votes. Projects stored in the `/projects` collection
+ * are publicly readable.
+ *
+ * Data Structure:
+ * - /users/{userId}/userProfile: User profile data, owned by the user.
+ * - /users/{userId}/settings/{settingsId}: User-specific settings, owned by the user.
+ * - /users/{userId}/donations/{donationId}: Donation records for a specific user.
+ * - /users/{userId}/smileBadges/{smileBadgeId}: NFT badges awarded to a user.
+ * - /users/{userId}/projectVotes/{projectVoteId}: User's votes for community projects.
+ * - /projects/{projectId}: Community project data (publicly readable).
+ *
+ * Key Security Decisions:
+ * - User listing is disallowed.
+ * - Strict ownership is enforced for all user-specific data.
+ * - Public read access is granted for the /projects collection.
+ * - Data consistency between the path and document ID is enforced for user-owned data on creation and updates.
+ *
+ * Denormalization for Authorization:
+ * - User-owned data is nested under /users/{userId} to avoid needing get() calls to check ownership.
+ *
+ * Structural Segregation:
+ * - User profiles and settings are stored in separate collections under /users/{userId} to allow for potentially different access control rules in the future.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * @description Ensures the user is signed in.
+     * @path N/A
+     * @allow N/A
+     * @deny N/A
+     * @principle Fundamental check for authentication.
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /**
+     * @description Checks if the request is made by the owner of the resource.
+     * @path N/A
+     * @allow N/A
+     * @deny N/A
+     * @principle Ensures that only the owner can modify their data.
+     *
+     * @param {string} userId - The user ID to check against the request's auth UID.
+     */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+     /**
+      * @description Checks if the request is made by the owner of the resource and the resource exists
+      * @path N/A
+      * @allow N/A
+      * @deny N/A
+      * @principle Ensures that only the owner can modify their data and that the data exists.
+      */
+    function isExistingOwner(userId) {
+      return isOwner(userId) && resource != null;
+    }
+
+
+    /**
+     * @description Rules for user profiles. Only the authenticated user can access their own profile.
+     * @path /users/{userId}/userProfile
+     * @allow (create) User 'user_abc' can create their profile if request.auth.uid == userId.
+     * @allow (get) User 'user_abc' can get their profile if request.auth.uid == userId.
+     * @allow (update) User 'user_abc' can update their profile if request.auth.uid == userId.
+     * @allow (delete) User 'user_abc' can delete their profile if request.auth.uid == userId.
+     * @deny (create) User 'user_xyz' cannot create profile for user 'user_abc'.
+     * @deny (get) User 'user_xyz' cannot get profile for user 'user_abc'.
+     * @deny (update) User 'user_xyz' cannot update profile for user 'user_abc'.
+     * @deny (delete) User 'user_xyz' cannot delete profile for user 'user_abc'.
+     * @principle Enforces document ownership for all operations.
+     */
+    match /users/{userId}/userProfile {
+      allow get: if isOwner(userId);
+      allow list: if false;
+      allow create: if isOwner(userId) && request.resource.data.id == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Rules for user settings. Only the authenticated user can access their own settings.
+     * @path /users/{userId}/settings/{settingsId}
+     * @allow (create) User 'user_abc' can create settings if request.auth.uid == userId.
+     * @allow (get) User 'user_abc' can get their settings if request.auth.uid == userId.
+     * @allow (update) User 'user_abc' can update their settings if request.auth.uid == userId.
+     * @allow (delete) User 'user_abc' can delete their settings if request.auth.uid == userId.
+     * @deny (create) User 'user_xyz' cannot create settings for user 'user_abc'.
+     * @deny (get) User 'user_xyz' cannot get settings for user 'user_abc'.
+     * @deny (update) User 'user_xyz' cannot update settings for user 'user_abc'.
+     * @deny (delete) User 'user_xyz' cannot delete settings for user 'user_abc'.
+     * @principle Enforces document ownership for all operations.
+     */
+    match /users/{userId}/settings/{settingsId} {
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.userProfileId == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.userProfileId == resource.data.userProfileId;
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Rules for user donations. Only the authenticated user can access their own donations.
+     * @path /users/{userId}/donations/{donationId}
+     * @allow (create) User 'user_abc' can create a donation if request.auth.uid == userId.
+     * @allow (get) User 'user_abc' can get their donation if request.auth.uid == userId.
+     * @allow (update) User 'user_abc' can update their donation if request.auth.uid == userId.
+     * @allow (delete) User 'user_abc' can delete their donation if request.auth.uid == userId.
+     * @deny (create) User 'user_xyz' cannot create a donation for user 'user_abc'.
+     * @deny (get) User 'user_xyz' cannot get donation for user 'user_abc'.
+     * @deny (update) User 'user_xyz' cannot update donation for user 'user_abc'.
+     * @deny (delete) User 'user_xyz' cannot delete donation for user 'user_abc'.
+     * @principle Enforces document ownership for all operations.
+     */
+    match /users/{userId}/donations/{donationId} {
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.userProfileId == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.userProfileId == resource.data.userProfileId;
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Rules for user smile badges. Only the authenticated user can access their own smile badges.
+     * @path /users/{userId}/smileBadges/{smileBadgeId}
+     * @allow (create) User 'user_abc' can create a smile badge if request.auth.uid == userId.
+     * @allow (get) User 'user_abc' can get their smile badge if request.auth.uid == userId.
+     * @allow (update) User 'user_abc' can update their smile badge if request.auth.uid == userId.
+     * @allow (delete) User 'user_abc' can delete their smile badge if request.auth.uid == userId.
+     * @deny (create) User 'user_xyz' cannot create a smile badge for user 'user_abc'.
+     * @deny (get) User 'user_xyz' cannot get smile badge for user 'user_abc'.
+     * @deny (update) User 'user_xyz' cannot update smile badge for user 'user_abc'.
+     * @deny (delete) User 'user_xyz' cannot delete smile badge for user 'user_abc'.
+     * @principle Enforces document ownership for all operations.
+     */
+    match /users/{userId}/smileBadges/{smileBadgeId} {
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.userProfileId == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.userProfileId == resource.data.userProfileId;
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Rules for user project votes. Only the authenticated user can access their own project votes.
+     * @path /users/{userId}/projectVotes/{projectVoteId}
+     * @allow (create) User 'user_abc' can create a project vote if request.auth.uid == userId.
+     * @allow (get) User 'user_abc' can get their project vote if request.auth.uid == userId.
+     * @allow (update) User 'user_abc' can update their project vote if request.auth.uid == userId.
+     * @allow (delete) User 'user_abc' can delete their project vote if request.auth.uid == userId.
+     * @deny (create) User 'user_xyz' cannot create a project vote for user 'user_abc'.
+     * @deny (get) User 'user_xyz' cannot get project vote for user 'user_abc'.
+     * @deny (update) User 'user_xyz' cannot update project vote for user 'user_abc'.
+     * @deny (delete) User 'user_xyz' cannot delete project vote for user 'user_abc'.
+     * @principle Enforces document ownership for all operations.
+     */
+    match /users/{userId}/projectVotes/{projectVoteId} {
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.userProfileId == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.userProfileId == resource.data.userProfileId;
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Rules for community projects. Projects are publicly readable, but writes are disallowed (for now).
+     * @path /projects/{projectId}
+     * @allow (get) Any user can get a project.
+     * @allow (list) Any user can list projects.
+     * @deny (create) No one can create a project (for now).
+     * @deny (update) No one can update a project (for now).
+     * @deny (delete) No one can delete a project (for now).
+     * @principle Allows public read access while restricting write access.
+     */
+    match /projects/{projectId} {
+      allow get: if true;
+      allow list: if true;
+      allow create: if false;
+      allow update: if false;
+      allow delete: if false;
+    }
+  }
+}

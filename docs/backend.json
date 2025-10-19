@@ -1,0 +1,367 @@
+{
+  "entities": {
+    "UserProfile": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UserProfile",
+      "type": "object",
+      "description": "Represents a user's profile within the PaySmile application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the user profile."
+        },
+        "walletAddress": {
+          "type": "string",
+          "description": "The user's Celo or Valora wallet address."
+        },
+        "userName": {
+          "type": "string",
+          "description": "The user's display name.",
+          "format": "string"
+        },
+        "email": {
+          "type": "string",
+          "description": "The user's email address for communication.",
+          "format": "email"
+        },
+        "profilePictureUrl": {
+          "type": "string",
+          "description": "URL of the user's profile picture.",
+          "format": "uri"
+        },
+        "monthlyDonationLimit": {
+          "type": "number",
+          "description": "The user's self-imposed monthly donation limit in UGX."
+        },
+        "roundUpPreference": {
+          "type": "number",
+          "description": "User's round-up preference (e.g., 10, 50, 100 UGX)."
+        },
+        "automaticRoundUpsEnabled": {
+          "type": "boolean",
+          "description": "Indicates whether automatic round-ups are enabled for the user."
+        }
+      },
+      "required": [
+        "id",
+        "walletAddress",
+        "userName"
+      ]
+    },
+    "ProjectVote": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ProjectVote",
+      "type": "object",
+      "description": "Represents a user's vote for a specific community project.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the project vote."
+        },
+        "userProfileId": {
+          "type": "string",
+          "description": "Reference to UserProfile. (Relationship: UserProfile 1:N ProjectVote)"
+        },
+        "projectId": {
+          "type": "string",
+          "description": "Reference to Project. (Relationship: Project 1:N ProjectVote)"
+        },
+        "voteTimestamp": {
+          "type": "string",
+          "description": "Timestamp of when the vote was cast.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userProfileId",
+        "projectId",
+        "voteTimestamp"
+      ]
+    },
+    "Project": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Project",
+      "type": "object",
+      "description": "Represents a community project seeking funding through PaySmile.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the project."
+        },
+        "projectName": {
+          "type": "string",
+          "description": "Name of the community project."
+        },
+        "projectDescription": {
+          "type": "string",
+          "description": "Detailed description of the project."
+        },
+        "fundingGoal": {
+          "type": "number",
+          "description": "The total funding goal for the project in UGX."
+        },
+        "currentFunding": {
+          "type": "number",
+          "description": "The current amount of funding received for the project in UGX."
+        },
+        "projectImageUrl": {
+          "type": "string",
+          "description": "URL of an image representing the project.",
+          "format": "uri"
+        },
+        "projectCategory": {
+          "type": "string",
+          "description": "Category of the project (e.g., Education, Healthcare, Environment)."
+        },
+        "projectStatus": {
+          "type": "string",
+          "description": "Status of the project (e.g., Active, Funded, Completed)."
+        }
+      },
+      "required": [
+        "id",
+        "projectName",
+        "projectDescription",
+        "fundingGoal"
+      ]
+    },
+    "Donation": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Donation",
+      "type": "object",
+      "description": "Represents a donation made by a user through PaySmile.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the donation."
+        },
+        "userProfileId": {
+          "type": "string",
+          "description": "Reference to UserProfile. (Relationship: UserProfile 1:N Donation)"
+        },
+        "amount": {
+          "type": "number",
+          "description": "The amount of the donation in UGX."
+        },
+        "transactionHash": {
+          "type": "string",
+          "description": "The transaction hash on the Celo blockchain."
+        },
+        "donationTimestamp": {
+          "type": "string",
+          "description": "Timestamp of when the donation was made.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userProfileId",
+        "amount",
+        "transactionHash",
+        "donationTimestamp"
+      ]
+    },
+    "SmileBadge": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "SmileBadge",
+      "type": "object",
+      "description": "Represents an NFT badge awarded to a user for their donations.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the smile badge."
+        },
+        "userProfileId": {
+          "type": "string",
+          "description": "Reference to UserProfile. (Relationship: UserProfile 1:N SmileBadge)"
+        },
+        "badgeName": {
+          "type": "string",
+          "description": "Name of the badge (e.g., Bronze Donor, Silver Supporter)."
+        },
+        "badgeDescription": {
+          "type": "string",
+          "description": "Description of what the badge represents."
+        },
+        "badgeImageUrl": {
+          "type": "string",
+          "description": "URL of the badge image.",
+          "format": "uri"
+        },
+        "mintingTimestamp": {
+          "type": "string",
+          "description": "Timestamp of when the badge was minted.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userProfileId",
+        "badgeName",
+        "badgeDescription",
+        "badgeImageUrl",
+        "mintingTimestamp"
+      ]
+    },
+    "Settings": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Settings",
+      "type": "object",
+      "description": "Represents user-specific settings for PaySmile.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the settings."
+        },
+        "userProfileId": {
+          "type": "string",
+          "description": "Reference to UserProfile. (Relationship: UserProfile 1:1 Settings)"
+        },
+        "notificationsEnabled": {
+          "type": "boolean",
+          "description": "Indicates whether push notifications are enabled."
+        },
+        "darkModeEnabled": {
+          "type": "boolean",
+          "description": "Indicates whether dark mode is enabled."
+        },
+        "languagePreference": {
+          "type": "string",
+          "description": "The user's preferred language."
+        },
+        "currencyPreference": {
+          "type": "string",
+          "description": "The user's preferred currency."
+        }
+      },
+      "required": [
+        "id",
+        "userProfileId"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}/userProfile",
+        "definition": {
+          "entityName": "UserProfile",
+          "schema": {
+            "$ref": "#/backend/entities/UserProfile"
+          },
+          "description": "Stores user profile data, owned by the user. The userId parameter matches the authenticated user's UID.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user, corresponding to their Firebase Auth UID."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/settings/{settingsId}",
+        "definition": {
+          "entityName": "Settings",
+          "schema": {
+            "$ref": "#/backend/entities/Settings"
+          },
+          "description": "Stores user-specific settings. The userId parameter matches the authenticated user's UID.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user, corresponding to their Firebase Auth UID."
+            },
+            {
+              "name": "settingsId",
+              "description": "The unique identifier of the settings document."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/donations/{donationId}",
+        "definition": {
+          "entityName": "Donation",
+          "schema": {
+            "$ref": "#/backend/entities/Donation"
+          },
+          "description": "Stores donation records for a specific user. The userId parameter matches the authenticated user's UID.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user, corresponding to their Firebase Auth UID."
+            },
+            {
+              "name": "donationId",
+              "description": "The unique identifier of the donation document."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/smileBadges/{smileBadgeId}",
+        "definition": {
+          "entityName": "SmileBadge",
+          "schema": {
+            "$ref": "#/backend/entities/SmileBadge"
+          },
+          "description": "Stores NFT badges awarded to a user. The userId parameter matches the authenticated user's UID.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user, corresponding to their Firebase Auth UID."
+            },
+            {
+              "name": "smileBadgeId",
+              "description": "The unique identifier of the smile badge document."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/projectVotes/{projectVoteId}",
+        "definition": {
+          "entityName": "ProjectVote",
+          "schema": {
+            "$ref": "#/backend/entities/ProjectVote"
+          },
+          "description": "Stores user's votes for community projects. The userId parameter matches the authenticated user's UID.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user, corresponding to their Firebase Auth UID."
+            },
+            {
+              "name": "projectVoteId",
+              "description": "The unique identifier of the project vote document."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/projects/{projectId}",
+        "definition": {
+          "entityName": "Project",
+          "schema": {
+            "$ref": "#/backend/entities/Project"
+          },
+          "description": "Stores community project data.",
+          "params": [
+            {
+              "name": "projectId",
+              "description": "The unique identifier of the project."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore data structure is designed to ensure authorization independence, clarity, and scalability for the PaySmile application. Each collection is designed with a homogenous security posture and follows access modeling conventions.\n\n**Authorization Independence:**\n\n*   User-owned data (UserProfile, Settings, Donations, SmileBadges, ProjectVotes) is stored under the `/users/{userId}` path, ensuring that access control is based on the authenticated user ID.\n*   By storing data in hierarchical paths under the user ID, we avoid the need for complex `get()` calls in security rules. All necessary authorization information is directly available within the path, or the document itself.\n*   The Settings collection includes the `userProfileId` field. This ensures that even if we were to query settings outside of the user's subcollection, we could independently verify the user's ownership of the settings document without needing to perform a `get()` request to the parent `UserProfile`.\n\n**Structural Segregation:**\n\n*   User profiles are stored in `/users/{userId}/userProfile`, while user settings are in `/users/{userId}/settings`, separating user data from settings to allow for different access control rules if needed. ProjectVotes, Donations, and SmileBadges follow this pattern.\n*   Projects are stored in a separate `/projects` collection. This is appropriate because Projects have different access requirements than UserProfiles. Projects are globally accessible, and UserProfiles are not.\n\n**Access Modeling:**\n\n*   Private user data is managed using path-based ownership under `/users/{userId}`.\n*   The Settings document is a 1:1 relationship with the UserProfile. While it is technically private, and *could* be stored directly on the UserProfile, having a `/users/{userId}/settings` collection opens up the possibility to add additional Settings objects in the future. This gives the schema forward compatibility.\n\n**QAPs Support:**\n\n*   The structure enables secure list operations for user-specific data (donations, smile badges, project votes) under the `/users/{userId}` path. This is because the rules can efficiently filter based on the user ID.\n*   Global `list` operations on projects are secured with the appropriate rules on the `/projects` collection. A rule could verify that the requesting user is an admin."
+  }
+}
