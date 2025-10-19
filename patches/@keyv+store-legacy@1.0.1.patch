@@ -1,0 +1,14 @@
+diff --git a/node_modules/@keyv/store-legacy/dist/index.js b/node_modules/@keyv/store-legacy/dist/index.js
+index 7699793c59a35e83626786c624896e38dd401a07..7c52a0a25695029339e1a8779b6910357f4955b2 100644
+--- a/node_modules/@keyv/store-legacy/dist/index.js
++++ b/node_modules/@keyv/store-legacy/dist/index.js
+@@ -16,7 +16,7 @@ class Keyv extends events_1.default {
+         if (typeof options === 'string') {
+             options = { uri: options };
+         }
+-        if (options.uri) {
++        if (options.uri && typeof window === 'undefined') {
+             const sqlite = /^sqlite/i;
+             const postgres = /^postgres/i;
+             const mysql = /^mysql/i;
+
