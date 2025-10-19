@@ -1,9 +1,12 @@
 'use client';
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useCelo } from "@celo/react-celo";
 import { ArrowLeft, HelpCircle, Download, MousePointerClick, CheckCircle2, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
+import { useEffect } from "react";
 
 const steps = [
   {
@@ -24,8 +27,26 @@ const steps = [
 ];
 
 export default function ConnectWalletPage() {
+  const { connect, address } = useCelo();
+  const router = useRouter();
+
   const valoraLogo = PlaceHolderImages.find(img => img.id === 'valora-logo');
   const celoLogo = PlaceHolderImages.find(img => img.id === 'celo-logo');
+
+  const handleConnect = async () => {
+    try {
+      await connect();
+    } catch (error) {
+      console.error("Failed to connect wallet:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (address) {
+      router.push('/setup');
+    }
+  }, [address, router]);
+
 
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
@@ -86,8 +107,8 @@ export default function ConnectWalletPage() {
             <span className="material-symbols-outlined text-primary" style={{ fontSize: '20px' }}>security</span>
             <span>Your connection is secure and private.</span>
           </div>
-          <Button size="lg" className="h-14 w-full rounded-lg text-lg font-bold shadow-lg" asChild>
-            <Link href="/setup">Connect Wallet</Link>
+          <Button size="lg" className="h-14 w-full rounded-lg text-lg font-bold shadow-lg" onClick={handleConnect}>
+            Connect Wallet
           </Button>
           <div className="mt-4 text-center">
             <Link href="#" className="text-sm font-medium text-primary">
