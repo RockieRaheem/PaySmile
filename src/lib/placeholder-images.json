@@ -2,8 +2,8 @@
   "placeholderImages": [
     {
       "id": "welcome-child",
-      "description": "Close-up portrait of a smiling black child",
-      "imageUrl": "https://images.unsplash.com/photo-1596622718915-7f98e50454a8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxzbWlsaW5nJTIwYmxhY2slMjBjaGlsZHxlbnwwfHx8fDE3NjA5MDc3ODR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "description": "Smiling child",
+      "imageUrl": "https://images.unsplash.com/photo-1519238263530-99bdd11df2ea?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxzbWlsaW5nJTIwY2hpbGR8ZW58MHx8fHwxNzYwOTA2MzYxfDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "smiling child"
     },
     {
