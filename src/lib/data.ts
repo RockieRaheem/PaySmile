@@ -73,3 +73,36 @@ export const voteProjects = [
 ];
 
 export const projectCategories = ['All', 'Education', 'Healthcare', 'Environment', 'Community'];
+
+export const donationHistory = [
+  {
+    id: 1,
+    projectName: 'Clean Water Initiative',
+    amount: 500,
+    date: '2024-07-20',
+  },
+  {
+    id: 2,
+    projectName: 'School Supply Drive',
+    amount: 250,
+    date: '2024-07-19',
+  },
+  {
+    id: 3,
+    projectName: 'Reforestation Project',
+    amount: 1000,
+    date: '2024-07-18',
+  },
+  {
+    id: 4,
+    projectName: 'Community Kitchen',
+    amount: 750,
+    date: '2024-07-17',
+  },
+  {
+    id: 5,
+    projectName: 'Clean Water Initiative',
+    amount: 500,
+    date: '2024-07-16',
+  },
+];
