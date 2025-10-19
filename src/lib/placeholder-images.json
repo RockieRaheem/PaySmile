@@ -1,3 +1,64 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "welcome-child",
+      "description": "Illustration of a happy child smiling",
+      "imageUrl": "https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxoYXBweSUyMGNoaWxkfGVufDB8fHx8MTc2MDc4MTA5NXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "happy child"
+    },
+    {
+      "id": "valora-logo",
+      "description": "Valora wallet logo",
+      "imageUrl": "https://images.unsplash.com/photo-1625670413987-0ae649494c61?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHx2YWxvcmElMjBsb2dvfGVufDB8fHx8MTc2MDkwMTkyMHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "valora logo"
+    },
+    {
+      "id": "celo-logo",
+      "description": "Celo blockchain logo",
+      "imageUrl": "https://images.unsplash.com/photo-1708658223534-f4a3db0ec7ce?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxjZWxvJTIwbG9nb3xlbnwwfHx8fDE3NjA5MDE5MjB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "celo logo"
+    },
+    {
+      "id": "active-project-1",
+      "description": "People in a meeting for a community project",
+      "imageUrl": "https://images.unsplash.com/photo-1517048676732-d65bc937f952?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwZW9wbGUlMjBtZWV0aW5nfGVufDB8fHx8MTc2MDg5NTI3Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "people meeting"
+    },
+    {
+      "id": "active-project-2",
+      "description": "School children in a classroom",
+      "imageUrl": "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxzY2hvb2wlMjBjaGlsZHJlbnxlbnwwfHx8fDE3NjA5MDE5MjB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "school children"
+    },
+    {
+      "id": "funded-project-1",
+      "description": "A person planting a seedling for a reforestation project",
+      "imageUrl": "https://images.unsplash.com/photo-1607163365613-c281acde5012?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxwZXJzb24lMjBwbGFudGluZ3xlbnwwfHx8fDE3NjA5MDE5MjB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "person planting"
+    },
+    {
+      "id": "funded-project-2",
+      "description": "Group of volunteers at a community kitchen",
+      "imageUrl": "https://images.unsplash.com/photo-1642140076952-f373dacf76c3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHx2b2x1bnRlZXJzJTIwY29va2luZ3xlbnwwfHx8fDE3NjA5MDE5MjB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "volunteers cooking"
+    },
+    {
+      "id": "vote-project-1",
+      "description": "Children smiling and holding hands in a circle",
+      "imageUrl": "https://images.unsplash.com/photo-1583254447142-b47f12dd4f80?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxjaGlsZHJlbiUyMGhhbmRzfGVufDB8fHx8MTc2MDkwMTkyMHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "children hands"
+    },
+    {
+      "id": "vote-project-2",
+      "description": "A child reading a book in a classroom setting",
+      "imageUrl": "https://images.unsplash.com/photo-1565843248736-8c41e6db117b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxjaGlsZCUyMHJlYWRpbmd8ZW58MHx8fHwxNzYwODYyMDg5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "child reading"
+    },
+    {
+      "id": "vote-project-3",
+      "description": "A solar panel installation in a rural village",
+      "imageUrl": "https://images.unsplash.com/flagged/photo-1566838616631-f2618f74a6a2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxzb2xhciUyMHBhbmVsfGVufDB8fHx8MTc2MDkwMTkyMHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "solar panel"
+    }
+  ]
 }
