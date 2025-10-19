@@ -19,7 +19,7 @@ export default function WelcomePage() {
     setIsLoading(true);
     // Simulate a network request
     setTimeout(() => {
-      router.push('/dashboard');
+      router.push('/connect');
     }, 1000);
   };
   
