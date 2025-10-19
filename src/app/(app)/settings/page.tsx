@@ -8,7 +8,7 @@ import { ArrowLeft, Award, Loader2, User, Mail, LogOut, Bell } from 'lucide-reac
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
@@ -89,7 +89,7 @@ export default function SettingsPage() {
     } else if (user && !isProfileLoading) {
         // Create a default profile if one doesn't exist
         const defaultProfile = {
-            userName: 'Anonymous User',
+            userName: user.displayName || 'Anonymous User',
             email: user.email || '',
         };
         if (userProfileRef) {
@@ -276,7 +276,9 @@ export default function SettingsPage() {
                             onCheckedChange={(checked) => {
                               field.onChange(checked);
                               // Automatically submit on change
-                              onSettingsSubmit({ notificationsEnabled: checked });
+                              if (settingsRef) {
+                                onSettingsSubmit({ notificationsEnabled: checked });
+                              }
                             }}
                           />
                         </FormControl>
