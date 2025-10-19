@@ -2,9 +2,9 @@
   "placeholderImages": [
     {
       "id": "welcome-child",
-      "description": "Illustration of a happy child smiling",
-      "imageUrl": "https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxoYXBweSUyMGNoaWxkfGVufDB8fHx8MTc2MDc4MTA5NXww&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "happy child"
+      "description": "Close-up portrait of a smiling black child",
+      "imageUrl": "https://images.unsplash.com/photo-1596622718915-7f98e50454a8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxzbWlsaW5nJTIwYmxhY2slMjBjaGlsZHxlbnwwfHx8fDE3NjA5MDc3ODR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "smiling child"
     },
     {
       "id": "valora-logo",

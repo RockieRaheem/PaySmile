@@ -1,69 +1,91 @@
 'use client';
 
-import Image from "next/image";
-import Link from "next/link";
-import { HandHeart, Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import React, { createContext, useContext, ReactNode, useMemo } from 'react';
+import { FirebaseApp } from 'firebase/app';
+import { Auth } from 'firebase/auth';
+import { Firestore, DocumentReference, Query, collection, doc } from 'firebase/firestore';
+import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
 
-import { Button } from "@/components/ui/button";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
-import { useState } from "react";
+interface FirebaseContextType {
+  firebaseApp: FirebaseApp | null;
+  auth: Auth | null;
+  firestore: Firestore | null;
+}
 
-export default function WelcomePage() {
-  const welcomeImage = PlaceHolderImages.find(img => img.id === 'welcome-child');
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
+const FirebaseContext = createContext<FirebaseContextType>({
+  firebaseApp: null,
+  auth: null,
+  firestore: null,
+});
 
-
-  const handleGetStarted = () => {
-    setIsLoading(true);
-    // Simulate a network request
-    setTimeout(() => {
-      router.push('/dashboard');
-    }, 1000);
-  };
-  
-  if (isLoading) {
-    return (
-      <div className="flex h-screen w-full flex-col items-center justify-center bg-background">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
-        <p className="mt-4 text-muted-foreground">Loading...</p>
-      </div>
-    );
+export const useFirebase = () => {
+  const context = useContext(FirebaseContext);
+  if (context === undefined) {
+    throw new Error('useFirebase must be used within a FirebaseProvider');
   }
+  return context;
+};
+
+export const useFirebaseApp = () => {
+  const { firebaseApp } = useFirebase();
+  if (!firebaseApp) {
+    throw new Error('Firebase App not available. Make sure you are wrapping your component in a FirebaseProvider.');
+  }
+  return firebaseApp;
+};
+
+export const useAuth = () => {
+  const { auth } = useFirebase();
+  if (!auth) {
+    throw new Error('Firebase Auth not available. Make sure you are wrapping your component in a FirebaseProvider.');
+  }
+  return auth;
+};
+
+export const useFirestore = () => {
+  const { firestore } = useFirebase();
+  if (!firestore) {
+    throw new Error('Firestore not available. Make sure you are wrapping your component in a FirebaseProvider.');
+  }
+  return firestore;
+};
+
+interface FirebaseProviderProps {
+  children: ReactNode;
+  firebaseApp: FirebaseApp;
+  auth: Auth;
+  firestore: Firestore;
+}
+
+export function FirebaseProvider({
+  children,
+  firebaseApp,
+  auth,
+  firestore,
+}: FirebaseProviderProps) {
+  const value = { firebaseApp, auth, firestore };
 
   return (
-    <div className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-background p-4 text-center">
-      <div className="flex flex-col items-center">
-        <HandHeart className="h-24 w-24 text-primary" />
-        <h2 className="mt-2 text-3xl font-bold text-foreground">PaySmile</h2>
-      </div>
-
-      {welcomeImage && (
-        <div className="my-8 w-full max-w-md">
-            <Image
-              src={welcomeImage.imageUrl}
-              alt={welcomeImage.description}
-              width={1200}
-              height={675}
-              className="rounded-xl object-cover aspect-video"
-              data-ai-hint={welcomeImage.imageHint}
-            />
-        </div>
-      )}
-
-      <h1 className="text-4xl font-bold leading-tight tracking-tight text-foreground">
-        Small Payments, Big Smiles
-      </h1>
-
-      <div className="mt-12 flex w-full max-w-sm flex-col items-center gap-4">
-        <Button onClick={handleGetStarted} size="lg" className="h-14 w-full rounded-full text-lg font-bold">
-          Get Started
-        </Button>
-        <Button asChild variant="secondary" size="lg" className="h-14 w-full rounded-full bg-primary/20 text-secondary-foreground hover:bg-primary/30 text-lg font-bold">
-          <Link href="/learn-more">Learn More</Link>
-        </Button>
-      </div>
-    </div>
+    <FirebaseContext.Provider value={value}>
+      {children}
+      <FirebaseErrorListener />
+    </FirebaseContext.Provider>
   );
+}
+
+// Hook that properly memoizes a Firestore reference.
+export function useMemoFirebase<T>(
+  callback: () => T,
+  deps: React.DependencyList | undefined,
+): (T & {__memo: boolean}) | undefined {
+  return useMemo(() => {
+    const value = callback()
+    // value might be undefined, but if it is we can't memoize it
+    if (value) {
+      // @ts-ignore - we're adding a property to the object to track that it's memoized
+      value.__memo = true
+    }
+    return value
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, deps) as any
 }

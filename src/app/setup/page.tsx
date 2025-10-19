@@ -1,30 +1,52 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
+import { Loader2 } from 'lucide-react';
 
 export default function SetupPage() {
+  const router = useRouter();
+  const { toast } = useToast();
   const [monthlyLimit, setMonthlyLimit] = useState(5000);
   const [roundUpAmount, setRoundUpAmount] = useState("100");
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleLimitChange = (amount: number) => {
     setMonthlyLimit((prev) => Math.max(0, prev + amount));
   };
 
+  const handleSaveSettings = () => {
+    setIsSaving(true);
+    // Simulate saving settings
+    setTimeout(() => {
+      // In a real app, you would save these settings to a backend or localStorage
+      localStorage.setItem('donationSettings', JSON.stringify({ monthlyLimit, roundUpAmount }));
+      setIsSaving(false);
+      toast({
+        title: "Settings Saved!",
+        description: "Your donation preferences have been updated.",
+      });
+      router.push('/dashboard');
+    }, 1000);
+  };
+  
+  const purchaseAmount = 9500;
+  const roundupValue = parseInt(roundUpAmount, 10);
+  const totalAmount = Math.ceil(purchaseAmount / roundupValue) * roundupValue;
+  const donationAmount = totalAmount - purchaseAmount;
+
+
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
       <header className="sticky top-0 z-10 flex items-center justify-between bg-background p-4 pb-2">
-        <Button variant="ghost" size="icon" asChild>
-          <Link href="/connect">
-            <span className="material-symbols-outlined">arrow_back</span>
-          </Link>
-        </Button>
+         <div className="w-12"></div>
         <h1 className="flex-1 text-center text-lg font-bold">Manage Donations</h1>
         <Button variant="ghost" size="icon">
           <span className="material-symbols-outlined">info</span>
@@ -92,24 +114,22 @@ export default function SetupPage() {
               <span className="material-symbols-outlined text-4xl">shopping_cart</span>
             </div>
             <p className="font-medium">Your purchase</p>
-            <p className="mb-2 text-2xl font-bold">9,500 UGX</p>
+            <p className="mb-2 text-2xl font-bold">{new Intl.NumberFormat('en-US').format(purchaseAmount)} UGX</p>
             <span className="material-symbols-outlined my-1 text-muted-foreground">arrow_downward</span>
             <p className="font-medium">Rounds up to</p>
-            <p className="mb-2 text-2xl font-bold">10,000 UGX</p>
+            <p className="mb-2 text-2xl font-bold">{new Intl.NumberFormat('en-US').format(totalAmount)} UGX</p>
             <div className="my-2 h-px w-full bg-border"></div>
             <p className="font-medium">Your donation</p>
-            <p className="text-3xl font-bold text-primary">500 UGX</p>
+            <p className="text-3xl font-bold text-primary">{new Intl.NumberFormat('en-US').format(donationAmount)} UGX</p>
             <p className="mt-2 text-xs text-muted-foreground">This amount goes directly to a verified community project.</p>
           </CardContent>
         </Card>
       </main>
 
       <div className="sticky bottom-0 space-y-2 bg-background p-4 pt-0">
-        <Button size="lg" className="h-12 w-full rounded-full font-bold shadow-lg" asChild>
-          <Link href="/dashboard">Save Settings</Link>
-        </Button>
-        <Button size="lg" variant="outline" className="h-12 w-full rounded-full border-2 border-primary font-bold text-primary hover:bg-primary/10 hover:text-primary">
-          Simulate Round-ups
+        <Button size="lg" className="h-12 w-full rounded-full font-bold shadow-lg" onClick={handleSaveSettings} disabled={isSaving}>
+          {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+          Save Settings
         </Button>
       </div>
     </div>

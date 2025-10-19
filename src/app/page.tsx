@@ -45,6 +45,7 @@ export default function WelcomePage() {
               height={675}
               className="rounded-xl object-cover aspect-video"
               data-ai-hint={welcomeImage.imageHint}
+              priority
             />
         </div>
       )}
@@ -57,7 +58,7 @@ export default function WelcomePage() {
         <Button onClick={handleGetStarted} size="lg" className="h-14 w-full rounded-full text-lg font-bold">
           Get Started
         </Button>
-        <Button asChild variant="secondary" size="lg" className="h-14 w-full rounded-full bg-primary/20 text-secondary-foreground hover:bg-primary/30 text-lg font-bold">
+        <Button asChild variant="secondary" size="lg" className="h-14 w-full rounded-full bg-primary/20 text-lg font-bold text-secondary">
           <Link href="/learn-more">Learn More</Link>
         </Button>
       </div>

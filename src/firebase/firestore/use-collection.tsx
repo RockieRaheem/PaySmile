@@ -1,69 +1,73 @@
 'use client';
 
-import Image from "next/image";
-import Link from "next/link";
-import { HandHeart, Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect }from 'react';
+import {
+  Query,
+  onSnapshot,
+  QuerySnapshot,
+  DocumentData,
+  FirestoreError,
+  collection,
+} from 'firebase/firestore';
 
-import { Button } from "@/components/ui/button";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
-import { useState } from "react";
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
+import { useMemoFirebase } from '../provider';
 
-export default function WelcomePage() {
-  const welcomeImage = PlaceHolderImages.find(img => img.id === 'welcome-child');
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
+type WithId<T> = T & { id: string };
 
+export interface UseCollectionResult<T> {
+  data: WithId<T>[] | null;
+  isLoading: boolean;
+  error: FirestoreError | Error | null;
+}
 
-  const handleGetStarted = () => {
-    setIsLoading(true);
-    // Simulate a network request
-    setTimeout(() => {
-      router.push('/dashboard');
-    }, 1000);
-  };
-  
-  if (isLoading) {
-    return (
-      <div className="flex h-screen w-full flex-col items-center justify-center bg-background">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
-        <p className="mt-4 text-muted-foreground">Loading...</p>
-      </div>
+export function useCollection<T>(
+  memoizedTargetRefOrQuery: (Query<DocumentData> & {__memo?: boolean}) | null | undefined
+): UseCollectionResult<T> {
+  const [data, setData] = useState<WithId<T>[] | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<FirestoreError | Error | null>(null);
+
+  useEffect(() => {
+    // if a ref is not provided then don't do anything
+    if (!memoizedTargetRefOrQuery) {
+      setIsLoading(false);
+      setData([]);
+      return;
+    }
+
+    const unsubscribe = onSnapshot(
+      memoizedTargetRefOrQuery,
+      (snapshot: QuerySnapshot) => {
+        const a: WithId<T>[] = [];
+        snapshot.forEach((doc) => {
+          a.push({ id: doc.id, ...(doc.data() as T) });
+        });
+        setData(a);
+        setIsLoading(false);
+      },
+      (error) => {
+        const contextualError = new FirestorePermissionError({
+          path: (memoizedTargetRefOrQuery as CollectionReference).path,
+          operation: 'list'
+        });
+
+        setError(contextualError);
+        setIsLoading(false);
+        setData(null);
+
+        // trigger global error propagation
+        errorEmitter.emit('permission-error', contextualError);
+      }
     );
+
+    return unsubscribe;
+  }, [memoizedTargetRefOrQuery]);
+  
+  if(memoizedTargetRefOrQuery && !memoizedTargetRefOrQuery.__memo) {
+    throw new Error('useCollection was not properly memoized using useMemoFirebase');
   }
 
-  return (
-    <div className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-background p-4 text-center">
-      <div className="flex flex-col items-center">
-        <HandHeart className="h-24 w-24 text-primary" />
-        <h2 className="mt-2 text-3xl font-bold text-foreground">PaySmile</h2>
-      </div>
-
-      {welcomeImage && (
-        <div className="my-8 w-full max-w-md">
-            <Image
-              src={welcomeImage.imageUrl}
-              alt={welcomeImage.description}
-              width={1200}
-              height={675}
-              className="rounded-xl object-cover aspect-video"
-              data-ai-hint={welcomeImage.imageHint}
-            />
-        </div>
-      )}
-
-      <h1 className="text-4xl font-bold leading-tight tracking-tight text-foreground">
-        Small Payments, Big Smiles
-      </h1>
-
-      <div className="mt-12 flex w-full max-w-sm flex-col items-center gap-4">
-        <Button onClick={handleGetStarted} size="lg" className="h-14 w-full rounded-full text-lg font-bold">
-          Get Started
-        </Button>
-        <Button asChild variant="secondary" size="lg" className="h-14 w-full rounded-full bg-primary/20 text-secondary-foreground hover:bg-primary/30 text-lg font-bold">
-          <Link href="/learn-more">Learn More</Link>
-        </Button>
-      </div>
-    </div>
-  );
+  return { data, isLoading, error };
 }
