@@ -65,7 +65,7 @@ export default function WelcomePage() {
           Get Started
         </Button>
         <Button asChild variant="secondary" size="lg" className="h-14 w-full rounded-full bg-primary/20 text-secondary-foreground hover:bg-primary/30 text-lg font-bold">
-          <Link href="#">Learn More</Link>
+          <Link href="/learn-more">Learn More</Link>
         </Button>
       </div>
     </div>
