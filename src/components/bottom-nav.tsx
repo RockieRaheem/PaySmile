@@ -2,14 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Leaf, History, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-  { href: "/projects", icon: Leaf, label: "Projects" },
-  { href: "/history", icon: History, label: "History" },
-  { href: "/settings", icon: Settings, label: "Settings" },
+  { href: "/dashboard", icon: "home", label: "Home" },
+  { href: "/projects", icon: "how_to_vote", label: "Vote" },
+  { href: "/badges", icon: "military_tech", label: "Badges" },
+  { href: "/settings", icon: "settings", label: "Settings" },
 ];
 
 export function BottomNav() {
@@ -25,11 +24,11 @@ export function BottomNav() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex flex-col items-center text-muted-foreground transition-colors",
+                "flex flex-col items-center justify-end gap-1 text-muted-foreground transition-colors flex-1",
                 isActive ? "text-primary" : "hover:text-foreground"
               )}
             >
-              <item.icon className="h-6 w-6" />
+              <span className="material-symbols-outlined text-2xl">{item.icon}</span>
               <span className="text-xs">{item.label}</span>
             </Link>
           );

@@ -3,8 +3,6 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
-import { ArrowLeft, Award, Loader2, User, Mail, LogOut, Bell } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -13,7 +11,6 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { generateDonorNFT } from '@/ai/flows/generate-donor-nft';
 import {
   Form,
   FormControl,
@@ -23,9 +20,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
 
 const profileSchema = z.object({
   userName: z.string().min(2, 'Username must be at least 2 characters.'),
@@ -40,8 +35,6 @@ type ProfileFormValues = z.infer<typeof profileSchema>;
 type SettingsFormValues = z.infer<typeof settingsSchema>;
 
 export default function SettingsPage() {
-  const [nftImage, setNftImage] = useState<string | null>(null);
-  const [isGeneratingNFT, setIsGeneratingNFT] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
 
@@ -60,35 +53,8 @@ export default function SettingsPage() {
     },
   });
 
-  const handleClaimBadge = async () => {
-    setIsGeneratingNFT(true);
-    setNftImage(null);
-    try {
-      const result = await generateDonorNFT({
-        donationAmount: 500,
-        projectName: 'Test Project',
-        donorName: profileForm.getValues('userName') || 'Valued Donor',
-      });
-      if (result.nftDataUri) {
-        setNftImage(result.nftDataUri);
-        toast({
-          title: 'Badge Claimed!',
-          description: 'Your test NFT badge has been generated.',
-        });
-      }
-    } catch (error) {
-      console.error('Error generating NFT:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Uh oh! Something went wrong.',
-        description: 'Could not generate the test badge.',
-      });
-    } finally {
-      setIsGeneratingNFT(false);
-    }
-  };
-
   const onProfileSubmit = (values: ProfileFormValues) => {
+    console.log(values);
     toast({
       title: 'Profile Updated',
       description: 'Your profile information has been saved.',
@@ -96,6 +62,7 @@ export default function SettingsPage() {
   };
 
   const onSettingsSubmit = (values: SettingsFormValues) => {
+    console.log(values);
     toast({
       title: 'Settings Updated',
       description: 'Your notification settings have been saved.',
@@ -107,11 +74,11 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <div className="flex min-h-screen flex-col bg-background text-foreground">
       <header className="sticky top-0 z-10 flex items-center justify-between bg-background p-4 pb-2">
         <Button variant="ghost" size="icon" asChild>
           <Link href="/dashboard">
-            <ArrowLeft />
+             <span className="material-symbols-outlined">arrow_back</span>
           </Link>
         </Button>
         <h1 className="flex-1 text-center text-lg font-bold">Settings</h1>
@@ -133,7 +100,7 @@ export default function SettingsPage() {
                       <FormLabel>Username</FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground">person</span>
                           <Input placeholder="Your username" {...field} className="pl-10" />
                         </div>
                       </FormControl>
@@ -149,7 +116,7 @@ export default function SettingsPage() {
                       <FormLabel>Email</FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                           <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground">mail</span>
                           <Input placeholder="Your email" {...field} className="pl-10" />
                         </div>
                       </FormControl>
@@ -158,9 +125,6 @@ export default function SettingsPage() {
                   )}
                 />
                 <Button type="submit" disabled={profileForm.formState.isSubmitting} className="w-full">
-                  {profileForm.formState.isSubmitting ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : null}
                   Save Changes
                 </Button>
               </form>
@@ -203,37 +167,14 @@ export default function SettingsPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Award className="text-primary" />
+              <span className="material-symbols-outlined text-primary">military_tech</span>
               My Smile Badges (NFTs)
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {isGeneratingNFT && (
-              <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
-                <Loader2 className="h-8 w-8 animate-spin" />
-                <p>Generating your badge...</p>
-              </div>
-            )}
-            {nftImage && (
-              <div className="flex flex-col items-center">
-                <Image
-                  src={nftImage}
-                  alt="Generated NFT Badge"
-                  width={256}
-                  height={256}
-                  className="mb-4 rounded-lg border"
-                />
-                <p className="mb-4 text-center text-sm text-muted-foreground">
-                  Here is your newly minted Smile Badge! In a real app, this would be saved to your account.
-                </p>
-              </div>
-            )}
-            <Button onClick={handleClaimBadge} disabled={isGeneratingNFT} className="w-full">
-              {isGeneratingNFT
-                ? 'Claiming...'
-                : nftImage
-                ? 'Claim Another Test Badge'
-                : 'Claim a Test Badge'}
+            <p className="mb-4 text-muted-foreground">View your collected badges and share your impact.</p>
+            <Button asChild className="w-full">
+              <Link href="/badges">View My Badges</Link>
             </Button>
           </CardContent>
         </Card>
@@ -241,7 +182,7 @@ export default function SettingsPage() {
         <Card>
           <CardContent className="p-4">
             <Button onClick={handleLogout} variant="destructive" className="w-full">
-              <LogOut className="mr-2 h-4 w-4" />
+              <span className="material-symbols-outlined mr-2 h-4 w-4">logout</span>
               Logout
             </Button>
           </CardContent>

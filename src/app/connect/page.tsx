@@ -1,9 +1,8 @@
+'use client';
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, HelpCircle, Download, MousePointerClick, CheckCircle2, Shield } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 
 const steps = [
@@ -29,16 +28,16 @@ export default function ConnectWalletPage() {
   const celoLogo = PlaceHolderImages.find(img => img.id === 'celo-logo');
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <div className="flex min-h-screen flex-col bg-background text-foreground">
       <header className="flex items-center justify-between p-4 pb-2">
         <Button variant="ghost" size="icon" asChild>
           <Link href="/">
-            <ArrowLeft />
+            <span className="material-symbols-outlined">arrow_back</span>
           </Link>
         </Button>
         <h1 className="flex-1 text-center text-lg font-bold">Connect Your Wallet</h1>
         <Button variant="ghost" size="icon">
-          <HelpCircle />
+          <span className="material-symbols-outlined">help_outline</span>
         </Button>
       </header>
       <main className="flex flex-1 flex-col px-4 pt-4">
@@ -84,10 +83,10 @@ export default function ConnectWalletPage() {
         </div>
         <div className="mt-auto pb-6">
           <div className="mb-4 flex items-center justify-center gap-2 text-sm text-muted-foreground">
-            <Shield className="h-5 w-5 text-primary" />
+            <span className="material-symbols-outlined text-primary" style={{ fontSize: '20px' }}>security</span>
             <span>Your connection is secure and private.</span>
           </div>
-          <Button size="lg" className="h-14 w-full rounded-xl text-lg font-bold shadow-lg" asChild>
+          <Button size="lg" className="h-14 w-full rounded-lg text-lg font-bold shadow-lg" asChild>
             <Link href="/setup">Connect Wallet</Link>
           </Button>
           <div className="mt-4 text-center">
