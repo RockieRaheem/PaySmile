@@ -2,8 +2,6 @@
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { CeloProvider, Alfajores } from '@celo/react-celo';
-import '@celo/react-celo/lib/styles.css';
-
 
 export default function RootLayout({
   children,
