@@ -11,9 +11,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import { userStats, activeProjects, fundedProjects } from "@/lib/data";
-import { useUser, useAuth } from "@/firebase";
-import { doc } from "firebase/firestore";
-import { useFirestore, useDoc, useMemoFirebase } from "@/firebase";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,21 +33,9 @@ function StatCard({ label, value }: { label: string; value: string | number }) {
 }
 
 export default function DashboardPage() {
-  const { user } = useUser();
-  const firestore = useFirestore();
-  const auth = useAuth();
   const router = useRouter();
 
-  const userProfileRef = useMemoFirebase(
-    () => (user ? doc(firestore, 'users', user.uid) : null),
-    [user, firestore]
-  );
-  const { data: userProfile } = useDoc(userProfileRef);
-
   const handleLogout = async () => {
-    if (auth) {
-      await auth.signOut();
-    }
     router.push('/');
   };
 
@@ -85,7 +70,7 @@ export default function DashboardPage() {
         <section>
           <Card className="bg-secondary text-secondary-foreground">
             <CardContent className="p-6">
-              <p className="text-lg font-medium">Welcome, {userProfile?.userName || 'User'}!</p>
+              <p className="text-lg font-medium">Welcome, User!</p>
               <p className="mt-2 text-4xl font-bold tracking-tight">
                 {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'UGX', minimumFractionDigits: 0 }).format(userStats.totalDonations)}
               </p>

@@ -1,39 +1,69 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { errorEmitter } from '@/firebase/error-emitter';
-import { FirestorePermissionError } from '@/firebase/errors';
+import Image from "next/image";
+import Link from "next/link";
+import { HandHeart, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
-/**
- * An invisible component that listens for globally emitted 'permission-error' events.
- * It throws any received error to be caught by Next.js's global-error.tsx.
- */
-export function FirebaseErrorListener() {
-  // Use the specific error type for the state for type safety.
-  const [error, setError] = useState<FirestorePermissionError | null>(null);
+import { Button } from "@/components/ui/button";
+import { PlaceHolderImages } from "@/lib/placeholder-images";
+import { useState } from "react";
 
-  useEffect(() => {
-    // The callback now expects a strongly-typed error, matching the event payload.
-    const handleError = (error: FirestorePermissionError) => {
-      // Set error in state to trigger a re-render.
-      setError(error);
-    };
+export default function WelcomePage() {
+  const welcomeImage = PlaceHolderImages.find(img => img.id === 'welcome-child');
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
 
-    // The typed emitter will enforce that the callback for 'permission-error'
-    // matches the expected payload type (FirestorePermissionError).
-    errorEmitter.on('permission-error', handleError);
 
-    // Unsubscribe on unmount to prevent memory leaks.
-    return () => {
-      errorEmitter.off('permission-error', handleError);
-    };
-  }, []);
-
-  // On re-render, if an error exists in state, throw it.
-  if (error) {
-    throw error;
+  const handleGetStarted = () => {
+    setIsLoading(true);
+    // Simulate a network request
+    setTimeout(() => {
+      router.push('/dashboard');
+    }, 1000);
+  };
+  
+  if (isLoading) {
+    return (
+      <div className="flex h-screen w-full flex-col items-center justify-center bg-background">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        <p className="mt-4 text-muted-foreground">Loading...</p>
+      </div>
+    );
   }
 
-  // This component renders nothing.
-  return null;
+  return (
+    <div className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-background p-4 text-center">
+      <div className="flex flex-col items-center">
+        <HandHeart className="h-24 w-24 text-primary" />
+        <h2 className="mt-2 text-3xl font-bold text-foreground">PaySmile</h2>
+      </div>
+
+      {welcomeImage && (
+        <div className="my-8 w-full max-w-md">
+            <Image
+              src={welcomeImage.imageUrl}
+              alt={welcomeImage.description}
+              width={1200}
+              height={675}
+              className="rounded-xl object-cover aspect-video"
+              data-ai-hint={welcomeImage.imageHint}
+            />
+        </div>
+      )}
+
+      <h1 className="text-4xl font-bold leading-tight tracking-tight text-foreground">
+        Small Payments, Big Smiles
+      </h1>
+
+      <div className="mt-12 flex w-full max-w-sm flex-col items-center gap-4">
+        <Button onClick={handleGetStarted} size="lg" className="h-14 w-full rounded-full text-lg font-bold">
+          Get Started
+        </Button>
+        <Button asChild variant="secondary" size="lg" className="h-14 w-full rounded-full bg-primary/20 text-secondary-foreground hover:bg-primary/30 text-lg font-bold">
+          <Link href="/learn-more">Learn More</Link>
+        </Button>
+      </div>
+    </div>
+  );
 }

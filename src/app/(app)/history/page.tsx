@@ -4,36 +4,18 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { useUser, useFirestore, useCollection, useMemoFirebase } from "@/firebase";
-import { collection, query, orderBy } from "firebase/firestore";
+import { donationHistory } from "@/lib/data";
 
 type Donation = {
-  id: string;
+  id: number;
   projectName: string;
   amount: number;
-  donationTimestamp: {
-    seconds: number;
-  };
+  date: string;
 };
 
 export default function HistoryPage() {
-  const { user } = useUser();
-  const firestore = useFirestore();
-  
-  const donationsRef = useMemoFirebase(() => 
-    user ? collection(firestore, `users/${user.uid}/donations`) : null,
-    [user, firestore]
-  );
-  
-  const donationsQuery = useMemoFirebase(() =>
-    donationsRef ? query(donationsRef, orderBy("donationTimestamp", "desc")) : null,
-    [donationsRef]
-  );
-
-  const { data: donationHistory, isLoading } = useCollection<Donation>(donationsQuery);
-
-  const formatDate = (seconds: number) => {
-    return new Date(seconds * 1000).toLocaleDateString();
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString();
   };
 
   return (
@@ -48,12 +30,7 @@ export default function HistoryPage() {
         <div className="w-12" />
       </header>
       <main className="flex-1 space-y-4 p-4">
-        {isLoading && (
-          <div className="flex flex-1 items-center justify-center">
-            <p className="text-muted-foreground">Loading donation history...</p>
-          </div>
-        )}
-        {!isLoading && donationHistory?.length === 0 ? (
+        {donationHistory?.length === 0 ? (
           <div className="flex flex-1 items-center justify-center">
             <div className="text-center text-muted-foreground">
               <p>You haven't made any donations yet.</p>
@@ -65,7 +42,7 @@ export default function HistoryPage() {
               <CardContent className="flex items-center justify-between p-4">
                 <div>
                   <p className="font-bold">{donation.projectName}</p>
-                  <p className="text-sm text-muted-foreground">{formatDate(donation.donationTimestamp.seconds)}</p>
+                  <p className="text-sm text-muted-foreground">{formatDate(donation.date)}</p>
                 </div>
                 <div className="text-right">
                   <p className="font-bold text-primary">

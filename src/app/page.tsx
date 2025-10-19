@@ -7,27 +7,23 @@ import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
-import { useAuth, useUser } from "@/firebase";
-import { initiateAnonymousSignIn } from "@/firebase/non-blocking-login";
-import { useEffect } from "react";
+import { useState } from "react";
 
 export default function WelcomePage() {
   const welcomeImage = PlaceHolderImages.find(img => img.id === 'welcome-child');
-  const auth = useAuth();
-  const { user, isUserLoading } = useUser();
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    if (user) {
-      router.push('/dashboard');
-    }
-  }, [user, router]);
 
   const handleGetStarted = () => {
-    initiateAnonymousSignIn(auth);
+    setIsLoading(true);
+    // Simulate a network request
+    setTimeout(() => {
+      router.push('/dashboard');
+    }, 1000);
   };
   
-  if (isUserLoading || user) {
+  if (isLoading) {
     return (
       <div className="flex h-screen w-full flex-col items-center justify-center bg-background">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />

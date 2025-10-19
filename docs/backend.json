@@ -1,259 +1,66 @@
-
 {
-  "entities": {
-    "UserProfile": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "UserProfile",
-      "type": "object",
-      "description": "Represents a user's profile within the PaySmile application.",
-      "properties": {
-        "userName": {
-          "type": "string",
-          "description": "The user's display name."
-        },
-        "email": {
-          "type": "string",
-          "description": "The user's email address for communication.",
-          "format": "email"
-        },
-        "walletAddress": {
-          "type": "string",
-          "description": "The user's Celo or Valora wallet address."
-        },
-        "profilePictureUrl": {
-          "type": "string",
-          "description": "URL of the user's profile picture.",
-          "format": "uri"
-        },
-        "monthlyDonationLimit": {
-          "type": "number",
-          "description": "The user's self-imposed monthly donation limit in UGX."
-        },
-        "roundUpPreference": {
-          "type": "number",
-          "description": "User's round-up preference (e.g., 10, 50, 100 UGX)."
-        },
-        "automaticRoundUpsEnabled": {
-          "type": "boolean",
-          "description": "Indicates whether automatic round-ups are enabled for the user."
-        }
-      },
-      "required": [
-        "userName"
-      ]
-    },
-    "ProjectVote": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "ProjectVote",
-      "type": "object",
-      "description": "Represents a user's vote for a specific community project.",
-      "properties": {
-        "userProfileId": {
-          "type": "string",
-          "description": "Reference to UserProfile. (Relationship: UserProfile 1:N ProjectVote)"
-        },
-        "projectId": {
-          "type": "string",
-          "description": "Reference to Project. (Relationship: Project 1:N ProjectVote)"
-        },
-        "voteTimestamp": {
-          "type": "string",
-          "description": "Timestamp of when the vote was cast.",
-          "format": "date-time"
-        }
-      },
-      "required": [
-        "userProfileId",
-        "projectId",
-        "voteTimestamp"
-      ]
-    },
-    "Project": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Project",
-      "type": "object",
-      "description": "Represents a community project seeking funding through PaySmile.",
-      "properties": {
-        "projectName": {
-          "type": "string",
-          "description": "Name of the community project."
-        },
-        "projectDescription": {
-          "type": "string",
-          "description": "Detailed description of the project."
-        },
-        "fundingGoal": {
-          "type": "number",
-          "description": "The total funding goal for the project in UGX."
-        },
-        "currentFunding": {
-          "type": "number",
-          "description": "The current amount of funding received for the project in UGX."
-        },
-        "projectImageUrl": {
-          "type": "string",
-          "description": "URL of an image representing the project.",
-          "format": "uri"
-        },
-        "projectCategory": {
-          "type": "string",
-          "description": "Category of the project (e.g., Education, Healthcare, Environment)."
-        },
-        "projectStatus": {
-          "type": "string",
-          "description": "Status of the project (e.g., Active, Funded, Completed)."
-        }
-      },
-      "required": [
-        "projectName",
-        "projectDescription",
-        "fundingGoal"
-      ]
-    },
-    "Donation": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Donation",
-      "type": "object",
-      "description": "Represents a donation made by a user through PaySmile.",
-      "properties": {
-        "userProfileId": {
-          "type": "string",
-          "description": "Reference to UserProfile. (Relationship: UserProfile 1:N Donation)"
-        },
-        "amount": {
-          "type": "number",
-          "description": "The amount of the donation in UGX."
-        },
-        "transactionHash": {
-          "type": "string",
-          "description": "The transaction hash on the Celo blockchain."
-        },
-        "donationTimestamp": {
-          "type": "string",
-          "description": "Timestamp of when the donation was made.",
-          "format": "date-time"
-        }
-      },
-      "required": [
-        "userProfileId",
-        "amount",
-        "transactionHash",
-        "donationTimestamp"
-      ]
-    },
-    "SmileBadge": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "SmileBadge",
-      "type": "object",
-      "description": "Represents an NFT badge awarded to a user for their donations.",
-      "properties": {
-        "userProfileId": {
-          "type": "string",
-          "description": "Reference to UserProfile. (Relationship: UserProfile 1:N SmileBadge)"
-        },
-        "badgeName": {
-          "type": "string",
-          "description": "Name of the badge (e.g., Bronze Donor, Silver Supporter)."
-        },
-        "badgeDescription": {
-          "type": "string",
-          "description": "Description of what the badge represents."
-        },
-        "badgeImageUrl": {
-          "type": "string",
-          "description": "URL of the badge image.",
-          "format": "uri"
-        },
-        "mintingTimestamp": {
-          "type": "string",
-          "description": "Timestamp of when the badge was minted.",
-          "format": "date-time"
-        }
-      },
-      "required": [
-        "userProfileId",
-        "badgeName",
-        "badgeDescription",
-        "badgeImageUrl",
-        "mintingTimestamp"
-      ]
-    },
-    "Settings": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Settings",
-      "type": "object",
-      "description": "Represents user-specific settings for PaySmile.",
-      "properties": {
-        "userProfileId": {
-          "type": "string",
-          "description": "Reference to UserProfile. (Relationship: UserProfile 1:1 Settings)"
-        },
-        "notificationsEnabled": {
-          "type": "boolean",
-          "description": "Indicates whether push notifications are enabled."
-        },
-        "darkModeEnabled": {
-          "type": "boolean",
-          "description": "Indicates whether dark mode is enabled."
-        },
-        "languagePreference": {
-          "type": "string",
-          "description": "The user's preferred language."
-        },
-        "currencyPreference": {
-          "type": "string",
-          "description": "The user's preferred currency."
-        }
-      },
-      "required": [
-        "userProfileId"
-      ]
-    }
+  "name": "nextn",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack -p 9002",
+    "genkit:dev": "genkit start -- tsx src/ai/dev.ts",
+    "genkit:watch": "genkit start -- tsx --watch src/ai/dev.ts",
+    "build": "NODE_ENV=production next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit"
   },
-  "auth": {
-    "providers": [
-      "password",
-      "anonymous"
-    ]
+  "dependencies": {
+    "@genkit-ai/google-genai": "^1.20.0",
+    "@genkit-ai/next": "^1.20.0",
+    "@hookform/resolvers": "^4.1.3",
+    "@radix-ui/react-accordion": "^1.2.3",
+    "@radix-ui/react-alert-dialog": "^1.1.6",
+    "@radix-ui/react-avatar": "^1.1.3",
+    "@radix-ui/react-checkbox": "^1.1.4",
+    "@radix-ui/react-collapsible": "^1.1.11",
+    "@radix-ui/react-dialog": "^1.1.6",
+    "@radix-ui/react-dropdown-menu": "^2.1.6",
+    "@radix-ui/react-label": "^2.1.2",
+    "@radix-ui/react-menubar": "^1.1.6",
+    "@radix-ui/react-popover": "^1.1.6",
+    "@radix-ui/react-progress": "^1.1.2",
+    "@radix-ui/react-radio-group": "^1.2.3",
+    "@radix-ui/react-scroll-area": "^1.2.3",
+    "@radix-ui/react-select": "^2.1.6",
+    "@radix-ui/react-separator": "^1.1.2",
+    "@radix-ui/react-slider": "^1.2.3",
+    "@radix-ui/react-slot": "^1.2.3",
+    "@radix-ui/react-switch": "^1.1.3",
+    "@radix-ui/react-tabs": "^1.1.3",
+    "@radix-ui/react-toast": "^1.2.6",
+    "@radix-ui/react-tooltip": "^1.1.8",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "date-fns": "^3.6.0",
+    "dotenv": "^16.5.0",
+    "embla-carousel-react": "^8.6.0",
+    "genkit": "^1.20.0",
+    "lucide-react": "^0.475.0",
+    "next": "15.3.3",
+    "patch-package": "^8.0.0",
+    "react": "^18.3.1",
+    "react-day-picker": "^8.10.1",
+    "react-dom": "^18.3.1",
+    "react-hook-form": "^7.54.2",
+    "recharts": "^2.15.1",
+    "tailwind-merge": "^3.0.1",
+    "tailwindcss-animate": "^1.0.7",
+    "zod": "^3.24.2"
   },
-  "firestore": {
-    "/users/{userId}": {
-      "schema": {
-        "$ref": "#/entities/UserProfile"
-      },
-      "description": "Stores user profile data. Users can read and write their own profile."
-    },
-    "/users/{userId}/settings/{settingsId}": {
-      "schema": {
-        "$ref": "#/entities/Settings"
-      },
-      "description": "Stores user-specific settings. The userId parameter matches the authenticated user's UID."
-    },
-    "/users/{userId}/donations/{donationId}": {
-      "schema": {
-        "$ref": "#/entities/Donation"
-      },
-      "description": "Stores donation records for a specific user. The userId parameter matches the authenticated user's UID."
-    },
-    "/users/{userId}/smileBadges/{smileBadgeId}": {
-      "schema": {
-        "$ref": "#/entities/SmileBadge"
-      },
-      "description": "Stores NFT badges awarded to a user. The userId parameter matches the authenticated user's UID."
-    },
-    "/users/{userId}/projectVotes/{projectVoteId}": {
-      "schema": {
-        "$ref": "#/entities/ProjectVote"
-      },
-      "description": "Stores user's votes for community projects. The userId parameter matches the authenticated user's UID."
-    },
-    "/projects/{projectId}": {
-      "schema": {
-        "$ref": "#/entities/Project"
-      },
-      "description": "Stores community project data."
-    }
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "genkit-cli": "^1.20.0",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5"
   }
 }
-
-    
