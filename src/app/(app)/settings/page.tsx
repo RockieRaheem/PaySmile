@@ -4,17 +4,18 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowLeft, Award, Loader2, User, Mail } from 'lucide-react';
+import { ArrowLeft, Award, Loader2, User, Mail, LogOut, Bell } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { doc, setDoc } from 'firebase/firestore';
+import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { generateDonorNFT } from '@/ai/flows/generate-donor-nft';
-import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
+import { useUser, useFirestore, useDoc, useMemoFirebase, useAuth } from '@/firebase';
 import {
   Form,
   FormControl,
@@ -26,13 +27,20 @@ import {
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { setDocumentNonBlocking } from '@/firebase';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 
 const profileSchema = z.object({
   userName: z.string().min(2, 'Username must be at least 2 characters.'),
   email: z.string().email('Please enter a valid email address.'),
 });
 
+const settingsSchema = z.object({
+  notificationsEnabled: z.boolean(),
+});
+
 type ProfileFormValues = z.infer<typeof profileSchema>;
+type SettingsFormValues = z.infer<typeof settingsSchema>;
 
 export default function SettingsPage() {
   const [nftImage, setNftImage] = useState<string | null>(null);
@@ -40,6 +48,8 @@ export default function SettingsPage() {
   const { toast } = useToast();
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
+  const auth = useAuth();
+  const router = useRouter();
 
   const userProfileRef = useMemoFirebase(
     () => (user ? doc(firestore, `users/${user.uid}/userProfile`, user.uid) : null),
@@ -48,7 +58,14 @@ export default function SettingsPage() {
   
   const { data: userProfile, isLoading: isProfileLoading } = useDoc(userProfileRef);
 
-  const form = useForm<ProfileFormValues>({
+  const settingsRef = useMemoFirebase(
+    () => (user ? doc(firestore, `users/${user.uid}/settings`, 'appSettings') : null),
+    [user, firestore]
+  );
+
+  const { data: userSettings, isLoading: areSettingsLoading } = useDoc(settingsRef);
+
+  const profileForm = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
       userName: '',
@@ -56,15 +73,27 @@ export default function SettingsPage() {
     },
   });
 
+  const settingsForm = useForm<SettingsFormValues>({
+    resolver: zodResolver(settingsSchema),
+    defaultValues: {
+      notificationsEnabled: false,
+    },
+  });
+
   useEffect(() => {
     if (userProfile) {
-      form.reset({
+      profileForm.reset({
         userName: userProfile.userName || '',
         email: userProfile.email || user?.email || '',
       });
     }
-  }, [userProfile, user, form]);
-
+    if (userSettings) {
+      settingsForm.reset({
+        notificationsEnabled: userSettings.notificationsEnabled || false,
+      });
+    }
+  }, [userProfile, user, profileForm, userSettings, settingsForm]);
+  
   const handleClaimBadge = async () => {
     setIsGeneratingNFT(true);
     setNftImage(null);
@@ -93,7 +122,7 @@ export default function SettingsPage() {
     }
   };
 
-  const onSubmit = (values: ProfileFormValues) => {
+  const onProfileSubmit = (values: ProfileFormValues) => {
     if (!user || !userProfileRef) return;
     
     setDocumentNonBlocking(userProfileRef, values, { merge: true });
@@ -102,6 +131,20 @@ export default function SettingsPage() {
       title: 'Profile Updated',
       description: 'Your profile information has been saved.',
     });
+  };
+
+  const onSettingsSubmit = (values: SettingsFormValues) => {
+    if (!user || !settingsRef) return;
+    setDocumentNonBlocking(settingsRef, values, { merge: true });
+    toast({
+      title: 'Settings Updated',
+      description: 'Your notification settings have been saved.',
+    });
+  };
+
+  const handleLogout = async () => {
+    await auth.signOut();
+    router.push('/');
   };
 
   const ProfileSkeleton = () => (
@@ -146,10 +189,10 @@ export default function SettingsPage() {
             {isUserLoading || isProfileLoading ? (
                <ProfileSkeleton />
             ) : user ? (
-               <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+               <Form {...profileForm}>
+                <form onSubmit={profileForm.handleSubmit(onProfileSubmit)} className="space-y-4">
                   <FormField
-                    control={form.control}
+                    control={profileForm.control}
                     name="userName"
                     render={({ field }) => (
                       <FormItem>
@@ -165,7 +208,7 @@ export default function SettingsPage() {
                     )}
                   />
                   <FormField
-                    control={form.control}
+                    control={profileForm.control}
                     name="email"
                     render={({ field }) => (
                       <FormItem>
@@ -180,8 +223,8 @@ export default function SettingsPage() {
                       </FormItem>
                     )}
                   />
-                  <Button type="submit" disabled={form.formState.isSubmitting} className="w-full">
-                    {form.formState.isSubmitting ? (
+                  <Button type="submit" disabled={profileForm.formState.isSubmitting} className="w-full">
+                    {profileForm.formState.isSubmitting ? (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     ) : null}
                     Save Changes
@@ -193,6 +236,47 @@ export default function SettingsPage() {
             )}
           </CardContent>
         </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Notifications</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {areSettingsLoading ? (
+              <div className="flex items-center justify-between">
+                <Skeleton className="h-6 w-32" />
+                <Skeleton className="h-6 w-12" />
+              </div>
+            ) : (
+              <Form {...settingsForm}>
+                <form onSubmit={settingsForm.handleSubmit(onSettingsSubmit)}>
+                  <FormField
+                    control={settingsForm.control}
+                    name="notificationsEnabled"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                        <div className="space-y-0.5">
+                          <FormLabel className="text-base">Push Notifications</FormLabel>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={(checked) => {
+                              field.onChange(checked);
+                              // Automatically submit on change
+                              onSettingsSubmit({ notificationsEnabled: checked });
+                            }}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </form>
+              </Form>
+            )}
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -230,14 +314,16 @@ export default function SettingsPage() {
             </Button>
           </CardContent>
         </Card>
+
         <Card>
-          <CardHeader>
-            <CardTitle>Notifications</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">Notification settings will be here.</p>
+          <CardContent className="p-4">
+            <Button onClick={handleLogout} variant="destructive" className="w-full">
+              <LogOut className="mr-2 h-4 w-4" />
+              Logout
+            </Button>
           </CardContent>
         </Card>
+
       </main>
     </div>
   );

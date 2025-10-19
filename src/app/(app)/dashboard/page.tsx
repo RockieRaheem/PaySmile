@@ -1,17 +1,28 @@
+
 'use client';
 
 import Image from "next/image";
 import Link from "next/link";
-import { Smile, UserCircle, CheckCircle } from "lucide-react";
+import { Smile, UserCircle, CheckCircle, LogOut } from "lucide-react";
+import { useRouter } from 'next/navigation';
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import { userStats, activeProjects, fundedProjects } from "@/lib/data";
-import { useUser } from "@/firebase";
+import { useUser, useAuth } from "@/firebase";
 import { doc } from "firebase/firestore";
-import { useFirestore, useDoc } from "@/firebase";
+import { useFirestore, useDoc, useMemoFirebase } from "@/firebase";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+
 
 function StatCard({ label, value }: { label: string; value: string | number }) {
   return (
@@ -27,9 +38,19 @@ function StatCard({ label, value }: { label: string; value: string | number }) {
 export default function DashboardPage() {
   const { user } = useUser();
   const firestore = useFirestore();
+  const auth = useAuth();
+  const router = useRouter();
 
-  const userProfileRef = user ? doc(firestore, `users/${user.uid}/userProfile`, user.uid) : null;
+  const userProfileRef = useMemoFirebase(
+    () => (user ? doc(firestore, `users/${user.uid}/userProfile`, user.uid) : null),
+    [user, firestore]
+  );
   const { data: userProfile } = useDoc(userProfileRef);
+
+  const handleLogout = async () => {
+    await auth.signOut();
+    router.push('/');
+  };
 
   return (
     <div className="bg-background text-foreground">
@@ -38,11 +59,24 @@ export default function DashboardPage() {
           <Smile className="h-8 w-8 text-primary" />
           <h1 className="text-xl font-bold text-secondary">PaySmile</h1>
         </div>
-        <Button variant="ghost" size="icon" asChild>
-          <Link href="/settings">
-            <UserCircle className="h-8 w-8" />
-          </Link>
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon">
+              <UserCircle className="h-8 w-8" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>My Account</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link href="/settings">Settings</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout}>
+              <LogOut className="mr-2 h-4 w-4" />
+              <span>Logout</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </header>
 
       <main className="p-4 space-y-6">
