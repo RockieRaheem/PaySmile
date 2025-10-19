@@ -4,7 +4,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Smile, UserCircle, CheckCircle, LogOut } from "lucide-react";
-import { useRouter } from 'next/navigation';
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -33,11 +32,6 @@ function StatCard({ label, value }: { label: string; value: string | number }) {
 }
 
 export default function DashboardPage() {
-  const router = useRouter();
-
-  const handleLogout = async () => {
-    router.push('/');
-  };
 
   return (
     <div className="bg-background text-foreground">
@@ -58,9 +52,11 @@ export default function DashboardPage() {
             <DropdownMenuItem asChild>
               <Link href="/settings">Settings</Link>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleLogout}>
-              <LogOut className="mr-2 h-4 w-4" />
-              <span>Logout</span>
+            <DropdownMenuItem asChild>
+              <Link href="/">
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>Logout</span>
+              </Link>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
