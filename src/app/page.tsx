@@ -1,12 +1,40 @@
+'use client';
+
 import Image from "next/image";
 import Link from "next/link";
-import { HandHeart } from "lucide-react";
+import { HandHeart, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
+import { useAuth, useUser } from "@/firebase";
+import { initiateAnonymousSignIn } from "@/firebase/non-blocking-login";
+import { useEffect } from "react";
 
 export default function WelcomePage() {
   const welcomeImage = PlaceHolderImages.find(img => img.id === 'welcome-child');
+  const auth = useAuth();
+  const { user, isUserLoading } = useUser();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (user) {
+      router.push('/dashboard');
+    }
+  }, [user, router]);
+
+  const handleGetStarted = () => {
+    initiateAnonymousSignIn(auth);
+  };
+  
+  if (isUserLoading || user) {
+    return (
+      <div className="flex h-screen w-full flex-col items-center justify-center bg-background">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        <p className="mt-4 text-muted-foreground">Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-background p-4 text-center">
@@ -33,8 +61,8 @@ export default function WelcomePage() {
       </h1>
 
       <div className="mt-12 flex w-full max-w-sm flex-col items-center gap-4">
-        <Button asChild size="lg" className="h-14 w-full rounded-full text-lg font-bold">
-          <Link href="/connect">Get Started</Link>
+        <Button onClick={handleGetStarted} size="lg" className="h-14 w-full rounded-full text-lg font-bold">
+          Get Started
         </Button>
         <Button asChild variant="secondary" size="lg" className="h-14 w-full rounded-full bg-primary/20 text-secondary-foreground hover:bg-primary/30 text-lg font-bold">
           <Link href="#">Learn More</Link>

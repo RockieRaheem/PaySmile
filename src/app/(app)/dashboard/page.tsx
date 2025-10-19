@@ -1,3 +1,5 @@
+'use client';
+
 import Image from "next/image";
 import Link from "next/link";
 import { Smile, UserCircle, CheckCircle } from "lucide-react";
@@ -7,6 +9,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import { userStats, activeProjects, fundedProjects } from "@/lib/data";
+import { useUser } from "@/firebase";
+import { doc } from "firebase/firestore";
+import { useFirestore, useDoc } from "@/firebase";
 
 function StatCard({ label, value }: { label: string; value: string | number }) {
   return (
@@ -20,6 +25,12 @@ function StatCard({ label, value }: { label: string; value: string | number }) {
 }
 
 export default function DashboardPage() {
+  const { user } = useUser();
+  const firestore = useFirestore();
+
+  const userProfileRef = user ? doc(firestore, `users/${user.uid}/userProfile`, user.uid) : null;
+  const { data: userProfile } = useDoc(userProfileRef);
+
   return (
     <div className="bg-background text-foreground">
       <header className="flex items-center justify-between p-4 pb-2">
@@ -38,10 +49,11 @@ export default function DashboardPage() {
         <section>
           <Card className="bg-secondary text-secondary-foreground">
             <CardContent className="p-6">
-              <p className="text-lg font-medium">Your Total Donations</p>
+              <p className="text-lg font-medium">Welcome, {userProfile?.userName || 'User'}!</p>
               <p className="mt-2 text-4xl font-bold tracking-tight">
                 {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'UGX', minimumFractionDigits: 0 }).format(userStats.totalDonations)}
               </p>
+               <p className="text-sm">Your Total Donations</p>
             </CardContent>
           </Card>
         </section>
