@@ -37,6 +37,16 @@ const nextConfig: NextConfig = {
       }
     ],
   },
+  devIndicators: {
+    buildActivity: false,
+  },
+  experimental: {
+    allowedDevOrigins: [
+      "https://*.google.com",
+      "https://*.cloud.goog",
+      "https://*.run.app",
+    ]
+  }
 };
 
 export default nextConfig;
