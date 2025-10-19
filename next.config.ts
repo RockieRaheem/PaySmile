@@ -44,12 +44,6 @@ const nextConfig: NextConfig = {
       "https://*.run.app",
     ]
   },
-  webpack: (config, { isServer }) => {
-    if (!isServer) {
-      config.resolve.alias['swarm-js'] = false;
-    }
-    return config;
-  },
 };
 
 export default nextConfig;

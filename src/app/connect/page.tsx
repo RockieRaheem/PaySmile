@@ -2,7 +2,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCelo } from "@celo/react-celo";
+import { useAccount, useConnect, useDisconnect } from 'wagmi';
+import { injected } from 'wagmi/connectors';
 import { ArrowLeft, HelpCircle, Download, MousePointerClick, CheckCircle2, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
@@ -27,25 +28,22 @@ const steps = [
 ];
 
 export default function ConnectWalletPage() {
-  const { connect, address } = useCelo();
   const router = useRouter();
+  const { connect } = useConnect();
+  const { address, isConnected } = useAccount();
 
   const valoraLogo = PlaceHolderImages.find(img => img.id === 'valora-logo');
   const celoLogo = PlaceHolderImages.find(img => img.id === 'celo-logo');
 
-  const handleConnect = async () => {
-    try {
-      await connect();
-    } catch (error) {
-      console.error("Failed to connect wallet:", error);
-    }
+  const handleConnect = () => {
+    connect({ connector: injected() });
   };
 
   useEffect(() => {
-    if (address) {
+    if (isConnected && address) {
       router.push('/setup');
     }
-  }, [address, router]);
+  }, [isConnected, address, router]);
 
 
   return (

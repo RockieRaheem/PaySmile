@@ -1,7 +1,7 @@
 'use client';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
-import { CeloProvider, Alfajores } from '@celo/react-celo';
+import { WagmiProvider } from '@/components/WagmiProvider';
 
 export default function RootLayout({
   children,
@@ -9,15 +9,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <CeloProvider
-      dapp={{
-        name: 'PaySmile',
-        description: 'Small Payments, Big Smiles.',
-        url: 'https://app.paysmile.org',
-        icon: 'https://app.paysmile.org/favicon.ico',
-      }}
-      network={Alfajores}
-    >
+    <WagmiProvider>
       <html lang="en" className="light">
         <head>
           <title>PaySmile</title>
@@ -31,6 +23,6 @@ export default function RootLayout({
           <Toaster />
         </body>
       </html>
-    </CeloProvider>
+    </WagmiProvider>
   );
 }

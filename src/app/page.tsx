@@ -17,10 +17,7 @@ export default function WelcomePage() {
 
   const handleGetStarted = () => {
     setIsLoading(true);
-    // Simulate a network request
-    setTimeout(() => {
-      router.push('/connect');
-    }, 1000);
+    router.push('/connect');
   };
   
   if (isLoading) {
