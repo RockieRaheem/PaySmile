@@ -217,119 +217,41 @@
     ]
   },
   "firestore": {
-    "structure": [
-      {
-        "path": "/users/{userId}",
-        "definition": {
-          "entityName": "UserProfile",
-          "schema": {
-            "$ref": "#/backend/entities/UserProfile"
-          },
-          "description": "Stores user profile data, owned by the user. The userId parameter matches the authenticated user's UID.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user, corresponding to their Firebase Auth UID."
-            }
-          ]
-        }
+    "/users/{userId}": {
+      "schema": {
+        "$ref": "#/entities/UserProfile"
       },
-      {
-        "path": "/users/{userId}/settings/{settingsId}",
-        "definition": {
-          "entityName": "Settings",
-          "schema": {
-            "$ref": "#/backend/entities/Settings"
-          },
-          "description": "Stores user-specific settings. The userId parameter matches the authenticated user's UID.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user, corresponding to their Firebase Auth UID."
-            },
-            {
-              "name": "settingsId",
-              "description": "The unique identifier of the settings document."
-            }
-          ]
-        }
+      "description": "Stores user profile data, owned by the user. The userId parameter matches the authenticated user's UID."
+    },
+    "/users/{userId}/settings/{settingsId}": {
+      "schema": {
+        "$ref": "#/entities/Settings"
       },
-      {
-        "path": "/users/{userId}/donations/{donationId}",
-        "definition": {
-          "entityName": "Donation",
-          "schema": {
-            "$ref": "#/backend/entities/Donation"
-          },
-          "description": "Stores donation records for a specific user. The userId parameter matches the authenticated user's UID.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user, corresponding to their Firebase Auth UID."
-            },
-            {
-              "name": "donationId",
-              "description": "The unique identifier of the donation document."
-            }
-          ]
-        }
+      "description": "Stores user-specific settings. The userId parameter matches the authenticated user's UID."
+    },
+    "/users/{userId}/donations/{donationId}": {
+      "schema": {
+        "$ref": "#/entities/Donation"
       },
-      {
-        "path": "/users/{userId}/smileBadges/{smileBadgeId}",
-        "definition": {
-          "entityName": "SmileBadge",
-          "schema": {
-            "$ref": "#/backend/entities/SmileBadge"
-          },
-          "description": "Stores NFT badges awarded to a user. The userId parameter matches the authenticated user's UID.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user, corresponding to their Firebase Auth UID."
-            },
-            {
-              "name": "smileBadgeId",
-              "description": "The unique identifier of the smile badge document."
-            }
-          ]
-        }
+      "description": "Stores donation records for a specific user. The userId parameter matches the authenticated user's UID."
+    },
+    "/users/{userId}/smileBadges/{smileBadgeId}": {
+      "schema": {
+        "$ref": "#/entities/SmileBadge"
       },
-      {
-        "path": "/users/{userId}/projectVotes/{projectVoteId}",
-        "definition": {
-          "entityName": "ProjectVote",
-          "schema": {
-            "$ref": "#/backend/entities/ProjectVote"
-          },
-          "description": "Stores user's votes for community projects. The userId parameter matches the authenticated user's UID.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user, corresponding to their Firebase Auth UID."
-            },
-            {
-              "name": "projectVoteId",
-              "description": "The unique identifier of the project vote document."
-            }
-          ]
-        }
+      "description": "Stores NFT badges awarded to a user. The userId parameter matches the authenticated user's UID."
+    },
+    "/users/{userId}/projectVotes/{projectVoteId}": {
+      "schema": {
+        "$ref": "#/entities/ProjectVote"
       },
-      {
-        "path": "/projects/{projectId}",
-        "definition": {
-          "entityName": "Project",
-          "schema": {
-            "$ref": "#/backend/entities/Project"
-          },
-          "description": "Stores community project data.",
-          "params": [
-            {
-              "name": "projectId",
-              "description": "The unique identifier of the project."
-            }
-          ]
-        }
-      }
-    ]
+      "description": "Stores user's votes for community projects. The userId parameter matches the authenticated user's UID."
+    },
+    "/projects/{projectId}": {
+      "schema": {
+        "$ref": "#/entities/Project"
+      },
+      "description": "Stores community project data."
+    }
   }
 }
