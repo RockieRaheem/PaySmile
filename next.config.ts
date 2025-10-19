@@ -43,7 +43,13 @@ const nextConfig: NextConfig = {
       "https://*.cloud.goog",
       "https://*.run.app",
     ]
-  }
+  },
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.alias['swarm-js'] = false;
+    }
+    return config;
+  },
 };
 
 export default nextConfig;
