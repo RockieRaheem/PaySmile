@@ -19,7 +19,9 @@ import { useEffect, useState } from "react";
  */
 export function useContractAddresses() {
   const { chainId } = useAccount();
-  return getContractAddresses(chainId || 44787); // Default to Alfajores
+  // Use chainId from env if not connected, otherwise use actual chainId
+  const defaultChainId = parseInt(process.env.NEXT_PUBLIC_CHAIN_ID || "31337");
+  return getContractAddresses(chainId || defaultChainId);
 }
 
 /**

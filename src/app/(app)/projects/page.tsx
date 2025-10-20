@@ -16,6 +16,7 @@ import {
   useHasVoted,
 } from "@/hooks/use-contracts";
 import { getContractAddresses } from "@/lib/contracts";
+import { NetworkChecker } from "@/components/NetworkChecker";
 
 // Project data structure from blockchain
 interface BlockchainProject {
@@ -183,6 +184,11 @@ export default function ProjectsPage() {
           <span className="material-symbols-outlined">search</span>
         </Button>
       </header>
+
+      {/* Network checker - shows alert if on wrong network */}
+      <div className="px-4 pt-2">
+        <NetworkChecker />
+      </div>
 
       <div className="flex gap-3 overflow-x-auto whitespace-nowrap px-4 py-2">
         {projectCategories.map((category) => (

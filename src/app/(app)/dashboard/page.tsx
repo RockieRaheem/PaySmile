@@ -25,6 +25,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { NetworkChecker } from "@/components/NetworkChecker";
 
 interface BlockchainProject {
   id: number;
@@ -131,6 +132,9 @@ export default function DashboardPage() {
       </header>
 
       <main className="p-4 space-y-6">
+        {/* Network checker - shows alert if on wrong network */}
+        <NetworkChecker />
+
         <section>
           <Card className="bg-secondary text-secondary-foreground">
             <CardContent className="p-6">
