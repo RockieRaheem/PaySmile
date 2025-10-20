@@ -19,38 +19,80 @@ PaySmile transforms micro-donations into macro-impact by allowing users to round
 
 ## 🚀 Quick Start
 
+### Prerequisites
+
+- Node.js 18+ and npm
+- MetaMask browser extension
+- Git
+
 ### For Development
 
-1. **Install Dependencies**
+1. **Clone and Install**
 
    ```bash
+   git clone <repository-url>
+   cd PaySmile
    npm install
    ```
 
-2. **Start Local Blockchain** (in one terminal)
+2. **Start Local Blockchain** (Terminal 1)
 
    ```bash
    npx hardhat node
    ```
 
-3. **Deploy Smart Contracts** (in another terminal)
+   This starts a local Ethereum node on `http://127.0.0.1:8545` with 20 test accounts (10,000 ETH each).
+
+3. **Deploy Smart Contracts** (Terminal 2)
 
    ```bash
    npx hardhat run scripts/deploy.js --network localhost
    ```
 
-4. **Start Next.js Development Server**
+   ✅ **Contracts deployed:**
+
+   - DonationPool: `0x5FbDB2315678afecb367f032d93F642f64180aa3`
+   - SmileBadgeNFT: `0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512`
+
+4. **Verify Setup**
+
+   ```bash
+   ./scripts/verify-setup.sh
+   ```
+
+   This checks all configurations are correct.
+
+5. **Start Next.js Development Server** (Terminal 3)
 
    ```bash
    npm run dev
    ```
 
-5. **Open in Browser**
-   - Visit [http://localhost:9002](http://localhost:9002)
-   - Connect MetaMask to localhost (Chain ID: 31337)
-   - Import test account to interact with contracts
+   App runs on [http://localhost:9002](http://localhost:9002)
 
-📖 **Full Web3 Integration Guide**: See [WEB3_INTEGRATION.md](./WEB3_INTEGRATION.md)
+6. **Configure MetaMask** (One-time setup)
+
+   See **[METAMASK_SETUP.md](./METAMASK_SETUP.md)** for detailed instructions.
+
+   **Quick Steps:**
+
+   - Add Hardhat Localhost network (Chain ID: 31337, RPC: http://127.0.0.1:8545)
+   - Import test account: `0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80`
+   - Switch to Hardhat Localhost network
+
+7. **Test the Application**
+
+   - Visit [http://localhost:9002](http://localhost:9002)
+   - Connect MetaMask wallet
+   - Explore dashboard and projects
+   - Vote on projects
+   - View donation stats
+
+📖 **Detailed Guides:**
+
+- [MetaMask Setup](./METAMASK_SETUP.md) - Wallet configuration
+- [End-to-End Testing](./docs/END_TO_END_TESTING.md) - Complete testing guide
+- [Network Troubleshooting](./docs/NETWORK_FIX.md) - Fix network issues
 
 ## 🏗️ Tech Stack
 
@@ -112,25 +154,67 @@ PaySmile/
 
 ## 🧪 Testing
 
-### Test Locally
+### Automated Verification
 
 ```bash
-# Run Hardhat tests (when available)
-npx hardhat test
-
-# Use Hardhat console
-npx hardhat console --network localhost
-
-# Check deployment
-npx hardhat run scripts/deploy.js --network localhost
+# Run setup verification script
+./scripts/verify-setup.sh
 ```
 
-### Test on Alfajores Testnet
+This checks:
+
+- ✅ Environment configuration (.env.local)
+- ✅ Deployment files
+- ✅ Hardhat node status
+- ✅ Dev server status
+- ✅ Smart contracts compilation
+- ✅ Frontend components
+- ✅ Documentation files
+
+### Manual Testing
+
+See **[docs/END_TO_END_TESTING.md](./docs/END_TO_END_TESTING.md)** for comprehensive testing guide.
+
+**Quick Test Flow:**
+
+1. Connect wallet → Dashboard → View stats
+2. Navigate to Projects → Vote on a project
+3. Test round-up calculator → Setup page
+4. Switch networks → Verify NetworkChecker alerts
+
+### Contract Interaction (Hardhat Console)
+
+```bash
+# Start Hardhat console
+npx hardhat console --network localhost
+
+# Donate to a project
+const pool = await ethers.getContractAt('DonationPool', '0x5FbDB2315678afecb367f032d93F642f64180aa3');
+await pool.donateToProject(0, {value: ethers.parseEther('1')});
+
+# Check project details
+const project = await pool.getProject(0);
+console.log('Funding:', ethers.formatEther(project.currentFunding), 'ETH');
+
+# Check donor stats
+const [deployer] = await ethers.getSigners();
+const stats = await pool.getDonorStats(deployer.address);
+console.log('Total:', ethers.formatEther(stats.totalDonations), 'ETH');
+```
+
+### Test on Celo Alfajores Testnet
 
 1. Get test CELO from [Celo Faucet](https://faucet.celo.org/alfajores)
-2. Add `PRIVATE_KEY` to `.env`
+2. Create `.env` file: `PRIVATE_KEY=<your_private_key>`
 3. Deploy: `npx hardhat run scripts/deploy.js --network alfajores`
-4. Update `.env.local` with testnet contract addresses
+4. Update `.env.local`:
+   ```env
+   NEXT_PUBLIC_CHAIN_ID=44787
+   NEXT_PUBLIC_DONATION_POOL_ADDRESS=<new_address>
+   NEXT_PUBLIC_SMILE_BADGE_NFT_ADDRESS=<new_address>
+   ```
+5. Add Celo Alfajores network to MetaMask
+6. Test on testnet
 
 ## 🌍 Deployment
 
