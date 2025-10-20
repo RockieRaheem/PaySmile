@@ -4,11 +4,17 @@
  */
 
 export const CONTRACTS = {
+  // Localhost (Hardhat node)
+  localhost: {
+    chainId: 31337,
+    DonationPool: process.env.NEXT_PUBLIC_DONATION_POOL_ADDRESS || "",
+    SmileBadgeNFT: process.env.NEXT_PUBLIC_SMILE_BADGE_NFT_ADDRESS || "",
+  },
   // Celo Alfajores Testnet
   alfajores: {
     chainId: 44787,
-    DonationPool: process.env.NEXT_PUBLIC_DONATION_POOL_ADDRESS || "",
-    SmileBadgeNFT: process.env.NEXT_PUBLIC_SMILE_BADGE_NFT_ADDRESS || "",
+    DonationPool: "", // Will be updated after testnet deployment
+    SmileBadgeNFT: "",
   },
   // Celo Mainnet (for production)
   celo: {
@@ -23,12 +29,14 @@ export const CONTRACTS = {
  */
 export function getContractAddresses(chainId: number) {
   switch (chainId) {
+    case 31337:
+      return CONTRACTS.localhost;
     case 44787:
       return CONTRACTS.alfajores;
     case 42220:
       return CONTRACTS.celo;
     default:
-      console.warn(`Unsupported chain ID: ${chainId}`);
-      return CONTRACTS.alfajores; // Default to testnet
+      console.warn(`Unsupported chain ID: ${chainId}, using localhost`);
+      return CONTRACTS.localhost; // Default to localhost for development
   }
 }

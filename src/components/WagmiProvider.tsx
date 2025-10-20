@@ -1,14 +1,14 @@
 "use client";
 
 import { WagmiProvider as WagmiProviderBase, createConfig, http } from "wagmi";
-import { celo, celoAlfajores } from "wagmi/chains";
+import { celo, celoAlfajores, localhost } from "wagmi/chains";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactNode } from "react";
 import { injected, walletConnect } from "wagmi/connectors";
 
-// Initialize with Celo testnet for development
+// Initialize with localhost for development, Celo testnet for testing
 const config = createConfig({
-  chains: [celoAlfajores, celo],
+  chains: [localhost, celoAlfajores, celo],
   connectors: [
     injected({
       target: {
@@ -28,6 +28,7 @@ const config = createConfig({
     injected(),
   ],
   transports: {
+    [localhost.id]: http("http://127.0.0.1:8545"),
     [celo.id]: http("https://forno.celo.org"),
     [celoAlfajores.id]: http("https://alfajores-forno.celo-testnet.org"),
   },
