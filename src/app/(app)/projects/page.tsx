@@ -199,48 +199,93 @@ export default function ProjectsPage() {
       </div>
 
       <main className="flex-1 space-y-4 overflow-y-auto p-4">
-        {filteredProjects.map((project) => (
-          <Card key={project.id} className="overflow-hidden bg-card shadow-sm">
-            {project.image && (
-              <div
-                className="aspect-video w-full bg-cover bg-center"
-                style={{ backgroundImage: `url(${project.image.imageUrl})` }}
-                data-alt={project.image.description}
-              ></div>
-            )}
-            <CardContent className="space-y-3 p-4">
-              <p className="text-lg font-bold">{project.title}</p>
-              <p className="text-sm text-muted-foreground">
-                {project.description}
-              </p>
-              <Progress
-                value={(project.currentFunding / project.fundingGoal) * 100}
-                className="h-2 rounded bg-primary/20"
-              />
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-muted-foreground">
-                  {new Intl.NumberFormat("en-US").format(
-                    project.currentFunding
-                  )}{" "}
-                  / {new Intl.NumberFormat("en-US").format(project.fundingGoal)}{" "}
-                  UGX
-                </p>
-                <Button
-                  size="sm"
-                  className="rounded-full px-6 font-bold"
-                  onClick={() => handleVote(project.id)}
-                  disabled={isPending && votingProjectId === project.id}
-                >
-                  {isPending && votingProjectId === project.id ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    "Vote"
-                  )}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+        {filteredProjects.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <p className="text-muted-foreground">
+              No projects found in this category.
+            </p>
+          </div>
+        ) : (
+          filteredProjects.map((project) => {
+            const fundingProgress =
+              project.fundingGoal > BigInt(0)
+                ? (Number(project.currentFunding) /
+                    Number(project.fundingGoal)) *
+                  100
+                : 0;
+
+            return (
+              <Card
+                key={project.id}
+                className="overflow-hidden bg-card shadow-sm"
+              >
+                <CardContent className="space-y-3 p-4">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-lg font-bold">{project.name}</p>
+                      {project.category && (
+                        <span className="inline-block rounded-full bg-primary/20 px-2 py-0.5 text-xs font-medium text-primary">
+                          {project.category}
+                        </span>
+                      )}
+                    </div>
+                    {project.isFunded && (
+                      <span className="rounded-full bg-green-100 px-2 py-1 text-xs font-semibold text-green-700">
+                        Funded ✓
+                      </span>
+                    )}
+                  </div>
+
+                  <p className="text-sm text-muted-foreground">
+                    {project.description}
+                  </p>
+
+                  <div className="space-y-1">
+                    <Progress
+                      value={fundingProgress}
+                      className="h-2 rounded bg-primary/20"
+                    />
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <span>
+                        {formatEther(project.currentFunding)} CELO raised
+                      </span>
+                      <span>Goal: {formatEther(project.fundingGoal)} CELO</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-2">
+                    <div className="text-sm text-muted-foreground">
+                      {project.votesReceived.toString()} votes
+                    </div>
+                    <Button
+                      size="sm"
+                      className="rounded-full px-6 font-bold"
+                      onClick={() => handleVote(project.id)}
+                      disabled={
+                        (isPending && votingProjectId === project.id) ||
+                        !project.isActive ||
+                        project.isFunded
+                      }
+                    >
+                      {isPending && votingProjectId === project.id ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Voting...
+                        </>
+                      ) : project.isFunded ? (
+                        "Funded"
+                      ) : !project.isActive ? (
+                        "Closed"
+                      ) : (
+                        "Vote"
+                      )}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })
+        )}
       </main>
     </div>
   );

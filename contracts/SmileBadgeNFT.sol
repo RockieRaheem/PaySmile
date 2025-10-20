@@ -4,7 +4,6 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
 
 /**
  * @title SmileBadgeNFT
@@ -15,9 +14,8 @@ import "@openzeppelin/contracts/utils/Counters.sol";
  * - Track badge types and rarities
  */
 contract SmileBadgeNFT is ERC721, ERC721URIStorage, Ownable {
-    using Counters for Counters.Counter;
     
-    Counters.Counter private _tokenIdCounter;
+    uint256 private _tokenIdCounter;
     
     // Badge types
     enum BadgeType {
@@ -52,8 +50,8 @@ contract SmileBadgeNFT is ERC721, ERC721URIStorage, Ownable {
     ) external onlyOwner returns (uint256) {
         require(!badgesEarned[to][badgeType], "Badge already earned");
         
-        uint256 tokenId = _tokenIdCounter.current();
-        _tokenIdCounter.increment();
+        uint256 tokenId = _tokenIdCounter;
+        _tokenIdCounter++;
         
         _safeMint(to, tokenId);
         _setTokenURI(tokenId, tokenURI);
@@ -97,7 +95,7 @@ contract SmileBadgeNFT is ERC721, ERC721URIStorage, Ownable {
      * @dev Get total badges minted
      */
     function totalSupply() external view returns (uint256) {
-        return _tokenIdCounter.current();
+        return _tokenIdCounter;
     }
     
     // Override required functions
