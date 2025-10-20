@@ -7,14 +7,14 @@ export const CONTRACTS = {
   // Celo Alfajores Testnet
   alfajores: {
     chainId: 44787,
-    DonationPool: process.env.NEXT_PUBLIC_DONATION_POOL_ADDRESS || '',
-    SmileBadgeNFT: process.env.NEXT_PUBLIC_SMILE_BADGE_NFT_ADDRESS || '',
+    DonationPool: process.env.NEXT_PUBLIC_DONATION_POOL_ADDRESS || "",
+    SmileBadgeNFT: process.env.NEXT_PUBLIC_SMILE_BADGE_NFT_ADDRESS || "",
   },
   // Celo Mainnet (for production)
   celo: {
     chainId: 42220,
-    DonationPool: '',
-    SmileBadgeNFT: '',
+    DonationPool: "",
+    SmileBadgeNFT: "",
   },
 } as const;
 
