@@ -4,27 +4,13 @@ import { WagmiProvider as WagmiProviderBase, createConfig, http } from "wagmi";
 import { celo, celoAlfajores, localhost } from "wagmi/chains";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactNode } from "react";
-import { injected, walletConnect } from "wagmi/connectors";
+import { injected } from "wagmi/connectors";
 
 // Initialize with localhost for development, Celo testnet for testing
 const config = createConfig({
   chains: [localhost, celoAlfajores, celo],
   connectors: [
-    injected({
-      target: {
-        id: "valora",
-        name: "Valora",
-        provider: (window as any)?.ethereum,
-      },
-    }),
-    injected({
-      target: {
-        id: "celo",
-        name: "Celo Wallet",
-        provider: (window as any)?.celo,
-      },
-    }),
-    // Fallback to standard injected provider
+    // Standard injected provider (MetaMask, Valora, etc.)
     injected(),
   ],
   transports: {

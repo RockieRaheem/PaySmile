@@ -22,21 +22,25 @@ PaySmile transforms micro-donations into macro-impact by allowing users to round
 ### For Development
 
 1. **Install Dependencies**
+
    ```bash
    npm install
    ```
 
 2. **Start Local Blockchain** (in one terminal)
+
    ```bash
    npx hardhat node
    ```
 
 3. **Deploy Smart Contracts** (in another terminal)
+
    ```bash
    npx hardhat run scripts/deploy.js --network localhost
    ```
 
 4. **Start Next.js Development Server**
+
    ```bash
    npm run dev
    ```
@@ -61,11 +65,15 @@ PaySmile transforms micro-donations into macro-impact by allowing users to round
 ## 📋 Smart Contracts
 
 ### DonationPool
+
 Manages donations, projects, and voting
+
 - Address (localhost): `0x5FbDB2315678afecb367f032d93F642f64180aa3`
 
-### SmileBadgeNFT  
+### SmileBadgeNFT
+
 ERC-721 NFT badges for donors
+
 - Address (localhost): `0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512`
 
 ## 🎯 Hackathon: EthNile'25
@@ -73,12 +81,14 @@ ERC-721 NFT badges for donors
 **Track**: Celo - Mobile-First for Africa
 
 **Problem Solved**:
+
 - Lack of trust in donation systems
 - No transparent way to support local development
 - Small contributions often ignored
 - Communities struggle with funding verification
 
 **Our Solution**:
+
 - Blockchain transparency for every donation
 - Community governance through voting
 - Gamification with NFT badges
@@ -125,11 +135,13 @@ npx hardhat run scripts/deploy.js --network localhost
 ## 🌍 Deployment
 
 ### Celo Alfajores Testnet
+
 - **Chain ID**: 44787
 - **RPC**: https://alfajores-forno.celo-testnet.org
 - **Explorer**: https://alfajores.celoscan.io
 
-### Celo Mainnet  
+### Celo Mainnet
+
 - **Chain ID**: 42220
 - **RPC**: https://forno.celo.org
 - **Explorer**: https://celoscan.io
@@ -137,6 +149,7 @@ npx hardhat run scripts/deploy.js --network localhost
 ## 🔐 Environment Variables
 
 Create `.env.local`:
+
 ```env
 NEXT_PUBLIC_CHAIN_ID=31337
 NEXT_PUBLIC_DONATION_POOL_ADDRESS=<contract_address>
@@ -144,6 +157,7 @@ NEXT_PUBLIC_SMILE_BADGE_NFT_ADDRESS=<contract_address>
 ```
 
 For deployment, create `.env`:
+
 ```env
 PRIVATE_KEY=<your_private_key>
 CELOSCAN_API_KEY=<optional_for_verification>
@@ -151,7 +165,7 @@ CELOSCAN_API_KEY=<optional_for_verification>
 
 ## 🤝 Contributing
 
-This is a hackathon project for EthNile'25. 
+This is a hackathon project for EthNile'25.
 
 ## 📄 License
 
@@ -160,4 +174,3 @@ MIT License
 ---
 
 **Built for EthNile'25 Hackathon** 🇺🇬
-
