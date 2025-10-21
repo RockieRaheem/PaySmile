@@ -3,6 +3,10 @@ import { createPublicClient, http } from "viem";
 import { localhost } from "viem/chains";
 import { DONATION_POOL_ABI } from "@/lib/abis/DonationPool";
 
+// Disable caching for this route to always fetch fresh blockchain data
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 const DONATION_POOL_ADDRESS = process.env
   .NEXT_PUBLIC_DONATION_POOL_ADDRESS as `0x${string}`;
 const CHAIN_ID = parseInt(process.env.NEXT_PUBLIC_CHAIN_ID || "31337");
@@ -57,7 +61,14 @@ export async function GET(
       category: categorizeProject(data[0] as string, data[1] as string),
     };
 
-    return NextResponse.json(project);
+    return NextResponse.json(project, {
+      headers: {
+        "Cache-Control":
+          "no-store, no-cache, must-revalidate, proxy-revalidate",
+        Pragma: "no-cache",
+        Expires: "0",
+      },
+    });
   } catch (error: any) {
     console.error("Error fetching project:", error);
     return NextResponse.json(

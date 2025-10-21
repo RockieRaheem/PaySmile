@@ -168,8 +168,16 @@ export function useProjects() {
       const projectPromises = [];
 
       for (let i = 0; i < count; i++) {
+        // Add cache-busting timestamp to force fresh data
+        const timestamp = Date.now();
         projectPromises.push(
-          fetch(`/api/project/${i}`).then((res) => res.json())
+          fetch(`/api/project/${i}?t=${timestamp}`, {
+            cache: "no-store",
+            headers: {
+              "Cache-Control": "no-cache, no-store, must-revalidate",
+              Pragma: "no-cache",
+            },
+          }).then((res) => res.json())
         );
       }
 

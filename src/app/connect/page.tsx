@@ -2,168 +2,197 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useAccount, useConnect, useDisconnect } from "wagmi";
-import { ArrowLeft, Wallet, Smartphone } from "lucide-react";
+import { useAccount, useConnect } from "wagmi";
+import { Wallet, Check, Chrome, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { useEffect, useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
-const steps = [
+const benefits = [
   {
-    icon: Smartphone,
-    title: "Select your wallet below",
-    description: "Choose TrustWallet, Valora, MetaMask, or any Celo wallet.",
+    icon: Zap,
+    title: "Instant Connection",
+    description: "Connect in seconds with MetaMask or your favorite wallet",
   },
   {
     icon: Wallet,
-    title: "Approve in your wallet app",
-    description: "Your wallet will open automatically - just tap 'Connect'.",
+    title: "Secure & Private",
+    description: "Your keys, your crypto. We never store your private data.",
+  },
+  {
+    icon: Check,
+    title: "Easy to Use",
+    description: "Simple one-click connection - no complicated setup needed",
   },
 ];
 
 export default function ConnectWalletPage() {
   const router = useRouter();
-  const { connectors, connect, isPending } = useConnect();
+  const { connectors, connect, isPending, error } = useConnect();
   const { address, isConnected } = useAccount();
-  const [connecting, setConnecting] = useState(false);
+  const [connectingId, setConnectingId] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const valoraLogo = PlaceHolderImages.find((img) => img.id === "valora-logo");
   const celoLogo = PlaceHolderImages.find((img) => img.id === "celo-logo");
 
-  const handleConnect = (connectorId: string) => {
-    setConnecting(true);
-    const connector = connectors.find((c) => c.id === connectorId);
-    if (connector) {
-      connect(
-        { connector },
-        {
-          onSettled: () => setConnecting(false),
-        }
-      );
+  const handleConnect = async (connector: any) => {
+    try {
+      setConnectingId(connector.id);
+      await connect({ connector });
+      toast({
+        title: "Connected!",
+        description: "Your wallet has been connected successfully.",
+      });
+    } catch (err: any) {
+      console.error("Connection error:", err);
+      toast({
+        variant: "destructive",
+        title: "Connection Failed",
+        description:
+          err?.message || "Failed to connect wallet. Please try again.",
+      });
+      setConnectingId(null);
     }
   };
 
   useEffect(() => {
     if (isConnected && address) {
-      router.push("/setup");
+      setTimeout(() => {
+        router.push("/setup");
+      }, 500);
     }
   }, [isConnected, address, router]);
 
+  useEffect(() => {
+    if (error) {
+      setConnectingId(null);
+    }
+  }, [error]);
+
+  // Only show MetaMask/Injected connector
+  const injectedConnector = connectors.find((c) => c.id === "injected");
+
   return (
-    <div className="flex min-h-screen flex-col bg-background text-foreground">
-      <header className="flex items-center justify-between p-4 pb-2">
+    <div className="flex min-h-screen flex-col bg-gradient-to-b from-background to-secondary/20">
+      {/* Header */}
+      <header className="flex items-center justify-between p-4">
         <Button variant="ghost" size="icon" asChild>
           <Link href="/">
             <span className="material-symbols-outlined">arrow_back</span>
           </Link>
         </Button>
-        <h1 className="flex-1 text-center text-lg font-bold">
-          Connect Your Wallet
-        </h1>
-        <Button variant="ghost" size="icon">
-          <span className="material-symbols-outlined">help_outline</span>
-        </Button>
+        <h1 className="flex-1 text-center text-lg font-bold">Connect Wallet</h1>
+        <div className="w-10" /> {/* Spacer */}
       </header>
-      <main className="flex flex-1 flex-col px-4 pt-4">
-        <p className="pb-6 text-center text-muted-foreground">
-          Choose your wallet to connect. It will open automatically in your
-          wallet app.
-        </p>
 
-        {/* Wallet logos */}
-        <div className="mb-8 flex items-center justify-center gap-6">
-          {valoraLogo && (
-            <Image
-              src={valoraLogo.imageUrl}
-              alt={valoraLogo.description}
-              width={64}
-              height={64}
-              className="object-contain"
-              data-ai-hint={valoraLogo.imageHint}
-            />
-          )}
-          {celoLogo && (
-            <Image
-              src={celoLogo.imageUrl}
-              alt={celoLogo.description}
-              width={64}
-              height={64}
-              className="object-contain"
-              data-ai-hint={celoLogo.imageHint}
-            />
-          )}
+      <main className="flex flex-1 flex-col px-6 py-4">
+        {/* Hero Section */}
+        <div className="mb-8 text-center">
+          <div className="mb-4 flex items-center justify-center gap-4">
+            {valoraLogo && (
+              <div className="rounded-2xl bg-white p-3 shadow-lg">
+                <Image
+                  src={valoraLogo.imageUrl}
+                  alt="Valora"
+                  width={48}
+                  height={48}
+                  className="object-contain"
+                  data-ai-hint={valoraLogo.imageHint}
+                />
+              </div>
+            )}
+            {celoLogo && (
+              <div className="rounded-2xl bg-white p-3 shadow-lg">
+                <Image
+                  src={celoLogo.imageUrl}
+                  alt="Celo"
+                  width={48}
+                  height={48}
+                  className="object-contain"
+                  data-ai-hint={celoLogo.imageHint}
+                />
+              </div>
+            )}
+          </div>
+          <h2 className="mb-2 text-2xl font-bold">Connect Your Wallet</h2>
+          <p className="text-muted-foreground">
+            Connect with MetaMask to start making donations
+          </p>
         </div>
 
-        {/* How it works */}
-        <div className="mb-6 space-y-4">
-          {steps.map((step, index) => (
-            <div
+        {/* Benefits Cards */}
+        <div className="mb-8 space-y-3">
+          {benefits.map((benefit, index) => (
+            <Card
               key={index}
-              className="flex min-h-[72px] items-center gap-4 rounded-lg border bg-card p-4"
+              className="flex items-center gap-4 border-0 bg-card/50 p-4 backdrop-blur-sm"
             >
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary/20 text-primary">
-                <step.icon className="h-6 w-6" />
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10">
+                <benefit.icon className="h-6 w-6 text-primary" />
               </div>
-              <div className="flex flex-col justify-center">
-                <p className="font-medium">{step.title}</p>
-                {step.description && (
-                  <p className="text-sm text-muted-foreground">
-                    {step.description}
-                  </p>
-                )}
+              <div>
+                <p className="font-semibold">{benefit.title}</p>
+                <p className="text-sm text-muted-foreground">
+                  {benefit.description}
+                </p>
               </div>
-            </div>
+            </Card>
           ))}
         </div>
 
-        {/* Wallet connection buttons */}
-        <div className="mt-auto pb-6 space-y-3">
-          {connectors.map((connector) => (
+        {/* Connection Button */}
+        <div className="mt-auto space-y-4 pb-6">
+          {injectedConnector ? (
             <Button
-              key={connector.id}
               size="lg"
-              variant={connector.id === "walletConnect" ? "default" : "outline"}
-              className="h-14 w-full rounded-lg text-lg font-medium shadow-sm"
-              onClick={() => handleConnect(connector.id)}
-              disabled={connecting || isPending}
+              className="h-16 w-full rounded-xl text-lg font-semibold shadow-lg"
+              onClick={() => handleConnect(injectedConnector)}
+              disabled={connectingId === injectedConnector.id || isPending}
             >
-              {connecting || isPending ? (
+              {connectingId === injectedConnector.id || isPending ? (
                 <>
-                  <span className="material-symbols-outlined animate-spin mr-2">
+                  <span className="material-symbols-outlined animate-spin mr-3">
                     progress_activity
                   </span>
-                  Connecting...
+                  Connecting to MetaMask...
                 </>
               ) : (
                 <>
-                  {connector.id === "walletConnect" && (
-                    <span className="mr-2">📱</span>
-                  )}
-                  {connector.id === "injected" && (
-                    <span className="material-symbols-outlined mr-2">
-                      account_balance_wallet
-                    </span>
-                  )}
-                  {connector.name}
+                  <Chrome className="mr-3 h-6 w-6" />
+                  Connect with MetaMask
                 </>
               )}
             </Button>
-          ))}
+          ) : (
+            <Card className="border-dashed p-4 text-center">
+              <p className="text-sm text-muted-foreground">
+                MetaMask not detected. Please install MetaMask browser
+                extension.
+              </p>
+            </Card>
+          )}
 
-          <div className="mt-4 flex items-center justify-center gap-2 text-sm text-muted-foreground">
-            <span
-              className="material-symbols-outlined text-primary"
-              style={{ fontSize: "20px" }}
-            >
-              security
+          {/* Security Note */}
+          <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+            <span className="material-symbols-outlined text-green-500">
+              verified_user
             </span>
-            <span>Opens natively in your wallet app</span>
+            <span>Secure connection • Your keys stay with you</span>
           </div>
 
-          <div className="mt-2 text-center">
-            <Link href="#" className="text-sm font-medium text-primary">
-              Don't have a wallet? Download one
-            </Link>
+          {/* Help Link */}
+          <div className="text-center">
+            <a
+              href="https://metamask.io/download/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+            >
+              Don't have MetaMask? Download here →
+            </a>
           </div>
         </div>
       </main>

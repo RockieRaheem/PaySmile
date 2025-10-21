@@ -4,12 +4,7 @@ import { WagmiProvider as WagmiProviderBase, createConfig, http } from "wagmi";
 import { celo, celoAlfajores, localhost } from "wagmi/chains";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactNode } from "react";
-import { injected, walletConnect } from "wagmi/connectors";
-
-// WalletConnect project ID from environment variable
-// Get yours from https://cloud.walletconnect.com (free!)
-const projectId =
-  process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "demo-project-id";
+import { injected } from "wagmi/connectors";
 
 // Initialize with localhost for development, Celo testnet for testing
 const config = createConfig({
@@ -18,25 +13,6 @@ const config = createConfig({
     // Injected wallets (MetaMask, etc.) - prioritize for local development
     injected({
       shimDisconnect: true,
-    }),
-    // WalletConnect - Opens wallets natively (TrustWallet, Valora, MetaMask app)
-    walletConnect({
-      projectId,
-      metadata: {
-        name: "PaySmile",
-        description:
-          "Round up your transactions and donate to meaningful projects",
-        url:
-          typeof window !== "undefined"
-            ? window.location.origin
-            : "https://paysmile.app",
-        icons: ["https://avatars.githubusercontent.com/u/37784886"],
-      },
-      showQrModal: true, // Show QR for desktop users
-      qrModalOptions: {
-        enableExplorer: false, // Reduces initial load
-      },
-      disableProviderPing: true, // Prevents automatic connection attempts
     }),
   ],
   transports: {
