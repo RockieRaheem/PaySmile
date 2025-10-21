@@ -33,6 +33,10 @@ const config = createConfig({
         icons: ["https://avatars.githubusercontent.com/u/37784886"],
       },
       showQrModal: true, // Show QR for desktop users
+      qrModalOptions: {
+        enableExplorer: false, // Reduces initial load
+      },
+      disableProviderPing: true, // Prevents automatic connection attempts
     }),
   ],
   transports: {
