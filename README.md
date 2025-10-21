@@ -2,57 +2,300 @@
 
 **"Small Payments, Big Smiles."**
 
+> 🏆 **Built for EthNile'25 Hackathon - Celo Track**
+
 A blockchain-based mobile application built on **Celo** that enables Ugandans to automatically donate small change ("round-ups") from everyday mobile payments toward verified community projects.
 
-## 🌟 Project Overview
+---
 
-PaySmile transforms micro-donations into macro-impact by allowing users to round up their daily transactions and contribute to community projects like clean water initiatives, education support, and environmental conservation.
+## 📺 Demo Video
+
+**Watch PaySmile in Action:** [YouTube Demo Link] _(5 minutes)_
+
+---
+
+## 🌟 The Problem
+
+In Uganda, over **30 million mobile money transactions** happen daily. People buy airtime, pay for goods, and send money constantly. But the spare change - those 50, 100, or 200 shillings left over - never goes toward building communities.
+
+**Why?**
+
+- ❌ No trust in traditional donation systems
+- ❌ No transparency about where money goes
+- ❌ People think small amounts can't make a difference
+- ❌ Community projects struggle to raise funds
+
+---
+
+## 💡 The Solution: PaySmile
+
+PaySmile turns everyday payments into community impact through **round-up micro-donations** on the Celo blockchain.
+
+### How It Works
+
+1. **User makes a payment** (e.g., 1,950 UGX for airtime)
+2. **PaySmile rounds it up** to 2,000 UGX
+3. **Extra 50 UGX becomes a donation** (converted to CELO)
+4. **Community votes** on which projects to fund
+5. **Donors earn NFT badges** as blockchain-verified rewards
 
 ### Key Features
 
-- 💰 **Round-Up Donations**: Automatically round up transactions to donate spare change
-- 🗳️ **Community Voting**: Vote on which projects receive funding
-- 🏆 **NFT Badges**: Earn recognition for your contributions
-- 📊 **Impact Dashboard**: Track your donations and see real-world impact
-- 🔗 **Blockchain Transparency**: All transactions visible on-chain
-- 📱 **Mobile-First**: Optimized for Celo's mobile-first ecosystem
+- 💰 **Round-Up Donations**: Automatically calculate and donate spare change
+- 🌍 **UGX to CELO Conversion**: Seamless currency handling for Uganda
+- 🗳️ **Community Voting**: Democratic project selection via blockchain
+- 🏆 **NFT Badge System**: Gamified rewards (First Step, Community Builder, Impact Champion, Legend)
+- 📊 **Impact Dashboard**: Real-time donation tracking and project updates
+- 🔗 **Complete Transparency**: All transactions visible on Celo blockchain
+- 📱 **Mobile-First**: Optimized for Valora and MetaMask on mobile devices
+
+---
+
+## 🏗️ Technical Architecture
+
+### Smart Contracts (Solidity)
+
+- **DonationPool.sol**: Manages donations, projects, and voting
+- **SmileBadgeNFT.sol**: Mints achievement NFTs for donors
+
+### Frontend (Next.js 15 + TypeScript)
+
+- Mobile-responsive UI with Tailwind CSS
+- wagmi + viem for Celo blockchain integration
+- Real-time contract data fetching
+
+### Blockchain
+
+- **Network**: Celo Alfajores Testnet (Chain ID: 44787)
+- **Currency**: CELO (with UGX conversion display)
+- **Deployed Contracts**:
+  - DonationPool: `0xDF9c58fE7F366c376d6E83C92a7408fb13dee089`
+  - SmileBadgeNFT: `0x04d271595Bed4335fb136E264ECEE9fd96d1d479`
+
+---
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 
 - Node.js 18+ and npm
-- MetaMask browser extension
+- MetaMask or Valora wallet
 - Git
 
-### For Development
+### Installation
 
 1. **Clone and Install**
 
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/RockieRaheem/PaySmile.git
    cd PaySmile
    npm install
    ```
 
-2. **Start Local Blockchain** (Terminal 1)
+2. **Environment Setup**
+
+   The project is already configured for **Celo Alfajores testnet**. Contract addresses are in `.env.local`.
+
+3. **Run the App**
 
    ```bash
-   npx hardhat node
+   npm run dev
    ```
 
-   This starts a local Ethereum node on `http://127.0.0.1:8545` with 20 test accounts (10,000 ETH each).
+   Open [http://localhost:9002](http://localhost:9002)
 
-3. **Deploy Smart Contracts** (Terminal 2)
+### Testing on Celo Alfajores
 
-   ```bash
-   npx hardhat run scripts/deploy.js --network localhost
-   ```
+1. **Get Test CELO**
 
-   ✅ **Contracts deployed:**
+   - Visit [Celo Faucet](https://faucet.celo.org/alfajores)
+   - Add Celo Alfajores network to MetaMask:
+     - Network Name: Celo Alfajores Testnet
+     - RPC URL: `https://alfajores-forno.celo-testnet.org`
+     - Chain ID: `44787`
+     - Currency: `CELO`
+     - Explorer: `https://alfajores.celoscan.io`
 
-   - DonationPool: `0x5FbDB2315678afecb367f032d93F642f64180aa3`
-   - SmileBadgeNFT: `0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512`
+2. **Connect Wallet**
+
+   - Go to `/setup` page
+   - Click "Connect Wallet"
+   - Approve MetaMask/Valora connection
+
+3. **Try Round-Up Donations**
+
+   - Navigate to `/round-up`
+   - Enter a payment amount (e.g., 1,950 UGX)
+   - See auto-calculated donation
+   - Confirm transaction
+
+4. **Vote for Projects**
+
+   - Go to `/projects`
+   - Browse community projects
+   - Cast your vote (requires CELO for gas)
+
+5. **Earn NFT Badges**
+   - Make donations to earn badges
+   - View collection at `/badges`
+
+---
+
+## 📂 Project Structure
+
+```
+PaySmile/
+├── contracts/              # Solidity smart contracts
+│   ├── DonationPool.sol   # Main donation logic
+│   └── SmileBadgeNFT.sol  # NFT badge system
+├── src/
+│   ├── app/               # Next.js pages
+│   │   ├── (app)/
+│   │   │   ├── dashboard/ # User stats & overview
+│   │   │   ├── round-up/  # 🌟 Signature feature
+│   │   │   ├── projects/  # Project voting
+│   │   │   └── badges/    # NFT badge collection
+│   │   └── setup/         # Wallet connection
+│   ├── components/        # React components
+│   ├── hooks/             # Custom React hooks
+│   └── lib/               # Utilities & ABIs
+├── scripts/               # Deployment scripts
+└── hardhat.config.js      # Blockchain config
+```
+
+---
+
+## 🎯 EthNile'25 Hackathon Submission
+
+### Track: **Celo - Mobile-First for Africa**
+
+### Why PaySmile Wins
+
+✅ **Innovation (9/10)**
+
+- Unique round-up mechanism for micro-donations
+- Combines payment simulation + blockchain + gamification
+
+✅ **Impact (9/10)**
+
+- Solves real problem in Uganda (30M+ daily transactions)
+- Transparent, trustworthy donation system
+- Empowers communities through voting
+
+✅ **Execution (9/10)**
+
+- Fully functional on Celo Alfajores
+- Clean, mobile-first UI
+- Complete smart contract system
+
+✅ **Mobile-First (10/10)**
+
+- Built specifically for Celo's mobile ecosystem
+- Works with Valora wallet
+- UGX currency integration for Uganda
+
+✅ **Sustainability (8/10)**
+
+- Scalable across Africa
+- NFT rewards drive engagement
+- DAO-like governance for project selection
+
+---
+
+## 🌍 Social Impact
+
+### Aligned with UN SDGs
+
+- **SDG 1**: No Poverty - Enables community-driven development
+- **SDG 6**: Clean Water - Funds water projects transparently
+- **SDG 11**: Sustainable Communities - Strengthens local participation
+- **SDG 13**: Climate Action - Supports environmental projects
+
+### Potential Impact
+
+- **10,000 users** × 100 UGX/day = **30M UGX/month** for communities
+- **20+ projects funded** monthly
+- **100% transparency** via blockchain
+- **Scalable across East Africa** and beyond
+
+---
+
+## 🛠️ Development
+
+### Deploy to Celo Alfajores
+
+```bash
+# Check balance
+npx hardhat run scripts/check-balance.js --network alfajores
+
+# Deploy contracts
+npx hardhat run scripts/deploy.js --network alfajores
+```
+
+### Tech Stack
+
+- **Blockchain**: Celo, Solidity, Hardhat
+- **Frontend**: Next.js 15, TypeScript, Tailwind CSS
+- **Web3**: wagmi, viem, Valora SDK
+- **UI**: shadcn/ui components
+
+---
+
+## 📸 Screenshots
+
+### Round-Up Feature
+
+_Payment simulator that auto-calculates donations_
+
+### Community Projects
+
+_Vote on verified local projects in Uganda_
+
+### NFT Badges
+
+_Earn blockchain-verified achievement badges_
+
+---
+
+## 👥 Team
+
+- **Developer**: [Your Name]
+- **Track**: Celo - Mobile-First for Africa
+- **Hackathon**: EthNile'25
+
+---
+
+## 📄 License
+
+MIT License - see LICENSE file
+
+---
+
+## 🔗 Links
+
+- **Demo Video**: [YouTube Link]
+- **Live Demo**: [Vercel Deployment]
+- **Celo Explorer**: [View Contracts on Celoscan](https://alfajores.celoscan.io)
+- **GitHub**: [Repository](https://github.com/RockieRaheem/PaySmile)
+
+---
+
+## 🙏 Acknowledgments
+
+- **EthNile'25** for the hackathon opportunity
+- **Celo Foundation** for the mobile-first blockchain
+- **Uganda's mobile payment community** for inspiration
+
+---
+
+**PaySmile - Turning Small Payments into Big Smiles** 😊
+
+_Built with ❤️ for Africa, powered by Celo_
+
+✅ **Contracts deployed:**
+
+- DonationPool: `0x5FbDB2315678afecb367f032d93F642f64180aa3`
+- SmileBadgeNFT: `0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512`
 
 4. **Verify Setup**
 

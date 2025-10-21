@@ -51,15 +51,17 @@ export default function BadgesPage() {
   const { SmileBadgeNFT } = useContractAddresses();
   const [userBadges, setUserBadges] = useState<number[]>([]);
 
-  // Read badge balance from contract
+  // Read badges from contract
   const { data: badgeBalance, isLoading } = useReadContract({
     address: SmileBadgeNFT as `0x${string}`,
     abi: SMILE_BADGE_NFT_ABI,
-    functionName: "balanceOf",
+    functionName: "getBadgesByOwner",
     args: address ? [address] : undefined,
   });
 
-  const badgeCount = badgeBalance ? Number(badgeBalance) : 0;
+  const badgeCount = badgeBalance
+    ? (badgeBalance as readonly bigint[]).length
+    : 0;
 
   // Simulate earned badges based on balance (for demo)
   useEffect(() => {
