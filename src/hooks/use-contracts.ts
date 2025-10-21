@@ -161,55 +161,76 @@ export function useProjects() {
   const [projects, setProjects] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchProjects = useCallback(async () => {
-    if (projectCount !== undefined) {
-      setIsLoading(true);
-      const count = Number(projectCount);
-      const projectPromises = [];
+  const fetchProjects = useCallback(
+    async (silent = false) => {
+      if (projectCount !== undefined) {
+        // Only show loading state on initial load, not on refetch
+        if (!silent) {
+          setIsLoading(true);
+        }
+        const count = Number(projectCount);
+        const projectPromises = [];
 
-      for (let i = 0; i < count; i++) {
-        // Add cache-busting timestamp to force fresh data
-        const timestamp = Date.now();
-        projectPromises.push(
-          fetch(`/api/project/${i}?t=${timestamp}`, {
-            cache: "no-store",
-            headers: {
-              "Cache-Control": "no-cache, no-store, must-revalidate",
-              Pragma: "no-cache",
-            },
-          }).then((res) => res.json())
-        );
+        for (let i = 0; i < count; i++) {
+          // Add cache-busting timestamp to force fresh data
+          const timestamp = Date.now();
+          projectPromises.push(
+            fetch(`/api/project/${i}?t=${timestamp}`, {
+              cache: "no-store",
+              headers: {
+                "Cache-Control": "no-cache, no-store, must-revalidate",
+                Pragma: "no-cache",
+              },
+            }).then((res) => res.json())
+          );
+        }
+
+        Promise.all(projectPromises)
+          .then((fetchedProjects) => {
+            // Convert string values back to bigints
+            const parsedProjects = fetchedProjects.map((project) => ({
+              ...project,
+              fundingGoal: BigInt(project.fundingGoal || "0"),
+              currentFunding: BigInt(project.currentFunding || "0"),
+              votesReceived: BigInt(project.votesReceived || "0"),
+            }));
+            setProjects(parsedProjects);
+          })
+          .finally(() => {
+            if (!silent) {
+              setIsLoading(false);
+            }
+          });
       }
-
-      Promise.all(projectPromises)
-        .then((fetchedProjects) => {
-          // Convert string values back to bigints
-          const parsedProjects = fetchedProjects.map((project) => ({
-            ...project,
-            fundingGoal: BigInt(project.fundingGoal || "0"),
-            currentFunding: BigInt(project.currentFunding || "0"),
-            votesReceived: BigInt(project.votesReceived || "0"),
-          }));
-          setProjects(parsedProjects);
-        })
-        .finally(() => setIsLoading(false));
-    }
-  }, [projectCount]);
+    },
+    [projectCount]
+  );
 
   useEffect(() => {
-    fetchProjects();
+    fetchProjects(false);
   }, [fetchProjects]);
 
   const refetch = useCallback(() => {
-    refetchCount();
-    fetchProjects();
-  }, [refetchCount, fetchProjects]);
+    // Silent refetch - don't show loading state
+    fetchProjects(true);
+  }, [fetchProjects]);
+
+  // Function to update a single project optimistically
+  const updateProject = useCallback(
+    (projectId: number, updates: Partial<any>) => {
+      setProjects((prev) =>
+        prev.map((p) => (p.id === projectId ? { ...p, ...updates } : p))
+      );
+    },
+    []
+  );
 
   return {
     projects,
     projectCount: projectCount ? Number(projectCount) : 0,
     isLoading,
     refetch,
+    updateProject, // Export the optimistic update function
   };
 }
 

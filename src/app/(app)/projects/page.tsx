@@ -56,7 +56,7 @@ export default function ProjectsPage() {
     useState<BlockchainProject | null>(null);
 
   // Fetch projects from blockchain using the hook
-  const { projects, isLoading, refetch } = useProjects();
+  const { projects, isLoading, refetch, updateProject } = useProjects();
 
   const filteredProjects = projects.filter((project) => {
     return activeCategory === "All" || project.category === activeCategory;
@@ -89,16 +89,16 @@ export default function ProjectsPage() {
     try {
       await voteForProject(projectId);
       toast({
-        title: "Vote Submitted!",
+        title: "Vote Submitted! ⏳",
         description: "Your vote is being processed on the blockchain.",
       });
+      // Don't clear votingProjectId here - wait for confirmation
     } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Vote Failed",
         description: error.message || "Failed to cast vote",
       });
-    } finally {
       setVotingProjectId(null);
     }
   };
@@ -137,16 +137,17 @@ export default function ProjectsPage() {
       await donateToProject(selectedProject.id, amount.toString());
 
       toast({
-        title: "Donation Submitted!",
+        title: "Donation Submitted! ⏳",
         description: `Donating ${amount} ETH to ${selectedProject.name}`,
       });
+
+      // Don't clear donatingProjectId or amount here - wait for confirmation
     } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Donation Failed",
         description: error.message || "Failed to process donation",
       });
-    } finally {
       setDonatingProjectId(null);
       setDonationAmount("");
     }
@@ -154,28 +155,44 @@ export default function ProjectsPage() {
 
   // Show success toast when vote is confirmed
   useEffect(() => {
-    if (isSuccess) {
+    if (isSuccess && votingProjectId !== null) {
       toast({
-        title: "Vote Confirmed!",
+        title: "Vote Confirmed! ✅",
         description: "Your vote has been recorded on the blockchain.",
       });
-      // Refetch projects to show updated vote count
-      setTimeout(() => refetch(), 1000);
+
+      // Optimistically update the vote count immediately
+      const project = projects.find((p) => p.id === votingProjectId);
+      if (project) {
+        updateProject(votingProjectId, {
+          votesReceived: project.votesReceived + BigInt(1),
+        });
+      }
+
+      // Clear the voting state
+      setVotingProjectId(null);
+
+      // Silently refetch in background to ensure accuracy
+      setTimeout(() => refetch(), 500);
     }
-  }, [isSuccess, toast, refetch]);
+  }, [isSuccess, votingProjectId, toast, refetch, updateProject, projects]);
 
   // Show success toast when donation is confirmed
   useEffect(() => {
-    if (isDonateSuccess) {
+    if (isDonateSuccess && donatingProjectId !== null) {
       toast({
-        title: "Donation Confirmed!",
+        title: "Donation Confirmed! 🎉",
         description: "Your donation has been recorded on the blockchain.",
       });
-      // Refetch projects to show updated funding
-      setTimeout(() => refetch(), 1000);
-    }
-  }, [isDonateSuccess, toast, refetch]);
 
+      // Clear the donation state
+      setDonatingProjectId(null);
+      setDonationAmount("");
+
+      // Silently refetch in background without showing loading state
+      setTimeout(() => refetch(), 500);
+    }
+  }, [isDonateSuccess, donatingProjectId, toast, refetch]);
   if (!isConnected) {
     return (
       <div className="flex min-h-screen flex-col bg-background text-foreground">

@@ -40,25 +40,29 @@ export default function SetupPage() {
   const [autoRoundUp, setAutoRoundUp] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [connectingId, setConnectingId] = useState<string | null>(null);
+  const [walletAcknowledged, setWalletAcknowledged] = useState(false);
+  const [hasInteracted, setHasInteracted] = useState(false);
 
   const valoraLogo = PlaceHolderImages.find((img) => img.id === "valora-logo");
   const celoLogo = PlaceHolderImages.find((img) => img.id === "celo-logo");
 
-  // Show settings section once connected
+  // Show settings section only after user acknowledges wallet connection
   useEffect(() => {
-    if (isConnected && address) {
+    if (isConnected && address && walletAcknowledged) {
       setShowSettings(true);
     }
-  }, [isConnected, address]);
+  }, [isConnected, address, walletAcknowledged]);
 
   const handleConnect = async (connector: any) => {
     try {
       setConnectingId(connector.id);
+      setHasInteracted(true); // Mark that user explicitly connected
       await connect({ connector });
       toast({
         title: "Wallet Connected! 🎉",
         description: `Connected to ${connector.name}`,
       });
+      // Don't auto-proceed - let user review their connection
     } catch (err: any) {
       console.error("Connection error:", err);
       toast({
@@ -73,6 +77,8 @@ export default function SetupPage() {
   const handleDisconnect = () => {
     disconnect();
     setShowSettings(false);
+    setWalletAcknowledged(false);
+    setHasInteracted(false);
     toast({
       title: "Wallet Disconnected",
       description: "You've been disconnected from your wallet.",
@@ -128,20 +134,32 @@ export default function SetupPage() {
         {/* Welcome Section */}
         <div className="text-center">
           <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
-            <Wallet className="h-10 w-10 text-primary" />
+            {!isConnected || !hasInteracted ? (
+              <Wallet className="h-10 w-10 text-primary" />
+            ) : showSettings ? (
+              <Settings className="h-10 w-10 text-primary" />
+            ) : (
+              <Check className="h-10 w-10 text-green-500" />
+            )}
           </div>
           <h2 className="mb-2 text-2xl font-bold">
-            {!isConnected ? "Connect Your Wallet" : "Setup Complete! 🎉"}
+            {!isConnected || !hasInteracted
+              ? "Connect Your Wallet"
+              : showSettings
+              ? "Setup Your Donations"
+              : "Wallet Connected! ✅"}
           </h2>
           <p className="text-muted-foreground">
-            {!isConnected
+            {!isConnected || !hasInteracted
               ? "Connect your wallet to start making donations"
-              : "Configure your donation preferences below"}
+              : showSettings
+              ? "Configure your donation preferences below"
+              : "Review your connection and continue"}
           </p>
         </div>
 
         {/* Wallet Connection Section */}
-        {!isConnected && (
+        {(!isConnected || !hasInteracted) && (
           <div className="space-y-4">
             {/* Benefits */}
             <div className="grid gap-3">
@@ -248,16 +266,16 @@ export default function SetupPage() {
           </div>
         )}
 
-        {/* Wallet Info Section - Shows when connected */}
-        {isConnected && address && (
+        {/* Wallet Info Section - Shows when connected AND user has interacted */}
+        {isConnected && address && hasInteracted && !showSettings && (
           <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-base">
                 <Check className="h-5 w-5 text-green-500" />
-                Wallet Connected
+                Wallet Connected Successfully!
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">Address</span>
                 <Badge variant="secondary" className="font-mono text-xs">
@@ -278,6 +296,18 @@ export default function SetupPage() {
                 <span className="text-sm text-muted-foreground">Network</span>
                 <Badge>Hardhat Localhost</Badge>
               </div>
+
+              <Separator className="my-3" />
+
+              {/* Continue Button */}
+              <Button
+                size="lg"
+                className="w-full rounded-xl text-base font-semibold"
+                onClick={() => setWalletAcknowledged(true)}
+              >
+                Continue to Setup
+                <ChevronRight className="ml-2 h-5 w-5" />
+              </Button>
             </CardContent>
           </Card>
         )}
