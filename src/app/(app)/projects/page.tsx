@@ -2,21 +2,32 @@
 
 import { useState, useEffect } from "react";
 import { useAccount } from "wagmi";
-import { formatEther } from "viem";
+import { formatEther, parseEther } from "viem";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { projectCategories } from "@/lib/data";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
-import { Loader2, Wallet } from "lucide-react";
+import { Loader2, Wallet, Heart } from "lucide-react";
 import {
   useVoteForProject,
   useProjects,
   useHasVoted,
+  useDonateToProject,
 } from "@/hooks/use-contracts";
 import { getContractAddresses } from "@/lib/contracts";
 import { NetworkChecker } from "@/components/NetworkChecker";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 // Project data structure from blockchain
 interface BlockchainProject {
@@ -36,9 +47,16 @@ export default function ProjectsPage() {
   const { toast } = useToast();
   const { address, isConnected } = useAccount();
   const [votingProjectId, setVotingProjectId] = useState<number | null>(null);
+  const [donatingProjectId, setDonatingProjectId] = useState<number | null>(
+    null
+  );
+  const [donationAmount, setDonationAmount] = useState("");
+  const [showDonateDialog, setShowDonateDialog] = useState(false);
+  const [selectedProject, setSelectedProject] =
+    useState<BlockchainProject | null>(null);
 
   // Fetch projects from blockchain using the hook
-  const { projects, isLoading } = useProjects();
+  const { projects, isLoading, refetch } = useProjects();
 
   const filteredProjects = projects.filter((project) => {
     return activeCategory === "All" || project.category === activeCategory;
@@ -47,6 +65,14 @@ export default function ProjectsPage() {
   // Voting hook
   const { voteForProject, isPending, isConfirming, isSuccess } =
     useVoteForProject();
+
+  // Donation hook
+  const {
+    donateToProject,
+    isPending: isDonating,
+    isConfirming: isDonateConfirming,
+    isSuccess: isDonateSuccess,
+  } = useDonateToProject();
 
   const handleVote = async (projectId: number) => {
     if (!isConnected) {
@@ -77,6 +103,55 @@ export default function ProjectsPage() {
     }
   };
 
+  const handleDonateClick = (project: BlockchainProject) => {
+    if (!isConnected) {
+      toast({
+        variant: "destructive",
+        title: "Wallet Not Connected",
+        description: "Please connect your wallet to donate.",
+      });
+      return;
+    }
+    setSelectedProject(project);
+    setDonationAmount("");
+    setShowDonateDialog(true);
+  };
+
+  const handleDonateSubmit = async () => {
+    if (!selectedProject || !donationAmount) return;
+
+    try {
+      const amount = parseFloat(donationAmount);
+      if (isNaN(amount) || amount <= 0) {
+        toast({
+          variant: "destructive",
+          title: "Invalid Amount",
+          description: "Please enter a valid donation amount.",
+        });
+        return;
+      }
+
+      setDonatingProjectId(selectedProject.id);
+      setShowDonateDialog(false);
+
+      await donateToProject(selectedProject.id, amount.toString());
+
+      toast({
+        title: "Donation Submitted!",
+        description: `Donating ${amount} ETH to ${selectedProject.name}`,
+      });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Donation Failed",
+        description: error.message || "Failed to process donation",
+      });
+    } finally {
+      setDonatingProjectId(null);
+      setDonationAmount("");
+    }
+  };
+
   // Show success toast when vote is confirmed
   useEffect(() => {
     if (isSuccess) {
@@ -84,8 +159,22 @@ export default function ProjectsPage() {
         title: "Vote Confirmed!",
         description: "Your vote has been recorded on the blockchain.",
       });
+      // Refetch projects to show updated vote count
+      setTimeout(() => refetch(), 1000);
     }
-  }, [isSuccess, toast]);
+  }, [isSuccess, toast, refetch]);
+
+  // Show success toast when donation is confirmed
+  useEffect(() => {
+    if (isDonateSuccess) {
+      toast({
+        title: "Donation Confirmed!",
+        description: "Your donation has been recorded on the blockchain.",
+      });
+      // Refetch projects to show updated funding
+      setTimeout(() => refetch(), 1000);
+    }
+  }, [isDonateSuccess, toast, refetch]);
 
   if (!isConnected) {
     return (
@@ -220,33 +309,58 @@ export default function ProjectsPage() {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between pt-2">
+                  <div className="flex items-center justify-between gap-2 pt-2">
                     <div className="text-sm text-muted-foreground">
                       {project.votesReceived.toString()} votes
                     </div>
-                    <Button
-                      size="sm"
-                      className="rounded-full px-6 font-bold"
-                      onClick={() => handleVote(project.id)}
-                      disabled={
-                        (isPending && votingProjectId === project.id) ||
-                        !project.isActive ||
-                        project.isFunded
-                      }
-                    >
-                      {isPending && votingProjectId === project.id ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Voting...
-                        </>
-                      ) : project.isFunded ? (
-                        "Funded"
-                      ) : !project.isActive ? (
-                        "Closed"
-                      ) : (
-                        "Vote"
-                      )}
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="rounded-full px-4"
+                        onClick={() => handleDonateClick(project)}
+                        disabled={
+                          (isDonating && donatingProjectId === project.id) ||
+                          !project.isActive ||
+                          project.isFunded
+                        }
+                      >
+                        {isDonating && donatingProjectId === project.id ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Donating...
+                          </>
+                        ) : (
+                          <>
+                            <Heart className="mr-1 h-4 w-4" />
+                            Donate
+                          </>
+                        )}
+                      </Button>
+                      <Button
+                        size="sm"
+                        className="rounded-full px-6 font-bold"
+                        onClick={() => handleVote(project.id)}
+                        disabled={
+                          (isPending && votingProjectId === project.id) ||
+                          !project.isActive ||
+                          project.isFunded
+                        }
+                      >
+                        {isPending && votingProjectId === project.id ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Voting...
+                          </>
+                        ) : project.isFunded ? (
+                          "Funded"
+                        ) : !project.isActive ? (
+                          "Closed"
+                        ) : (
+                          "Vote"
+                        )}
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -254,6 +368,49 @@ export default function ProjectsPage() {
           })
         )}
       </main>
+
+      {/* Donation Dialog */}
+      <Dialog open={showDonateDialog} onOpenChange={setShowDonateDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Donate to {selectedProject?.name}</DialogTitle>
+            <DialogDescription>
+              Enter the amount you'd like to donate in ETH
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="amount">Amount (ETH)</Label>
+              <Input
+                id="amount"
+                type="number"
+                step="0.01"
+                min="0.01"
+                placeholder="0.1"
+                value={donationAmount}
+                onChange={(e) => setDonationAmount(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">
+                Minimum donation: 0.01 ETH
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowDonateDialog(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleDonateSubmit}
+              disabled={!donationAmount || parseFloat(donationAmount) < 0.01}
+            >
+              Donate
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

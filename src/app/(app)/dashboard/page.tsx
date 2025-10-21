@@ -51,9 +51,21 @@ function StatCard({ label, value }: { label: string; value: string | number }) {
 
 export default function DashboardPage() {
   const { address, isConnected } = useAccount();
-  const { totalDonations, isLoading: statsLoading } = useDonorStats(address);
-  const { projects, isLoading: projectsLoading } = useProjects();
-  const { data: balance, isLoading: balanceLoading } = useBalance({
+  const {
+    totalDonations,
+    isLoading: statsLoading,
+    refetch: refetchStats,
+  } = useDonorStats(address);
+  const {
+    projects,
+    isLoading: projectsLoading,
+    refetch: refetchProjects,
+  } = useProjects();
+  const {
+    data: balance,
+    isLoading: balanceLoading,
+    refetch: refetchBalance,
+  } = useBalance({
     address: address,
   });
 

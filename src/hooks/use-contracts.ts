@@ -12,7 +12,7 @@ import { DONATION_POOL_ABI } from "@/lib/abis/DonationPool";
 import { SMILE_BADGE_NFT_ABI } from "@/lib/abis/SmileBadgeNFT";
 import { getContractAddresses } from "@/lib/contracts";
 import { parseEther, formatEther } from "viem";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 /**
  * Hook to get contract addresses for current chain
@@ -67,7 +67,7 @@ export function useDonateToProject() {
     return writeContract({
       address: DonationPool as `0x${string}`,
       abi: DONATION_POOL_ABI,
-      functionName: "donate",
+      functionName: "donateToProject",
       args: [BigInt(projectId)],
       value: parseEther(amountInCelo),
     });
@@ -152,7 +152,7 @@ export function useProject(projectId: number) {
 export function useProjects() {
   const { DonationPool } = useContractAddresses();
 
-  const { data: projectCount } = useReadContract({
+  const { data: projectCount, refetch: refetchCount } = useReadContract({
     address: DonationPool as `0x${string}`,
     abi: DONATION_POOL_ABI,
     functionName: "getProjectCount",
@@ -161,8 +161,9 @@ export function useProjects() {
   const [projects, setProjects] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
+  const fetchProjects = useCallback(async () => {
     if (projectCount !== undefined) {
+      setIsLoading(true);
       const count = Number(projectCount);
       const projectPromises = [];
 
@@ -173,15 +174,34 @@ export function useProjects() {
       }
 
       Promise.all(projectPromises)
-        .then(setProjects)
+        .then((fetchedProjects) => {
+          // Convert string values back to bigints
+          const parsedProjects = fetchedProjects.map((project) => ({
+            ...project,
+            fundingGoal: BigInt(project.fundingGoal || "0"),
+            currentFunding: BigInt(project.currentFunding || "0"),
+            votesReceived: BigInt(project.votesReceived || "0"),
+          }));
+          setProjects(parsedProjects);
+        })
         .finally(() => setIsLoading(false));
     }
   }, [projectCount]);
+
+  useEffect(() => {
+    fetchProjects();
+  }, [fetchProjects]);
+
+  const refetch = useCallback(() => {
+    refetchCount();
+    fetchProjects();
+  }, [refetchCount, fetchProjects]);
 
   return {
     projects,
     projectCount: projectCount ? Number(projectCount) : 0,
     isLoading,
+    refetch,
   };
 }
 
@@ -193,7 +213,11 @@ export function useDonorStats(address?: string) {
   const { DonationPool } = useContractAddresses();
   const donorAddress = address || connectedAddress;
 
-  const { data: totalDonations, isLoading } = useReadContract({
+  const {
+    data: totalDonations,
+    isLoading,
+    refetch,
+  } = useReadContract({
     address: DonationPool as `0x${string}`,
     abi: DONATION_POOL_ABI,
     functionName: "totalDonationsByDonor",
@@ -206,6 +230,7 @@ export function useDonorStats(address?: string) {
       : "0",
     totalDonationsWei: totalDonations as bigint,
     isLoading,
+    refetch,
   };
 }
 
