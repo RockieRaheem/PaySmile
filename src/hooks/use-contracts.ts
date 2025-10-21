@@ -67,7 +67,7 @@ export function useDonateToProject() {
     return writeContract({
       address: DonationPool as `0x${string}`,
       abi: DONATION_POOL_ABI,
-      functionName: "donateToProject",
+      functionName: "donate",
       args: [BigInt(projectId)],
       value: parseEther(amountInCelo),
     });
@@ -121,7 +121,7 @@ export function useProject(projectId: number) {
   const { data, isLoading, error, refetch } = useReadContract({
     address: DonationPool as `0x${string}`,
     abi: DONATION_POOL_ABI,
-    functionName: "getProject",
+    functionName: "projects",
     args: [BigInt(projectId)],
   });
 
@@ -196,7 +196,7 @@ export function useDonorStats(address?: string) {
   const { data: totalDonations, isLoading } = useReadContract({
     address: DonationPool as `0x${string}`,
     abi: DONATION_POOL_ABI,
-    functionName: "getDonorTotal",
+    functionName: "totalDonationsByDonor",
     args: donorAddress ? [donorAddress as `0x${string}`] : undefined,
   });
 

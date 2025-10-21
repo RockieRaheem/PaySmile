@@ -15,6 +15,10 @@ const projectId =
 const config = createConfig({
   chains: [localhost, celoAlfajores, celo],
   connectors: [
+    // Injected wallets (MetaMask, etc.) - prioritize for local development
+    injected({
+      shimDisconnect: true,
+    }),
     // WalletConnect - Opens wallets natively (TrustWallet, Valora, MetaMask app)
     walletConnect({
       projectId,
@@ -22,14 +26,13 @@ const config = createConfig({
         name: "PaySmile",
         description:
           "Round up your transactions and donate to meaningful projects",
-        url: "https://paysmile.app",
+        url:
+          typeof window !== "undefined"
+            ? window.location.origin
+            : "https://paysmile.app",
         icons: ["https://avatars.githubusercontent.com/u/37784886"],
       },
       showQrModal: true, // Show QR for desktop users
-    }),
-    // Fallback to injected for browser extensions
-    injected({
-      shimDisconnect: true,
     }),
   ],
   transports: {

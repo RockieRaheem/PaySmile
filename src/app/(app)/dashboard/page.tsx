@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Smile, UserCircle, CheckCircle, LogOut, Loader2 } from "lucide-react";
-import { useAccount } from "wagmi";
+import { useAccount, useBalance } from "wagmi";
 import { formatEther } from "viem";
 import { useEffect, useState } from "react";
 
@@ -53,6 +53,9 @@ export default function DashboardPage() {
   const { address, isConnected } = useAccount();
   const { totalDonations, isLoading: statsLoading } = useDonorStats(address);
   const { projects, isLoading: projectsLoading } = useProjects();
+  const { data: balance, isLoading: balanceLoading } = useBalance({
+    address: address,
+  });
 
   const [activeProjects, setActiveProjects] = useState<BlockchainProject[]>([]);
   const [fundedProjects, setFundedProjects] = useState<BlockchainProject[]>([]);
@@ -139,7 +142,7 @@ export default function DashboardPage() {
           <Card className="bg-secondary text-secondary-foreground">
             <CardContent className="p-6">
               <p className="text-lg font-medium">Welcome back!</p>
-              {statsLoading ? (
+              {statsLoading || balanceLoading ? (
                 <div className="flex items-center gap-2 mt-2">
                   <Loader2 className="h-6 w-6 animate-spin" />
                   <p className="text-sm">Loading your stats...</p>
@@ -147,9 +150,18 @@ export default function DashboardPage() {
               ) : (
                 <>
                   <p className="mt-2 text-4xl font-bold tracking-tight">
-                    {totalDonationsNum.toFixed(4)} CELO
+                    {balance
+                      ? parseFloat(formatEther(balance.value)).toFixed(4)
+                      : "0.0000"}{" "}
+                    {balance?.symbol || "ETH"}
                   </p>
-                  <p className="text-sm">Your Total Donations</p>
+                  <p className="text-sm">Your Wallet Balance</p>
+                  <div className="mt-4 pt-4 border-t border-secondary-foreground/20">
+                    <p className="text-2xl font-bold tracking-tight">
+                      {totalDonationsNum.toFixed(4)} {balance?.symbol || "ETH"}
+                    </p>
+                    <p className="text-sm">Your Total Donations</p>
+                  </div>
                 </>
               )}
             </CardContent>

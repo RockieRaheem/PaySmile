@@ -5,8 +5,8 @@ async function main() {
   console.log("\n🚀 Testing PaySmile App Features...\n");
 
   // Get the deployed contract addresses
-  const donationPoolAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
-  const smileBadgeNFTAddress = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
+  const donationPoolAddress = "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707";
+  const smileBadgeNFTAddress = "0x0165878A594ca255338adfa4d48449f69242Eb8F";
 
   // Get signers (test accounts)
   const [owner, donor1, donor2] = await ethers.getSigners();
@@ -28,14 +28,16 @@ async function main() {
   console.log("=".repeat(60));
 
   // Get all projects
-  const projectCount = await donationPool.nextProjectId();
+  const projectCount = await donationPool.projectCounter();
   for (let i = 0; i < projectCount; i++) {
-    const project = await donationPool.getProject(i);
-    console.log(`\nProject #${i}: ${project.title}`);
+    const project = await donationPool.projects(i);
+    console.log(`\nProject #${i}: ${project.name}`);
     console.log(`   Description: ${project.description}`);
-    console.log(`   Goal: ${ethers.formatEther(project.goalAmount)} ETH`);
-    console.log(`   Raised: ${ethers.formatEther(project.raisedAmount)} ETH`);
-    console.log(`   Votes: ${project.votes}`);
+    console.log(`   Goal: ${ethers.formatEther(project.fundingGoal)} ETH`);
+    console.log(
+      `   Current Funding: ${ethers.formatEther(project.currentFunding)} ETH`
+    );
+    console.log(`   Votes: ${project.votesReceived}`);
     console.log(`   Active: ${project.isActive}`);
   }
 
@@ -56,8 +58,8 @@ async function main() {
   console.log("   Vote successful!");
 
   // Check updated votes
-  const updatedProject = await donationPool.getProject(0);
-  console.log(`\n📊 Project #0 now has ${updatedProject.votes} votes!`);
+  const updatedProject = await donationPool.projects(0);
+  console.log(`\n📊 Project #0 now has ${updatedProject.votesReceived} votes!`);
 
   console.log("\n" + "=".repeat(60));
   console.log("💰 TEST 2: MAKING DONATIONS");
@@ -72,15 +74,15 @@ async function main() {
   );
   const donateTx = await donationPool
     .connect(donor1)
-    .donate(0, { value: donationAmount });
+    .donateToProject(0, { value: donationAmount });
   await donateTx.wait();
   console.log("   Donation successful!");
 
   // Check updated raised amount
-  const projectAfterDonation = await donationPool.getProject(0);
+  const projectAfterDonation = await donationPool.projects(0);
   console.log(
-    `\n📊 Project #0 raised amount: ${ethers.formatEther(
-      projectAfterDonation.raisedAmount
+    `\n📊 Project #0 current funding: ${ethers.formatEther(
+      projectAfterDonation.currentFunding
     )} ETH`
   );
 

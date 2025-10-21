@@ -12,7 +12,7 @@ import Link from "next/link";
 import { Loader2, Wallet } from "lucide-react";
 import {
   useVoteForProject,
-  useProject,
+  useProjects,
   useHasVoted,
 } from "@/hooks/use-contracts";
 import { getContractAddresses } from "@/lib/contracts";
@@ -36,48 +36,9 @@ export default function ProjectsPage() {
   const { toast } = useToast();
   const { address, isConnected } = useAccount();
   const [votingProjectId, setVotingProjectId] = useState<number | null>(null);
-  const [projects, setProjects] = useState<BlockchainProject[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch projects from blockchain
-  useEffect(() => {
-    const fetchProjects = async () => {
-      if (!isConnected) {
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        // For now, we'll hardcode fetching first 3 projects
-        // In production, you'd fetch the project count first
-        const projectData: BlockchainProject[] = [];
-
-        for (let i = 0; i < 3; i++) {
-          // Note: This is a placeholder - you'll need to implement proper fetching
-          // using the useProject hook or a custom API route
-          projectData.push({
-            id: i,
-            name: `Project ${i}`,
-            description: "Loading...",
-            fundingGoal: BigInt(0),
-            currentFunding: BigInt(0),
-            isActive: true,
-            isFunded: false,
-            votesReceived: BigInt(0),
-            category: "Community",
-          });
-        }
-
-        setProjects(projectData);
-      } catch (error) {
-        console.error("Error fetching projects:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchProjects();
-  }, [isConnected]);
+  // Fetch projects from blockchain using the hook
+  const { projects, isLoading } = useProjects();
 
   const filteredProjects = projects.filter((project) => {
     return activeCategory === "All" || project.category === activeCategory;

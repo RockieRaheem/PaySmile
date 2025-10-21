@@ -38,7 +38,7 @@ export async function GET(
     const data = await publicClient.readContract({
       address: DONATION_POOL_ADDRESS,
       abi: DONATION_POOL_ABI,
-      functionName: "getProject",
+      functionName: "projects",
       args: [BigInt(projectId)],
     });
 
