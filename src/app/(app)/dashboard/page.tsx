@@ -165,12 +165,12 @@ export default function DashboardPage() {
                     {balance
                       ? parseFloat(formatEther(balance.value)).toFixed(4)
                       : "0.0000"}{" "}
-                    {balance?.symbol || "ETH"}
+                    {balance?.symbol || "CELO"}
                   </p>
                   <p className="text-sm">Your Wallet Balance</p>
                   <div className="mt-4 pt-4 border-t border-secondary-foreground/20">
                     <p className="text-2xl font-bold tracking-tight">
-                      {totalDonationsNum.toFixed(4)} {balance?.symbol || "ETH"}
+                      {totalDonationsNum.toFixed(4)} {balance?.symbol || "CELO"}
                     </p>
                     <p className="text-sm">Your Total Donations</p>
                   </div>
@@ -249,7 +249,7 @@ export default function DashboardPage() {
                           </p>
                           <Progress
                             value={percentFunded}
-                            className="mt-3 h-2.5"
+                            className="mt-3 h-2.5 bg-green-100"
                           />
                           <p className="mt-1 text-right text-xs text-muted-foreground">
                             {percentFunded.toFixed(1)}% Funded (

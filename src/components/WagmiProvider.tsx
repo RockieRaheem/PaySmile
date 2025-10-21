@@ -6,11 +6,11 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactNode } from "react";
 import { injected } from "wagmi/connectors";
 
-// Initialize with localhost for development, Celo testnet for testing
+// Initialize with Celo Alfajores testnet as default
 const config = createConfig({
-  chains: [localhost, celoAlfajores, celo],
+  chains: [celoAlfajores, celo, localhost],
   connectors: [
-    // Injected wallets (MetaMask, etc.) - prioritize for local development
+    // Injected wallets (MetaMask, etc.)
     injected({
       shimDisconnect: true,
     }),

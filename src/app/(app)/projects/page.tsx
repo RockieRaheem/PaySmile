@@ -138,7 +138,7 @@ export default function ProjectsPage() {
 
       toast({
         title: "Donation Submitted! ⏳",
-        description: `Donating ${amount} ETH to ${selectedProject.name}`,
+        description: `Donating ${amount} CELO to ${selectedProject.name}`,
       });
 
       // Don't clear donatingProjectId or amount here - wait for confirmation
@@ -316,7 +316,7 @@ export default function ProjectsPage() {
                   <div className="space-y-1">
                     <Progress
                       value={fundingProgress}
-                      className="h-2 rounded bg-primary/20"
+                      className="h-2 rounded bg-green-100"
                     />
                     <div className="flex items-center justify-between text-xs text-muted-foreground">
                       <span>
@@ -392,12 +392,12 @@ export default function ProjectsPage() {
           <DialogHeader>
             <DialogTitle>Donate to {selectedProject?.name}</DialogTitle>
             <DialogDescription>
-              Enter the amount you'd like to donate in ETH
+              Enter the amount you'd like to donate in CELO
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="amount">Amount (ETH)</Label>
+              <Label htmlFor="amount">Amount (CELO)</Label>
               <Input
                 id="amount"
                 type="number"
@@ -408,7 +408,7 @@ export default function ProjectsPage() {
                 onChange={(e) => setDonationAmount(e.target.value)}
               />
               <p className="text-xs text-muted-foreground">
-                Minimum donation: 0.01 ETH
+                Minimum donation: 0.01 CELO
               </p>
             </div>
           </div>

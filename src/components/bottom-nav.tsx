@@ -6,9 +6,9 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/dashboard", icon: "home", label: "Home" },
+  { href: "/round-up", icon: "payments", label: "Round-Up" },
   { href: "/projects", icon: "how_to_vote", label: "Vote" },
   { href: "/badges", icon: "military_tech", label: "Badges" },
-  { href: "/settings", icon: "settings", label: "Settings" },
 ];
 
 export function BottomNav() {
@@ -28,7 +28,9 @@ export function BottomNav() {
                 isActive ? "text-primary" : "hover:text-foreground"
               )}
             >
-              <span className="material-symbols-outlined text-2xl">{item.icon}</span>
+              <span className="material-symbols-outlined text-2xl">
+                {item.icon}
+              </span>
               <span className="text-xs">{item.label}</span>
             </Link>
           );

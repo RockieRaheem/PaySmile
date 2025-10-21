@@ -2,7 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAccount, useConnect, useDisconnect, useBalance } from "wagmi";
+import {
+  useAccount,
+  useConnect,
+  useDisconnect,
+  useBalance,
+  useSwitchChain,
+} from "wagmi";
+import { celoAlfajores } from "wagmi/chains";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -29,10 +36,11 @@ import { Separator } from "@/components/ui/separator";
 export default function SetupPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const { address, isConnected } = useAccount();
+  const { address, isConnected, chain } = useAccount();
   const { connectors, connect, isPending } = useConnect();
   const { disconnect } = useDisconnect();
   const { data: balance } = useBalance({ address });
+  const { switchChain } = useSwitchChain();
 
   const [showSettings, setShowSettings] = useState(false);
   const [monthlyLimit, setMonthlyLimit] = useState(5000);
@@ -52,6 +60,18 @@ export default function SetupPage() {
       setShowSettings(true);
     }
   }, [isConnected, address, walletAcknowledged]);
+
+  // Auto-switch to Celo Alfajores if connected to wrong network
+  useEffect(() => {
+    if (isConnected && chain && chain.id !== celoAlfajores.id) {
+      // Automatically switch to Celo Alfajores
+      switchChain?.({ chainId: celoAlfajores.id });
+      toast({
+        title: "Switching Network",
+        description: "Switching to Celo Alfajores Testnet...",
+      });
+    }
+  }, [isConnected, chain, switchChain, toast]);
 
   const handleConnect = async (connector: any) => {
     try {
@@ -294,7 +314,20 @@ export default function SetupPage() {
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">Network</span>
-                <Badge>Hardhat Localhost</Badge>
+                {chain?.id === celoAlfajores.id ? (
+                  <Badge className="bg-green-500/10 text-green-600 border-green-500/20">
+                    ✓ Celo Alfajores
+                  </Badge>
+                ) : (
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={() => switchChain?.({ chainId: celoAlfajores.id })}
+                    className="h-7 text-xs"
+                  >
+                    Switch to Celo Alfajores
+                  </Button>
+                )}
               </div>
 
               <Separator className="my-3" />
@@ -304,9 +337,16 @@ export default function SetupPage() {
                 size="lg"
                 className="w-full rounded-xl text-base font-semibold"
                 onClick={() => setWalletAcknowledged(true)}
+                disabled={chain?.id !== celoAlfajores.id}
               >
-                Continue to Setup
-                <ChevronRight className="ml-2 h-5 w-5" />
+                {chain?.id === celoAlfajores.id ? (
+                  <>
+                    Continue to Setup
+                    <ChevronRight className="ml-2 h-5 w-5" />
+                  </>
+                ) : (
+                  "Please switch to Celo Alfajores"
+                )}
               </Button>
             </CardContent>
           </Card>

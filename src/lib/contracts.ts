@@ -7,14 +7,14 @@ export const CONTRACTS = {
   // Localhost (Hardhat node)
   localhost: {
     chainId: 31337,
-    DonationPool: process.env.NEXT_PUBLIC_DONATION_POOL_ADDRESS || "",
-    SmileBadgeNFT: process.env.NEXT_PUBLIC_SMILE_BADGE_NFT_ADDRESS || "",
+    DonationPool: "",
+    SmileBadgeNFT: "",
   },
   // Celo Alfajores Testnet
   alfajores: {
     chainId: 44787,
-    DonationPool: "", // Will be updated after testnet deployment
-    SmileBadgeNFT: "",
+    DonationPool: process.env.NEXT_PUBLIC_DONATION_POOL_ADDRESS || "",
+    SmileBadgeNFT: process.env.NEXT_PUBLIC_SMILE_BADGE_NFT_ADDRESS || "",
   },
   // Celo Mainnet (for production)
   celo: {
