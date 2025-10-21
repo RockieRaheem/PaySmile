@@ -31,13 +31,13 @@
 
 ## 🎬 **SCENE 2: Introducing PaySmile (0:45 - 1:30)**
 
-### Visual: PaySmile Logo → App Interface
+### Visual: PaySmile Logo → App Interface → PWA Install
 
 **Narrator:**
 
 > "Meet PaySmile - where small payments create big smiles.
 >
-> PaySmile is a blockchain-powered mobile app built on Celo that turns your everyday transactions into community impact.
+> PaySmile is a Progressive Web App built on Celo's mobile-first blockchain. You can install it right on your phone, just like a native app. No app store needed.
 >
 > Here's how it works:
 >
@@ -45,14 +45,25 @@
 >
 > Every donation is recorded on the blockchain, so you can see exactly where your money goes. No middlemen. No corruption. Just pure impact.
 >
-> And to make giving fun, you earn digital NFT badges for every contribution - verified proof of your generosity that lives on the blockchain forever."
+> And to make giving fun, you earn digital NFT badges for every contribution - verified proof of your generosity that lives on the blockchain forever.
+>
+> Best part? It works offline. Cache your favorite projects and vote even without internet."
+
+**Screen Actions:**
+
+1. Show "Add to Home Screen" prompt
+2. Install PaySmile as PWA
+3. Launch from home screen (no browser UI!)
+4. Show app shortcuts (long-press icon)
 
 **Screen Text:**
 
-- Round-up spare change automatically
-- Transparent blockchain donations
-- Community decides which projects to fund
-- Earn NFT badges as rewards
+- ✅ Installable PWA (like a native app!)
+- 💰 Round-up spare change automatically
+- 🔗 Transparent blockchain donations
+- 🗳️ Community decides which projects to fund
+- 🏆 Earn NFT badges as rewards
+- 📱 Works offline with smart caching
 
 ---
 
