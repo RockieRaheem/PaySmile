@@ -1,26 +1,10 @@
 // PaySmile Service Worker for PWA
-const CACHE_NAME = "paysmile-v1";
-const DYNAMIC_CACHE = "paysmile-dynamic-v1";
+const CACHE_NAME = "paysmile-v2";
+const DYNAMIC_CACHE = "paysmile-dynamic-v2";
 
-// Assets to cache immediately
-const STATIC_ASSETS = [
-  "/",
-  "/dashboard",
-  "/round-up",
-  "/projects",
-  "/badges",
-  "/manifest.json",
-];
-
-// Install event - cache static assets
+// Install event - skip caching in development
 self.addEventListener("install", (event) => {
   console.log("[Service Worker] Installing...");
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      console.log("[Service Worker] Caching static assets");
-      return cache.addAll(STATIC_ASSETS);
-    })
-  );
   self.skipWaiting();
 });
 
@@ -42,61 +26,40 @@ self.addEventListener("activate", (event) => {
   self.clients.claim();
 });
 
-// Fetch event - serve from cache, fallback to network
+// Fetch event - minimal interference in development
 self.addEventListener("fetch", (event) => {
   const { request } = event;
+  const url = new URL(request.url);
 
   // Skip non-GET requests
   if (request.method !== "GET") {
     return;
   }
 
-  // Skip Chrome extensions and external requests
+  // Skip Chrome extensions and non-http requests
   if (!request.url.startsWith("http")) {
     return;
   }
 
-  // Network-first strategy for API calls and blockchain data
-  if (request.url.includes("/api/") || request.url.includes("alfajores")) {
-    event.respondWith(
-      fetch(request)
-        .then((response) => {
-          // Cache successful responses
-          if (response.ok) {
-            const responseClone = response.clone();
-            caches.open(DYNAMIC_CACHE).then((cache) => {
-              cache.put(request, responseClone);
-            });
-          }
-          return response;
-        })
-        .catch(() => {
-          // Fallback to cache if network fails
-          return caches.match(request);
-        })
-    );
-    return;
+  // Skip Next.js internal requests (HMR, dev server, etc.)
+  if (
+    url.pathname.startsWith("/_next/webpack-hmr") ||
+    url.pathname.startsWith("/__nextjs_original-stack-frames") ||
+    url.pathname.includes("hot-update") ||
+    url.hostname === "localhost" ||
+    url.hostname === "127.0.0.1"
+  ) {
+    return; // Let Next.js dev server handle these
   }
 
-  // Cache-first strategy for static assets
-  event.respondWith(
-    caches.match(request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
+  // For API routes, always fetch from network (don't cache in dev)
+  if (url.pathname.startsWith("/api/")) {
+    return; // Don't intercept API calls
+  }
 
-      return fetch(request).then((response) => {
-        // Cache new resources
-        if (response.ok) {
-          const responseClone = response.clone();
-          caches.open(DYNAMIC_CACHE).then((cache) => {
-            cache.put(request, responseClone);
-          });
-        }
-        return response;
-      });
-    })
-  );
+  // For all other requests, just pass through to network
+  // Only cache in production builds
+  return;
 });
 
 // Handle messages from the client

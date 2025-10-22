@@ -10,8 +10,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   useEffect(() => {
-    // Register service worker for PWA
-    if ("serviceWorker" in navigator) {
+    // Only register service worker in production
+    if (
+      typeof window !== "undefined" &&
+      "serviceWorker" in navigator &&
+      process.env.NODE_ENV === "production"
+    ) {
       navigator.serviceWorker
         .register("/sw.js")
         .then((registration) => {
@@ -33,7 +37,7 @@ export default function RootLayout({
             content="Turn spare change into community impact through round-up micro-donations on Celo blockchain"
           />
 
-          {/* PWA Primary Meta Tags */}
+          {/* PWA Meta Tags */}
           <meta name="application-name" content="PaySmile" />
           <meta name="apple-mobile-web-app-capable" content="yes" />
           <meta
@@ -45,19 +49,15 @@ export default function RootLayout({
           <meta name="mobile-web-app-capable" content="yes" />
           <meta name="theme-color" content="#10b981" />
 
-          {/* Viewport for mobile optimization */}
+          {/* Viewport */}
           <meta
             name="viewport"
             content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover"
           />
 
-          {/* PWA Manifest */}
+          {/* Icons */}
           <link rel="manifest" href="/manifest.json" />
-
-          {/* Favicon */}
           <link rel="icon" href="/favicon.ico" />
-
-          {/* Apple Touch Icons */}
           <link
             rel="apple-touch-icon"
             sizes="152x152"

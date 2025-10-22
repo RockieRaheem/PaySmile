@@ -25,6 +25,12 @@ module.exports = {
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
       chainId: 44787,
     },
+    // Celo Alfajores Testnet (alias)
+    celoAlfajores: {
+      url: "https://alfajores-forno.celo-testnet.org",
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
+      chainId: 44787,
+    },
     // Local development
     localhost: {
       url: "http://127.0.0.1:8545",
