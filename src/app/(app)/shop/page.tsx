@@ -12,6 +12,9 @@ import {
   Sparkles,
   ArrowLeft,
   Check,
+  Search,
+  Filter,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -134,6 +137,10 @@ export default function ShopPage() {
   const [showCheckout, setShowCheckout] = useState(false);
   const [selectedProject, setSelectedProject] = useState<number | null>(null);
   const [roundUpEnabled, setRoundUpEnabled] = useState(true);
+  const [customAmount, setCustomAmount] = useState<string>("");
+  const [isEditingAmount, setIsEditingAmount] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
 
   // Fetch projects from blockchain
   const { projects, isLoading: projectsLoading } = useProjects();
@@ -148,13 +155,68 @@ export default function ShopPage() {
   } = useDonateToProject();
 
   const calculateRoundUp = (amount: number) => {
-    const rounded = Math.ceil(amount / 1000) * 1000;
-    return rounded - amount;
+    // Smart round-up algorithm that suggests affordable donations based on amount
+
+    if (amount < 1000) {
+      // Small amounts: round to nearest 100
+      const rounded = Math.ceil(amount / 100) * 100;
+      return rounded - amount;
+    } else if (amount < 5000) {
+      // 1K-5K: round to nearest 500
+      const rounded = Math.ceil(amount / 500) * 500;
+      return rounded - amount;
+    } else if (amount < 10000) {
+      // 5K-10K: round to nearest 1000
+      const rounded = Math.ceil(amount / 1000) * 1000;
+      return rounded - amount;
+    } else if (amount < 50000) {
+      // 10K-50K: suggest 500-2000 donation (round to nearest 500)
+      // For amounts like 19000, suggest 20000 (1000 donation)
+      // For amounts like 15000, suggest 15500 (500 donation)
+      const baseRound = Math.ceil(amount / 500) * 500;
+      const donation = baseRound - amount;
+
+      // If donation would be too large (>2000), reduce to 500-1000
+      if (donation > 2000) {
+        const thousands = Math.floor(amount / 1000);
+        const remainder = amount % 1000;
+        if (remainder === 0) {
+          return 500; // Even thousands get 500 donation
+        } else if (remainder <= 500) {
+          return 500 - remainder; // Round to next 500
+        } else {
+          return 1000 - remainder; // Round to next 1000
+        }
+      }
+
+      return donation;
+    } else if (amount < 100000) {
+      // 50K-100K: suggest 1000-5000 donation
+      const thousands = Math.floor(amount / 1000);
+      const remainder = amount % 1000;
+
+      if (remainder === 0) {
+        return 1000; // Even thousands get 1000 donation
+      } else if (remainder <= 500) {
+        return 500 - remainder; // Round to previous 500 + 500
+      } else {
+        return 1000 - remainder; // Round to next 1000
+      }
+    } else {
+      // 100K+: suggest 2000-10000 donation (round to nearest 5000)
+      const baseRound = Math.ceil(amount / 5000) * 5000;
+      const donation = baseRound - amount;
+
+      // Cap large donations at 10000
+      return Math.min(donation, 10000);
+    }
   };
 
   const handleBuyClick = (product: Product) => {
     setSelectedProduct(product);
     setQuantity(1);
+    setCustomAmount(""); // Reset to empty so it uses base calculation
+    setIsEditingAmount(false);
     setShowCheckout(true);
     setSelectedProject(activeProjects.length > 0 ? activeProjects[0].id : null);
   };
@@ -220,7 +282,13 @@ export default function ShopPage() {
     });
   }
 
-  const totalAmount = selectedProduct ? selectedProduct.price * quantity : 0;
+  // Calculate total using custom amount if set, otherwise use product price * quantity
+  const baseAmount = selectedProduct ? selectedProduct.price * quantity : 0;
+  const totalAmount = selectedProduct
+    ? customAmount && customAmount !== "" // If custom amount is set
+      ? parseFloat(customAmount) || 0 // Use custom amount
+      : baseAmount // Otherwise use base amount
+    : 0;
   const roundUpAmount = calculateRoundUp(totalAmount);
   const finalAmount = totalAmount + (roundUpEnabled ? roundUpAmount : 0);
 
@@ -252,99 +320,157 @@ export default function ShopPage() {
         <NetworkChecker />
       </div>
 
-      <main className="flex-1 space-y-6 overflow-y-auto p-4">
-        {/* How It Works Banner */}
-        <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Sparkles className="h-5 w-5 text-primary" />
-              Shop with Impact
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2 text-sm">
-            <div className="flex items-start gap-2">
-              <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/20 text-xs font-bold text-primary">
-                1
-              </div>
-              <p className="text-muted-foreground">
-                Add products to cart and checkout
-              </p>
-            </div>
-            <div className="flex items-start gap-2">
-              <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/20 text-xs font-bold text-primary">
-                2
-              </div>
-              <p className="text-muted-foreground">
-                We round up to nearest 1,000 UGX
-              </p>
-            </div>
-            <div className="flex items-start gap-2">
-              <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/20 text-xs font-bold text-primary">
-                3
-              </div>
-              <p className="text-muted-foreground">
-                Spare change goes to community projects
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+      <main className="flex-1 space-y-4 overflow-y-auto p-4">
+        {/* Search and Filter Section */}
+        <div className="space-y-3">
+          {/* Search Bar */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Search products..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full rounded-lg border border-input bg-background py-2.5 pl-10 pr-10 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 hover:bg-accent"
+              >
+                <X className="h-3.5 w-3.5 text-muted-foreground" />
+              </button>
+            )}
+          </div>
+
+          {/* Category Filters */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-2">
+            <Filter className="h-4 w-4 shrink-0 text-muted-foreground" />
+            {["All", "Electronics", "Accessories", "Fashion", "Lifestyle"].map(
+              (category) => (
+                <Button
+                  key={category}
+                  variant={
+                    selectedCategory === category ? "default" : "outline"
+                  }
+                  size="sm"
+                  onClick={() => setSelectedCategory(category)}
+                  className={`shrink-0 ${
+                    selectedCategory === category
+                      ? "bg-primary text-primary-foreground"
+                      : ""
+                  }`}
+                >
+                  {category}
+                </Button>
+              )
+            )}
+          </div>
+
+          {/* Results Count */}
+          <div className="flex items-center justify-between text-sm text-muted-foreground">
+            <p>
+              {
+                products.filter((product) => {
+                  const matchesSearch =
+                    product.name
+                      .toLowerCase()
+                      .includes(searchQuery.toLowerCase()) ||
+                    product.description
+                      .toLowerCase()
+                      .includes(searchQuery.toLowerCase());
+                  const matchesCategory =
+                    selectedCategory === "All" ||
+                    product.category === selectedCategory;
+                  return matchesSearch && matchesCategory;
+                }).length
+              }{" "}
+              products found
+            </p>
+            {(searchQuery || selectedCategory !== "All") && (
+              <button
+                onClick={() => {
+                  setSearchQuery("");
+                  setSelectedCategory("All");
+                }}
+                className="text-primary hover:underline"
+              >
+                Clear filters
+              </button>
+            )}
+          </div>
+        </div>
 
         {/* Products Grid */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {products.map((product) => (
-            <Card
-              key={product.id}
-              className="group overflow-hidden transition-shadow hover:shadow-lg"
-            >
-              <div className="relative aspect-square overflow-hidden bg-muted">
-                <Image
-                  src={product.image}
-                  alt={product.name}
-                  fill
-                  className="object-cover transition-transform group-hover:scale-105"
-                />
-                <div className="absolute right-2 top-2">
-                  <Badge variant="secondary" className="bg-background/80">
-                    {product.category}
-                  </Badge>
-                </div>
-              </div>
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between gap-2">
-                  <CardTitle className="text-base">{product.name}</CardTitle>
-                  <div className="flex items-center gap-1 text-sm text-yellow-500">
-                    <Star className="h-4 w-4 fill-current" />
-                    <span>{product.rating}</span>
+          {products
+            .filter((product) => {
+              const matchesSearch =
+                product.name
+                  .toLowerCase()
+                  .includes(searchQuery.toLowerCase()) ||
+                product.description
+                  .toLowerCase()
+                  .includes(searchQuery.toLowerCase());
+              const matchesCategory =
+                selectedCategory === "All" ||
+                product.category === selectedCategory;
+              return matchesSearch && matchesCategory;
+            })
+            .map((product) => (
+              <Card
+                key={product.id}
+                className="group overflow-hidden transition-shadow hover:shadow-lg"
+              >
+                <div className="relative aspect-square overflow-hidden bg-muted">
+                  <Image
+                    src={product.image}
+                    alt={product.name}
+                    fill
+                    className="object-cover transition-transform group-hover:scale-105"
+                  />
+                  <div className="absolute right-2 top-2">
+                    <Badge variant="secondary" className="bg-background/80">
+                      {product.category}
+                    </Badge>
                   </div>
                 </div>
-                <CardDescription className="line-clamp-2">
-                  {product.description}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex items-baseline gap-2">
-                  <p className="text-2xl font-bold text-primary">
-                    {product.price.toLocaleString()}
-                  </p>
-                  <p className="text-sm text-muted-foreground">UGX</p>
-                </div>
-                <Button
-                  className="w-full"
-                  onClick={() => handleBuyClick(product)}
-                  disabled={!product.inStock}
-                >
-                  {product.inStock ? (
-                    <>
-                      <ShoppingCart className="mr-2 h-4 w-4" />
-                      Buy Now
-                    </>
-                  ) : (
-                    "Out of Stock"
-                  )}
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <CardTitle className="text-base">{product.name}</CardTitle>
+                    <div className="flex items-center gap-1 text-sm text-yellow-500">
+                      <Star className="h-4 w-4 fill-current" />
+                      <span>{product.rating}</span>
+                    </div>
+                  </div>
+                  <CardDescription className="line-clamp-2">
+                    {product.description}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex items-baseline gap-2">
+                    <p className="text-2xl font-bold text-primary">
+                      {product.price.toLocaleString()}
+                    </p>
+                    <p className="text-sm text-muted-foreground">UGX</p>
+                  </div>
+                  <Button
+                    className="w-full"
+                    onClick={() => handleBuyClick(product)}
+                    disabled={!product.inStock}
+                  >
+                    {product.inStock ? (
+                      <>
+                        <ShoppingCart className="mr-2 h-4 w-4" />
+                        Buy Now
+                      </>
+                    ) : (
+                      "Out of Stock"
+                    )}
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
         </div>
       </main>
 
@@ -384,7 +510,11 @@ export default function ShopPage() {
                           variant="outline"
                           size="icon"
                           className="h-8 w-8"
-                          onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                          onClick={() => {
+                            setQuantity(Math.max(1, quantity - 1));
+                            setCustomAmount(""); // Reset custom amount when quantity changes
+                            setIsEditingAmount(false);
+                          }}
                         >
                           <Minus className="h-4 w-4" />
                         </Button>
@@ -395,7 +525,11 @@ export default function ShopPage() {
                           variant="outline"
                           size="icon"
                           className="h-8 w-8"
-                          onClick={() => setQuantity(Math.min(10, quantity + 1))}
+                          onClick={() => {
+                            setQuantity(Math.min(10, quantity + 1));
+                            setCustomAmount(""); // Reset custom amount when quantity changes
+                            setIsEditingAmount(false);
+                          }}
                         >
                           <Plus className="h-4 w-4" />
                         </Button>
@@ -418,7 +552,9 @@ export default function ShopPage() {
                       size="sm"
                       onClick={() => setRoundUpEnabled(!roundUpEnabled)}
                       className={
-                        roundUpEnabled ? "text-primary" : "text-muted-foreground"
+                        roundUpEnabled
+                          ? "text-primary"
+                          : "text-muted-foreground"
                       }
                     >
                       {roundUpEnabled ? (
@@ -430,31 +566,125 @@ export default function ShopPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
+                    <div className="flex items-center justify-between gap-2">
                       <span className="text-muted-foreground">
                         Purchase Amount:
                       </span>
-                      <span className="font-semibold">
-                        {totalAmount.toLocaleString()} UGX
-                      </span>
+                      <div className="flex items-center gap-2">
+                        {isEditingAmount ? (
+                          <div className="flex items-center gap-1">
+                            <input
+                              type="number"
+                              value={customAmount}
+                              onChange={(e) => setCustomAmount(e.target.value)}
+                              className="w-24 rounded border border-input bg-background px-2 py-1 text-right text-sm font-semibold focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                              autoFocus
+                            />
+                            <span className="text-xs text-muted-foreground">
+                              UGX
+                            </span>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 px-2"
+                              onClick={() => setIsEditingAmount(false)}
+                            >
+                              <Check className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => {
+                              setIsEditingAmount(true);
+                              // Set input to current total amount (whether custom or base)
+                              setCustomAmount(totalAmount.toString());
+                            }}
+                            className="group flex items-center gap-1 rounded px-2 py-1 hover:bg-accent"
+                          >
+                            <span className="font-semibold">
+                              {totalAmount.toLocaleString()} UGX
+                            </span>
+                            <span className="text-xs text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100">
+                              ✏️ Edit
+                            </span>
+                          </button>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">
-                        Rounded To:
-                      </span>
-                      <span className="font-semibold">
-                        {Math.ceil(totalAmount / 1000) * 1000} UGX
-                      </span>
-                    </div>
-                    <Separator />
-                    <div className="flex justify-between text-base">
-                      <span className="font-semibold text-primary">
-                        Round-Up Donation:
-                      </span>
-                      <span className="font-bold text-primary">
-                        {roundUpAmount.toLocaleString()} UGX
-                      </span>
-                    </div>
+                    {roundUpEnabled && roundUpAmount > 0 && (
+                      <>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">
+                            Rounded To:
+                          </span>
+                          <span className="font-semibold">
+                            {(totalAmount + roundUpAmount).toLocaleString()} UGX
+                          </span>
+                        </div>
+                        <Separator />
+                        <div className="flex justify-between text-base">
+                          <span className="font-semibold text-primary">
+                            💚 Smart Round-Up Donation:
+                          </span>
+                          <span className="font-bold text-primary">
+                            {roundUpAmount.toLocaleString()} UGX
+                          </span>
+                        </div>
+
+                        {/* Show donation affordability message */}
+                        <p className="text-xs text-muted-foreground italic">
+                          {roundUpAmount < 500 &&
+                            "Micro-donation for maximum impact"}
+                          {roundUpAmount >= 500 &&
+                            roundUpAmount < 1000 &&
+                            "Affordable contribution"}
+                          {roundUpAmount >= 1000 &&
+                            roundUpAmount < 2000 &&
+                            "Generous support"}
+                          {roundUpAmount >= 2000 &&
+                            "Meaningful impact donation"}
+                        </p>
+                      </>
+                    )}
+                    {roundUpEnabled && roundUpAmount === 0 && (
+                      <div className="space-y-2 rounded-lg border border-dashed border-primary/30 bg-primary/5 p-3">
+                        <p className="text-xs font-semibold text-primary">
+                          💡 Amount already rounded!
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Try editing the amount above to see smart round-up
+                          suggestions, or add a custom donation:
+                        </p>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-1 text-xs"
+                            onClick={() => {
+                              // Don't go into edit mode, just update the custom amount
+                              const newAmount = (totalAmount + 500).toString();
+                              setCustomAmount(newAmount);
+                              // Keep edit mode off so it applies immediately
+                            }}
+                          >
+                            Add 500 UGX
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-1 text-xs"
+                            onClick={() => {
+                              // Don't go into edit mode, just update the custom amount
+                              const newAmount = (totalAmount + 1000).toString();
+                              setCustomAmount(newAmount);
+                              // Keep edit mode off so it applies immediately
+                            }}
+                          >
+                            Add 1,000 UGX
+                          </Button>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {roundUpEnabled && (
@@ -495,12 +725,17 @@ export default function ShopPage() {
                                   htmlFor={`project-${project.id}`}
                                   className="flex-1 cursor-pointer"
                                 >
-                                  <p className="font-semibold">{project.name}</p>
+                                  <p className="font-semibold">
+                                    {project.name}
+                                  </p>
                                   <p className="text-xs text-muted-foreground">
                                     {project.description}
                                   </p>
                                   <div className="mt-1">
-                                    <Badge variant="outline" className="text-xs">
+                                    <Badge
+                                      variant="outline"
+                                      className="text-xs"
+                                    >
                                       {project.category || "Community"}
                                     </Badge>
                                   </div>
