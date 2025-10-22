@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAccount } from "wagmi";
 import {
@@ -221,6 +221,22 @@ export default function ShopPage() {
     setSelectedProject(activeProjects.length > 0 ? activeProjects[0].id : null);
   };
 
+  // Handle donation success with useEffect to avoid setState in render
+  useEffect(() => {
+    if (isDonateSuccess && showCheckout) {
+      toast({
+        title: "Donation Confirmed! 💚",
+        description: "Your round-up donation is now on the blockchain",
+      });
+
+      // Close dialog and reset state after successful donation
+      setShowCheckout(false);
+      setSelectedProduct(null);
+      setCustomAmount("");
+      setQuantity(1);
+      setSelectedProject(null);
+    }
+  }, [isDonateSuccess, showCheckout, toast]);
   const handleCheckout = async () => {
     if (!selectedProduct) return;
 
@@ -233,10 +249,6 @@ export default function ShopPage() {
       return;
     }
 
-    const totalAmount = selectedProduct.price * quantity;
-    const roundUpAmount = calculateRoundUp(totalAmount);
-    const finalAmount = totalAmount + (roundUpEnabled ? roundUpAmount : 0);
-
     try {
       // In a real app, this would process payment through payment gateway
       // For demo, we'll just process the donation if round-up is enabled
@@ -245,42 +257,51 @@ export default function ShopPage() {
         // Convert UGX to CELO (demo rate: 1000 UGX = 0.001 CELO)
         const donationInCelo = (roundUpAmount / 1000000).toFixed(6);
 
+        // Show waiting toast
+        toast({
+          title: "Waiting for Confirmation... ⏳",
+          description: "Please approve the transaction in your wallet",
+        });
+
+        // This will trigger MetaMask and wait for user approval
         await donateToProject(selectedProject, donationInCelo);
 
-        toast({
-          title: "Purchase Processing! 🎉",
-          description: `Payment: ${totalAmount.toLocaleString()} UGX + ${roundUpAmount.toLocaleString()} UGX donation`,
-        });
+        // Don't close immediately - let the success effect handle it
       } else {
         // Simulate successful purchase without donation
         toast({
           title: "Purchase Successful! 🎉",
           description: `Total: ${totalAmount.toLocaleString()} UGX`,
         });
-      }
 
-      // Reset and close
-      setTimeout(() => {
-        setShowCheckout(false);
-        setSelectedProduct(null);
-        setQuantity(1);
-      }, 2000);
+        // Close after delay for non-donation purchases
+        setTimeout(() => {
+          setShowCheckout(false);
+          setSelectedProduct(null);
+          setQuantity(1);
+          setCustomAmount("");
+        }, 2000);
+      }
     } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Purchase Failed",
-        description: error.message || "Failed to process payment",
-      });
+      // Check if user rejected the transaction
+      if (
+        error.message?.includes("User rejected") ||
+        error.message?.includes("denied")
+      ) {
+        toast({
+          variant: "destructive",
+          title: "Transaction Cancelled",
+          description: "You rejected the transaction in your wallet",
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Purchase Failed",
+          description: error.message || "Failed to process payment",
+        });
+      }
     }
   };
-
-  // Show success toast when donation confirms
-  if (isDonateSuccess && showCheckout) {
-    toast({
-      title: "Donation Confirmed! 💚",
-      description: "Your round-up donation is now on the blockchain",
-    });
-  }
 
   // Calculate total using custom amount if set, otherwise use product price * quantity
   const baseAmount = selectedProduct ? selectedProduct.price * quantity : 0;
@@ -472,6 +493,39 @@ export default function ShopPage() {
               </Card>
             ))}
         </div>
+
+        {/* No Results Message */}
+        {products.filter((product) => {
+          const matchesSearch =
+            product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            product.description
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase());
+          const matchesCategory =
+            selectedCategory === "All" || product.category === selectedCategory;
+          return matchesSearch && matchesCategory;
+        }).length === 0 && (
+          <Card className="mt-8">
+            <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+              <ShoppingCart className="mb-4 h-12 w-12 text-muted-foreground opacity-50" />
+              <h3 className="mb-2 text-lg font-semibold">No products found</h3>
+              <p className="mb-4 text-sm text-muted-foreground">
+                {searchQuery
+                  ? `No results for "${searchQuery}"`
+                  : `No products in ${selectedCategory} category`}
+              </p>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSearchQuery("");
+                  setSelectedCategory("All");
+                }}
+              >
+                Clear filters
+              </Button>
+            </CardContent>
+          </Card>
+        )}
       </main>
 
       {/* Checkout Dialog */}
