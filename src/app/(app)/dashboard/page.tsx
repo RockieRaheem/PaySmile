@@ -183,9 +183,14 @@ export default function DashboardPage() {
         </section>
 
         <section>
-          <h2 className="text-[22px] font-bold leading-tight tracking-tight text-secondary mb-3">
-            Active Projects
-          </h2>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-[22px] font-bold leading-tight tracking-tight text-secondary">
+              Top Projects
+            </h2>
+            <Button variant="link" size="sm" asChild className="text-primary">
+              <Link href="/projects">View All</Link>
+            </Button>
+          </div>
           {projectsLoading ? (
             <div className="flex items-center justify-center p-8">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -197,60 +202,81 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 w-full">
-              {activeProjects.map((project, index) => {
-                const fundingGoal = parseFloat(
-                  formatEther(project.fundingGoal)
-                );
-                const currentFunding = parseFloat(
-                  formatEther(project.currentFunding)
-                );
-                const percentFunded =
-                  fundingGoal > 0 ? (currentFunding / fundingGoal) * 100 : 0;
-                const projectImageUrl = getProjectImage(
-                  project.name,
-                  undefined,
-                  project.description
-                );
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 w-full">
+              {activeProjects
+                .sort(
+                  (a, b) => Number(b.votesReceived) - Number(a.votesReceived)
+                )
+                .slice(0, 4)
+                .map((project) => {
+                  const fundingGoal = parseFloat(
+                    formatEther(project.fundingGoal)
+                  );
+                  const currentFunding = parseFloat(
+                    formatEther(project.currentFunding)
+                  );
+                  const percentFunded =
+                    fundingGoal > 0 ? (currentFunding / fundingGoal) * 100 : 0;
+                  const projectImageUrl = getProjectImage(
+                    project.name,
+                    undefined,
+                    project.description
+                  );
+                  const votes = Number(project.votesReceived);
 
-                return (
-                  <Card key={project.id} className="overflow-hidden">
-                    <div className="relative w-full aspect-[4/3]">
-                      <Image
-                        src={projectImageUrl}
-                        alt={project.name}
-                        fill
-                        sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                        className="object-cover"
-                      />
-                    </div>
-                    <CardContent className="p-2 space-y-1.5">
-                      <p className="font-bold text-xs text-secondary">
-                        {project.name}
-                      </p>
-                      <p className="text-[10px] text-muted-foreground">
-                        Goal: {fundingGoal.toFixed(2)} CELO
-                      </p>
-                      <Progress
-                        value={percentFunded}
-                        className="h-2 bg-green-100"
-                      />
-                      <p className="text-right text-[9px] text-muted-foreground">
-                        {percentFunded.toFixed(1)}% Funded (
-                        {currentFunding.toFixed(4)} CELO)
-                      </p>
-                    </CardContent>
-                  </Card>
-                );
-              })}
+                  return (
+                    <Link key={project.id} href="/projects">
+                      <Card className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
+                        <div className="relative w-full h-16">
+                          <Image
+                            src={projectImageUrl}
+                            alt={project.name}
+                            fill
+                            sizes="(max-width: 640px) 50vw, 25vw"
+                            className="object-cover"
+                          />
+                          <div className="absolute top-0.5 right-0.5 bg-primary/90 text-primary-foreground text-[8px] font-bold px-1 py-0.5 rounded-full">
+                            {votes} votes
+                          </div>
+                        </div>
+                        <CardContent className="p-2 space-y-1">
+                          <p className="font-bold text-xs text-secondary line-clamp-1">
+                            {project.name}
+                          </p>
+                          <p className="text-[10px] text-muted-foreground line-clamp-2">
+                            {project.description}
+                          </p>
+                          <div className="space-y-1 pt-0.5">
+                            <div className="flex justify-between text-[10px] text-muted-foreground">
+                              <span>Goal: {fundingGoal.toFixed(2)} CELO</span>
+                              <span>{currentFunding.toFixed(2)} CELO</span>
+                            </div>
+                            <Progress
+                              value={percentFunded}
+                              className="h-1.5 bg-green-100"
+                            />
+                            <p className="text-[10px] text-muted-foreground">
+                              {percentFunded.toFixed(1)}% funded
+                            </p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  );
+                })}
             </div>
           )}
         </section>
 
         <section>
-          <h2 className="text-[22px] font-bold leading-tight tracking-tight text-secondary mb-3">
-            Funded Projects
-          </h2>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-[22px] font-bold leading-tight tracking-tight text-secondary">
+              Recently Funded
+            </h2>
+            <Button variant="link" size="sm" asChild className="text-primary">
+              <Link href="/projects">View All</Link>
+            </Button>
+          </div>
           {projectsLoading ? (
             <div className="flex items-center justify-center p-8">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -263,8 +289,14 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 w-full">
-              {fundedProjects.map((project, index) => {
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 w-full">
+              {fundedProjects.slice(0, 4).map((project) => {
+                const fundingGoal = parseFloat(
+                  formatEther(project.fundingGoal)
+                );
+                const currentFunding = parseFloat(
+                  formatEther(project.currentFunding)
+                );
                 const projectImageUrl = getProjectImage(
                   project.name,
                   undefined,
@@ -272,26 +304,47 @@ export default function DashboardPage() {
                 );
 
                 return (
-                  <Card key={project.id} className="overflow-hidden">
-                    <div className="relative w-full aspect-[4/3]">
-                      <Image
-                        src={projectImageUrl}
-                        alt={project.name}
-                        fill
-                        sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                        className="object-cover"
-                      />
-                    </div>
-                    <CardContent className="p-2 space-y-1.5">
-                      <p className="font-bold text-xs text-secondary">
-                        {project.name}
-                      </p>
-                      <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/20 px-2 py-0.5 text-[10px] font-semibold text-primary">
-                        <CheckCircle className="h-3 w-3" />
-                        Fully Funded!
+                  <Link key={project.id} href="/projects">
+                    <Card className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
+                      <div className="relative w-full h-16">
+                        <Image
+                          src={projectImageUrl}
+                          alt={project.name}
+                          fill
+                          sizes="(max-width: 640px) 50vw, 25vw"
+                          className="object-cover"
+                        />
+                        <div className="absolute top-0.5 right-0.5 bg-primary text-primary-foreground text-[8px] font-bold px-1 py-0.5 rounded-full flex items-center gap-0.5">
+                          <CheckCircle className="h-2 w-2" />
+                          Funded
+                        </div>
                       </div>
-                    </CardContent>
-                  </Card>
+                      <CardContent className="p-2 space-y-1">
+                        <p className="font-bold text-xs text-secondary line-clamp-1">
+                          {project.name}
+                        </p>
+                        <p className="text-[10px] text-muted-foreground line-clamp-2">
+                          {project.description}
+                        </p>
+                        <div className="space-y-1 pt-0.5">
+                          <div className="flex justify-between text-[10px]">
+                            <span className="text-muted-foreground">
+                              Raised:
+                            </span>
+                            <span className="text-primary font-bold">
+                              {currentFunding.toFixed(2)} CELO
+                            </span>
+                          </div>
+                          <div className="inline-flex items-center gap-1 bg-primary/10 px-2 py-0.5 rounded-full">
+                            <CheckCircle className="h-2.5 w-2.5 text-primary" />
+                            <span className="text-[10px] text-primary font-semibold">
+                              Goal Achieved!
+                            </span>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
                 );
               })}
             </div>
