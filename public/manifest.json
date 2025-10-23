@@ -61,9 +61,9 @@
   "categories": ["finance", "social", "utilities"],
   "shortcuts": [
     {
-      "name": "Vote on Projects",
-      "short_name": "Vote",
-      "description": "Vote for community projects",
+      "name": "Donate to Projects",
+      "short_name": "Donate",
+      "description": "Donate to community projects",
       "url": "/projects",
       "icons": [{ "src": "/icons/icon-96x96.png", "sizes": "96x96" }]
     },

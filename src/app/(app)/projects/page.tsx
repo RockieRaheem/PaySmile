@@ -57,6 +57,7 @@ export default function ProjectsPage() {
   const [showDonateDialog, setShowDonateDialog] = useState(false);
   const [selectedProject, setSelectedProject] =
     useState<BlockchainProject | null>(null);
+  const [votedProjects, setVotedProjects] = useState<Set<number>>(new Set());
 
   // Fetch projects from blockchain using the hook
   const { projects, isLoading, refetch, updateProject } = useProjects();
@@ -172,6 +173,9 @@ export default function ProjectsPage() {
         });
       }
 
+      // Mark project as voted
+      setVotedProjects((prev) => new Set(prev).add(votingProjectId));
+
       // Clear the voting state
       setVotingProjectId(null);
 
@@ -206,7 +210,7 @@ export default function ProjectsPage() {
             </Link>
           </Button>
           <h1 className="flex-1 text-center text-lg font-bold">
-            Vote for Projects
+            Donate to Projects
           </h1>
           <div className="w-12" />
         </header>
@@ -216,7 +220,7 @@ export default function ProjectsPage() {
               <Wallet className="h-12 w-12 text-muted-foreground" />
               <h2 className="text-xl font-bold">Connect Your Wallet</h2>
               <p className="text-center text-muted-foreground">
-                Please connect your Celo wallet to view and vote for projects.
+                Please connect your Celo wallet to view and donate to projects.
               </p>
               <Button asChild className="w-full">
                 <Link href="/connect">Connect Wallet</Link>
@@ -248,7 +252,7 @@ export default function ProjectsPage() {
           </Link>
         </Button>
         <h1 className="flex-1 text-center text-lg font-bold">
-          Vote for Projects
+          Donate to Projects
         </h1>
         <Button variant="ghost" size="icon">
           <span className="material-symbols-outlined">search</span>
@@ -274,7 +278,7 @@ export default function ProjectsPage() {
         ))}
       </div>
 
-      <main className="flex-1 space-y-4 overflow-y-auto p-4">
+      <main className="flex-1 overflow-y-auto p-3 pb-24">
         {filteredProjects.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <p className="text-muted-foreground">
@@ -282,82 +286,64 @@ export default function ProjectsPage() {
             </p>
           </div>
         ) : (
-          filteredProjects.map((project) => {
-            const fundingProgress =
-              project.fundingGoal > BigInt(0)
-                ? (Number(project.currentFunding) /
-                    Number(project.fundingGoal)) *
-                  100
-                : 0;
+          <div className="grid grid-cols-2 gap-2.5">
+            {filteredProjects.map((project) => {
+              const fundingProgress =
+                project.fundingGoal > BigInt(0)
+                  ? (Number(project.currentFunding) /
+                      Number(project.fundingGoal)) *
+                    100
+                  : 0;
 
-            return (
-              <Card
-                key={project.id}
-                className="overflow-hidden bg-card shadow-sm"
-              >
-                <CardContent className="space-y-2 p-3">
-                  {/* Image at top - smaller and 16:9 aspect ratio */}
-                  <div className="relative h-32 w-full overflow-hidden rounded-md bg-muted">
-                    <Image
-                      src={getProjectImage(
-                        project.name,
-                        project.category,
-                        project.description
-                      )}
-                      alt={project.name}
-                      fill
-                      className="object-cover"
-                      unoptimized
-                    />
-                  </div>
+              const hasVoted = votedProjects.has(project.id);
 
-                  {/* Header with title and status */}
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1">
-                      <p className="text-base font-bold leading-tight">
+              return (
+                <Card
+                  key={project.id}
+                  className="overflow-hidden bg-card shadow-sm"
+                >
+                  <CardContent className="space-y-1.5 p-2">
+                    {/* Image at top - reduced height 4:3 ratio */}
+                    <div className="relative aspect-[4/3] w-full overflow-hidden rounded bg-muted">
+                      <Image
+                        src={getProjectImage(
+                          project.name,
+                          project.category,
+                          project.description
+                        )}
+                        alt={project.name}
+                        fill
+                        className="object-cover"
+                        unoptimized
+                      />
+                    </div>
+
+                    {/* Header with title - readable size */}
+                    <div>
+                      <p className="text-xs font-bold leading-tight line-clamp-1">
                         {project.name}
                       </p>
-                      {project.category && (
-                        <span className="mt-1 inline-block rounded-full bg-primary/20 px-2 py-0.5 text-xs font-medium text-primary">
-                          {project.category}
+                    </div>
+
+                    {/* Progress bar and funding - more visible */}
+                    <div className="space-y-1">
+                      <Progress
+                        value={fundingProgress}
+                        className="h-1.5 rounded bg-green-100"
+                      />
+                      <div className="flex items-center justify-between text-[10px] text-muted-foreground font-medium">
+                        <span>
+                          {formatEther(project.currentFunding).slice(0, 4)} CELO
                         </span>
-                      )}
+                        <span>{project.votesReceived.toString()} votes</span>
+                      </div>
                     </div>
-                    {project.isFunded && (
-                      <span className="rounded-full bg-green-100 px-2 py-1 text-xs font-semibold text-green-700">
-                        Funded ✓
-                      </span>
-                    )}
-                  </div>
 
-                  <p className="text-xs text-muted-foreground line-clamp-2">
-                    {project.description}
-                  </p>
-
-                  <div className="space-y-1">
-                    <Progress
-                      value={fundingProgress}
-                      className="h-1.5 rounded bg-green-100"
-                    />
-                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span className="text-[10px]">
-                        {formatEther(project.currentFunding)} CELO
-                      </span>
-                      <span className="text-[10px]">
-                        Goal: {formatEther(project.fundingGoal)} CELO
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between gap-2 pt-1">
-                    <div className="text-xs text-muted-foreground">
-                      {project.votesReceived.toString()} votes
-                    </div>
-                    <div className="flex gap-2 items-center">
+                    {/* Buttons - better size */}
+                    <div className="flex gap-1.5 pt-0.5">
                       <Button
                         size="sm"
-                        variant="outline"
-                        className="rounded-full px-3 py-1 h-7 text-xs flex items-center gap-1"
+                        className="rounded-md px-2.5 py-1 h-6 text-[10px] flex items-center gap-1 bg-primary text-primary-foreground hover:bg-primary/90 flex-1"
                         onClick={() => handleDonateClick(project)}
                         disabled={
                           (isDonating && donatingProjectId === project.id) ||
@@ -366,36 +352,55 @@ export default function ProjectsPage() {
                         }
                       >
                         {isDonating && donatingProjectId === project.id ? (
-                          <>
-                            <Loader2 className="h-3 w-3 animate-spin" />
-                            <span className="text-[10px]">Donating...</span>
-                          </>
+                          <Loader2 className="h-2.5 w-2.5 animate-spin" />
                         ) : (
                           <>
-                            <DollarSign className="h-3 w-3 text-primary" />
-                            <span className="text-[10px]">Donate</span>
+                            <DollarSign className="h-3 w-3" />
+                            <span>Donate</span>
                           </>
                         )}
                       </Button>
 
-                      {/* Vote heart - green when active */}
-                      <HeartButton
-                        ariaLabel={`Vote for ${project.name}`}
-                        initialLiked={false}
-                        variant="vote"
-                        size={16}
-                        onChange={(liked) => {
-                          // If liked becomes true, trigger blockchain vote; else do nothing (unvote not supported)
-                          if (liked) handleVote(project.id);
-                        }}
-                        className="ml-1"
-                      />
+                      {/* Vote button with heart - green when voted */}
+                      <Button
+                        size="sm"
+                        variant={hasVoted ? "default" : "outline"}
+                        className={`rounded-md px-2 py-1 h-6 text-[10px] flex items-center gap-1 ${
+                          hasVoted
+                            ? "bg-green-600 text-white hover:bg-green-700"
+                            : ""
+                        }`}
+                        onClick={() => handleVote(project.id)}
+                        disabled={
+                          hasVoted ||
+                          (isPending && votingProjectId === project.id) ||
+                          !project.isActive
+                        }
+                      >
+                        {isPending && votingProjectId === project.id ? (
+                          <Loader2 className="h-2.5 w-2.5 animate-spin" />
+                        ) : (
+                          <>
+                            <HeartButton
+                              ariaLabel={`Vote for ${project.name}`}
+                              initialLiked={hasVoted}
+                              variant="vote"
+                              size={11}
+                              onChange={(liked) => {
+                                if (liked && !hasVoted) handleVote(project.id);
+                              }}
+                              className="pointer-events-none"
+                            />
+                            <span>{hasVoted ? "Voted" : "Vote"}</span>
+                          </>
+                        )}
+                      </Button>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
         )}
       </main>
 
