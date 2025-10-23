@@ -315,7 +315,7 @@ export default function ShopPage() {
   const finalAmount = totalAmount + (roundUpEnabled ? roundUpAmount : 0);
 
   return (
-    <div className="flex min-h-screen w-full flex-col bg-background text-foreground pb-24">
+    <div className="flex min-h-screen w-full flex-col bg-background text-foreground pb-24 overflow-x-hidden">
       {/* Header */}
       <header className="sticky top-0 z-10 border-b bg-card/95 p-4 backdrop-blur supports-[backdrop-filter]:bg-card/60">
         <div className="flex items-center justify-between">
@@ -366,7 +366,7 @@ export default function ShopPage() {
           </div>
 
           {/* Category Filters */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-2">
+          <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin">
             <Filter className="h-4 w-4 shrink-0 text-muted-foreground" />
             {["All", "Electronics", "Accessories", "Fashion", "Lifestyle"].map(
               (category) => (

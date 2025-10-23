@@ -244,7 +244,7 @@ export default function ProjectsPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-background text-foreground">
+    <div className="flex min-h-screen w-full flex-col bg-background text-foreground overflow-x-hidden">
       <header className="sticky top-0 z-10 flex items-center justify-between bg-background p-4 pb-2">
         <Button variant="ghost" size="icon" asChild>
           <Link href="/dashboard">
@@ -264,7 +264,7 @@ export default function ProjectsPage() {
         <NetworkChecker />
       </div>
 
-      <div className="flex gap-3 overflow-x-auto whitespace-nowrap px-4 py-2">
+      <div className="flex gap-3 overflow-x-auto whitespace-nowrap px-4 py-2 scrollbar-thin">
         {projectCategories.map((category) => (
           <Button
             key={category}
@@ -286,7 +286,7 @@ export default function ProjectsPage() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-2.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5">
             {filteredProjects.map((project) => {
               const fundingProgress =
                 project.fundingGoal > BigInt(0)
