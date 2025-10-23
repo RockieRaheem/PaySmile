@@ -3,8 +3,7 @@
 // Project images mapping - eye-catching, relevant images
 const projectImageMap: Record<string, string> = {
   // Water & Sanitation
-  water:
-    "https://images.unsplash.com/photo-1541006008768-d181e7f9f3d8?w=800&q=80", // Clean water tap
+  water: "https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=800&q=80", // Clean drinking water
   borehole:
     "https://images.unsplash.com/photo-1594498257673-9f36b767286c?w=800&q=80", // Water well/borehole
   well: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800&q=80", // Hand pump water
