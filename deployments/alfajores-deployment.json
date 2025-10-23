@@ -2,15 +2,15 @@
   "network": "alfajores",
   "chainId": "44787",
   "deployer": "0xC00707652bd35aF2d6accee85B3002c2AD1053a6",
-  "timestamp": "2025-10-22T06:06:19.461Z",
+  "timestamp": "2025-10-23T04:30:29.699Z",
   "contracts": {
     "DonationPool": {
-      "address": "0x6D2d5B4485075723CFfBA941827147635865E1b2",
-      "explorerUrl": "https://alfajores.celoscan.io/address/0x6D2d5B4485075723CFfBA941827147635865E1b2"
+      "address": "0x7726637769da3CF89F0502bF124522B6f58e4aa5",
+      "explorerUrl": "https://alfajores.celoscan.io/address/0x7726637769da3CF89F0502bF124522B6f58e4aa5"
     },
     "SmileBadgeNFT": {
-      "address": "0x6e3B179DBCaD5EeD5328AB42273d0A0c431737A5",
-      "explorerUrl": "https://alfajores.celoscan.io/address/0x6e3B179DBCaD5EeD5328AB42273d0A0c431737A5"
+      "address": "0x0A0Be3D3c76b301007E0Ab612b36a9E72bAEd4F3",
+      "explorerUrl": "https://alfajores.celoscan.io/address/0x0A0Be3D3c76b301007E0Ab612b36a9E72bAEd4F3"
     }
   }
 }

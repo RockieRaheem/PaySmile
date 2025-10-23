@@ -10,7 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useDonate } from "@/hooks/use-contracts";
-import { Loader2, TrendingUp, Heart, Calculator } from "lucide-react";
+import { Loader2, TrendingUp, Calculator } from "lucide-react";
+import HeartButton from "@/components/ui/heart-button";
 import { NetworkChecker } from "@/components/NetworkChecker";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -137,7 +138,7 @@ export default function RoundUpPage() {
         <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-base">
-              <Heart className="h-5 w-5 text-primary" />
+              <HeartButton ariaLabel="Round-up info" asChild className="mr-2" />
               How Round-Up Donations Work
             </CardTitle>
           </CardHeader>
@@ -277,7 +278,11 @@ export default function RoundUpPage() {
                 </>
               ) : (
                 <>
-                  <Heart className="mr-2 h-5 w-5" />
+                  <HeartButton
+                    ariaLabel="Your Donation"
+                    asChild
+                    className="mr-2 h-5 w-5"
+                  />
                   Donate{" "}
                   {donation > 0 ? `${donation.toFixed(0)} UGX` : "Round-Up"}
                 </>

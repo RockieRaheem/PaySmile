@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/carousel";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { useDonorStats, useProjects } from "@/hooks/use-contracts";
+import { getProjectImage } from "@/lib/project-images";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -89,16 +90,6 @@ export default function DashboardPage() {
   const livesImpacted = projectsSupported * 50; // Estimate 50 lives per project
   const totalDonationsNum = totalDonations ? parseFloat(totalDonations) : 0;
   const roundupsMade = Math.floor(totalDonationsNum * 100); // Estimate roundups
-
-  // Get project images
-  const getProjectImage = (index: number) => {
-    const images = [
-      PlaceHolderImages.find((img) => img.id === "clean-water"),
-      PlaceHolderImages.find((img) => img.id === "education"),
-      PlaceHolderImages.find((img) => img.id === "tree-planting"),
-    ];
-    return images[index % images.length];
-  };
 
   if (!isConnected) {
     return (
@@ -214,7 +205,6 @@ export default function DashboardPage() {
             <Carousel opts={{ align: "start", loop: true }} className="w-full">
               <CarouselContent className="-ml-4">
                 {activeProjects.map((project, index) => {
-                  const image = getProjectImage(index);
                   const fundingGoal = parseFloat(
                     formatEther(project.fundingGoal)
                   );
@@ -223,6 +213,11 @@ export default function DashboardPage() {
                   );
                   const percentFunded =
                     fundingGoal > 0 ? (currentFunding / fundingGoal) * 100 : 0;
+                  const projectImageUrl = getProjectImage(
+                    project.name,
+                    undefined,
+                    project.description
+                  );
 
                   return (
                     <CarouselItem
@@ -230,16 +225,15 @@ export default function DashboardPage() {
                       className="basis-4/5 pl-4 md:basis-1/3"
                     >
                       <Card className="overflow-hidden">
-                        {image && (
+                        <div className="relative h-32 w-full">
                           <Image
-                            src={image.imageUrl}
-                            alt={image.description}
-                            width={400}
-                            height={225}
-                            className="w-full h-32 object-cover"
-                            data-ai-hint={image.imageHint}
+                            src={projectImageUrl}
+                            alt={project.name}
+                            fill
+                            sizes="(max-width: 640px) 80vw, 33vw"
+                            className="object-cover"
                           />
-                        )}
+                        </div>
                         <CardContent className="p-4">
                           <p className="font-bold text-secondary">
                             {project.name}
@@ -284,7 +278,11 @@ export default function DashboardPage() {
             <Carousel opts={{ align: "start", loop: true }} className="w-full">
               <CarouselContent className="-ml-4">
                 {fundedProjects.map((project, index) => {
-                  const image = getProjectImage(index);
+                  const projectImageUrl = getProjectImage(
+                    project.name,
+                    undefined,
+                    project.description
+                  );
 
                   return (
                     <CarouselItem
@@ -292,16 +290,15 @@ export default function DashboardPage() {
                       className="basis-4/5 pl-4 md:basis-1/3"
                     >
                       <Card className="overflow-hidden">
-                        {image && (
+                        <div className="relative h-32 w-full">
                           <Image
-                            src={image.imageUrl}
-                            alt={image.description}
-                            width={400}
-                            height={225}
-                            className="w-full h-32 object-cover"
-                            data-ai-hint={image.imageHint}
+                            src={projectImageUrl}
+                            alt={project.name}
+                            fill
+                            sizes="(max-width: 640px) 80vw, 33vw"
+                            className="object-cover"
                           />
-                        )}
+                        </div>
                         <CardContent className="p-4">
                           <p className="font-bold text-secondary">
                             {project.name}

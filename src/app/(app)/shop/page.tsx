@@ -34,6 +34,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import HeartButton from "@/components/ui/heart-button";
 import { useDonateToProject, useProjects } from "@/hooks/use-contracts";
 import { NetworkChecker } from "@/components/NetworkChecker";
 import Image from "next/image";
@@ -598,7 +599,11 @@ export default function ShopPage() {
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <CardTitle className="flex items-center gap-2 text-base">
-                      <Heart className="h-5 w-5 text-primary" />
+                      <HeartButton
+                        ariaLabel="Round-up info"
+                        asChild
+                        className="mr-2"
+                      />
                       Round-Up Donation
                     </CardTitle>
                     <Button

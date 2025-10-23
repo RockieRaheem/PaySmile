@@ -9,7 +9,8 @@ import { Progress } from "@/components/ui/progress";
 import { projectCategories } from "@/lib/data";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
-import { Loader2, Wallet, Heart } from "lucide-react";
+import { Loader2, Wallet, DollarSign } from "lucide-react";
+import HeartButton from "@/components/ui/heart-button";
 import {
   useVoteForProject,
   useProjects,
@@ -28,6 +29,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import Image from "next/image";
 
 // Project data structure from blockchain
 interface BlockchainProject {
@@ -41,6 +43,106 @@ interface BlockchainProject {
   votesReceived: bigint;
   category?: string;
 }
+
+// Project images mapping - eye-catching, relevant images
+const projectImageMap: Record<string, string> = {
+  // Water & Sanitation
+  water:
+    "https://images.unsplash.com/photo-1604537466158-719b1972feb8?w=800&q=80", // African woman with clean water
+  borehole:
+    "https://images.unsplash.com/photo-1631884163319-e973e0935e8f?w=800&q=80", // Water well/borehole in community
+  well: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800&q=80", // Hand pump water
+
+  // Education
+  school:
+    "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=800&q=80", // Books and learning
+  education:
+    "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&q=80", // Children in school
+  library:
+    "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&q=80", // Library books
+
+  // Healthcare
+  health:
+    "https://images.unsplash.com/photo-1584515933487-779824d29309?w=800&q=80", // Medical care
+  medical:
+    "https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?w=800&q=80", // Healthcare workers
+  clinic:
+    "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=800&q=80", // Medical clinic
+
+  // Environment
+  tree: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800&q=80", // Tree planting
+  environment:
+    "https://images.unsplash.com/photo-1466611653911-95081537e5b7?w=800&q=80", // Nature conservation
+  forest:
+    "https://images.unsplash.com/photo-1511497584788-876760111969?w=800&q=80", // Forest restoration
+
+  // Agriculture & Food
+  farm: "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=800&q=80", // Farming
+  food: "https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=800&q=80", // Fresh produce
+  agriculture:
+    "https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=800&q=80", // Agricultural field
+
+  // Community & Infrastructure
+  community:
+    "https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=800&q=80", // Community gathering
+  infrastructure:
+    "https://images.unsplash.com/photo-1581094271901-8022df4466f9?w=800&q=80", // Building construction
+  housing:
+    "https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=800&q=80", // Housing project
+
+  // Technology
+  technology:
+    "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=80", // Tech & innovation
+  digital:
+    "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=800&q=80", // Digital learning
+
+  // Default fallback
+  default:
+    "https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?w=800&q=80", // Hands together (community)
+};
+
+const getProjectImage = (
+  name: string,
+  category?: string,
+  description?: string
+): string => {
+  const searchText = `${name} ${category || ""} ${
+    description || ""
+  }`.toLowerCase();
+
+  // Priority keywords (most specific first)
+  const keywords = [
+    "borehole",
+    "well",
+    "water",
+    "school",
+    "library",
+    "education",
+    "clinic",
+    "medical",
+    "health",
+    "tree",
+    "forest",
+    "environment",
+    "farm",
+    "food",
+    "agriculture",
+    "housing",
+    "infrastructure",
+    "community",
+    "digital",
+    "technology",
+  ];
+
+  // Find first matching keyword
+  for (const keyword of keywords) {
+    if (searchText.includes(keyword)) {
+      return projectImageMap[keyword];
+    }
+  }
+
+  return projectImageMap["default"];
+};
 
 export default function ProjectsPage() {
   const [activeCategory, setActiveCategory] = useState("All");
@@ -292,12 +394,30 @@ export default function ProjectsPage() {
                 key={project.id}
                 className="overflow-hidden bg-card shadow-sm"
               >
-                <CardContent className="space-y-3 p-4">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <p className="text-lg font-bold">{project.name}</p>
+                <CardContent className="space-y-2 p-3">
+                  {/* Image at top - smaller and 16:9 aspect ratio */}
+                  <div className="relative h-32 w-full overflow-hidden rounded-md bg-muted">
+                    <Image
+                      src={getProjectImage(
+                        project.name,
+                        project.category,
+                        project.description
+                      )}
+                      alt={project.name}
+                      fill
+                      className="object-cover"
+                      unoptimized
+                    />
+                  </div>
+
+                  {/* Header with title and status */}
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1">
+                      <p className="text-base font-bold leading-tight">
+                        {project.name}
+                      </p>
                       {project.category && (
-                        <span className="inline-block rounded-full bg-primary/20 px-2 py-0.5 text-xs font-medium text-primary">
+                        <span className="mt-1 inline-block rounded-full bg-primary/20 px-2 py-0.5 text-xs font-medium text-primary">
                           {project.category}
                         </span>
                       )}
@@ -309,32 +429,34 @@ export default function ProjectsPage() {
                     )}
                   </div>
 
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs text-muted-foreground line-clamp-2">
                     {project.description}
                   </p>
 
                   <div className="space-y-1">
                     <Progress
                       value={fundingProgress}
-                      className="h-2 rounded bg-green-100"
+                      className="h-1.5 rounded bg-green-100"
                     />
                     <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span>
-                        {formatEther(project.currentFunding)} CELO raised
+                      <span className="text-[10px]">
+                        {formatEther(project.currentFunding)} CELO
                       </span>
-                      <span>Goal: {formatEther(project.fundingGoal)} CELO</span>
+                      <span className="text-[10px]">
+                        Goal: {formatEther(project.fundingGoal)} CELO
+                      </span>
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between gap-2 pt-2">
-                    <div className="text-sm text-muted-foreground">
+                  <div className="flex items-center justify-between gap-2 pt-1">
+                    <div className="text-xs text-muted-foreground">
                       {project.votesReceived.toString()} votes
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 items-center">
                       <Button
                         size="sm"
                         variant="outline"
-                        className="rounded-full px-4"
+                        className="rounded-full px-3 py-1 h-7 text-xs flex items-center gap-1"
                         onClick={() => handleDonateClick(project)}
                         disabled={
                           (isDonating && donatingProjectId === project.id) ||
@@ -344,39 +466,29 @@ export default function ProjectsPage() {
                       >
                         {isDonating && donatingProjectId === project.id ? (
                           <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Donating...
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                            <span className="text-[10px]">Donating...</span>
                           </>
                         ) : (
                           <>
-                            <Heart className="mr-1 h-4 w-4" />
-                            Donate
+                            <DollarSign className="h-3 w-3 text-primary" />
+                            <span className="text-[10px]">Donate</span>
                           </>
                         )}
                       </Button>
-                      <Button
-                        size="sm"
-                        className="rounded-full px-6 font-bold"
-                        onClick={() => handleVote(project.id)}
-                        disabled={
-                          (isPending && votingProjectId === project.id) ||
-                          !project.isActive ||
-                          project.isFunded
-                        }
-                      >
-                        {isPending && votingProjectId === project.id ? (
-                          <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Voting...
-                          </>
-                        ) : project.isFunded ? (
-                          "Funded"
-                        ) : !project.isActive ? (
-                          "Closed"
-                        ) : (
-                          "Vote"
-                        )}
-                      </Button>
+
+                      {/* Vote heart - green when active */}
+                      <HeartButton
+                        ariaLabel={`Vote for ${project.name}`}
+                        initialLiked={false}
+                        variant="vote"
+                        size={16}
+                        onChange={(liked) => {
+                          // If liked becomes true, trigger blockchain vote; else do nothing (unvote not supported)
+                          if (liked) handleVote(project.id);
+                        }}
+                        className="ml-1"
+                      />
                     </div>
                   </div>
                 </CardContent>
