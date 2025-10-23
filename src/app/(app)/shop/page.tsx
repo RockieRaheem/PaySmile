@@ -424,7 +424,7 @@ export default function ShopPage() {
         </div>
 
         {/* Products Grid */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 w-full">
           {products
             .filter((product) => {
               const matchesSearch =
@@ -442,59 +442,67 @@ export default function ShopPage() {
             .map((product) => (
               <Card
                 key={product.id}
-                className="group overflow-hidden transition-shadow hover:shadow-lg"
+                className="overflow-hidden bg-card shadow-sm"
               >
-                <div className="relative aspect-[3/2] overflow-hidden bg-muted">
-                  <Image
-                    src={product.image}
-                    alt={product.name}
-                    fill
-                    className="object-cover transition-transform group-hover:scale-105"
-                  />
-                  <div className="absolute right-2 top-2">
-                    <Badge
-                      variant="secondary"
-                      className="bg-background/80 text-[10px] px-1.5 py-0.5"
-                    >
-                      {product.category}
-                    </Badge>
-                  </div>
-                </div>
-                <CardHeader className="pb-2 p-3 space-y-1">
-                  <div className="flex items-start justify-between gap-2">
-                    <CardTitle className="text-sm font-semibold">
-                      {product.name}
-                    </CardTitle>
-                    <div className="flex items-center gap-0.5 text-xs text-yellow-500">
-                      <Star className="h-3 w-3 fill-current" />
-                      <span>{product.rating}</span>
+                <CardContent className="space-y-1.5 p-2">
+                  {/* Image - matching projects page aspect ratio */}
+                  <div className="relative aspect-[4/3] w-full overflow-hidden rounded bg-muted">
+                    <Image
+                      src={product.image}
+                      alt={product.name}
+                      fill
+                      className="object-cover transition-transform group-hover:scale-105"
+                    />
+                    {/* Category badge */}
+                    <div className="absolute right-1 top-1">
+                      <Badge
+                        variant="secondary"
+                        className="bg-background/80 text-[9px] px-1.5 py-0.5"
+                      >
+                        {product.category}
+                      </Badge>
                     </div>
                   </div>
-                  <CardDescription className="line-clamp-2 text-xs">
-                    {product.description}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-2 p-3 pt-0">
-                  <div className="flex items-baseline gap-1.5">
-                    <p className="text-lg font-bold text-primary">
-                      {product.price.toLocaleString()}
-                    </p>
-                    <p className="text-xs text-muted-foreground">UGX</p>
+
+                  {/* Product Info - compact like projects */}
+                  <div>
+                    <div className="flex items-start justify-between gap-1">
+                      <p className="text-xs font-bold line-clamp-1">
+                        {product.name}
+                      </p>
+                      <div className="flex items-center gap-0.5 text-[9px] text-yellow-500 shrink-0">
+                        <Star className="h-2.5 w-2.5 fill-current" />
+                        <span>{product.rating}</span>
+                      </div>
+                    </div>
                   </div>
-                  <Button
-                    className="w-full h-8 text-xs"
-                    onClick={() => handleBuyClick(product)}
-                    disabled={!product.inStock}
-                  >
-                    {product.inStock ? (
-                      <>
-                        <ShoppingCart className="mr-1.5 h-3 w-3" />
-                        Buy Now
-                      </>
-                    ) : (
-                      "Out of Stock"
-                    )}
-                  </Button>
+
+                  {/* Price and Button - compact */}
+                  <div className="space-y-1">
+                    <div className="flex items-baseline gap-1">
+                      <p className="text-[10px] font-medium text-muted-foreground">
+                        {product.price.toLocaleString()} UGX
+                      </p>
+                    </div>
+
+                    {/* Buy Button - matching projects page button style */}
+                    <div className="flex gap-1.5">
+                      <Button
+                        className="flex-1 h-6 text-[10px] rounded-md px-2.5 py-1"
+                        onClick={() => handleBuyClick(product)}
+                        disabled={!product.inStock}
+                      >
+                        {product.inStock ? (
+                          <>
+                            <ShoppingCart className="h-3 w-3" />
+                            <span>Buy</span>
+                          </>
+                        ) : (
+                          "Out of Stock"
+                        )}
+                      </Button>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             ))}
