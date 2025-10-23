@@ -9,7 +9,7 @@ import { Progress } from "@/components/ui/progress";
 import { projectCategories } from "@/lib/data";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
-import { Loader2, Wallet, DollarSign } from "lucide-react";
+import { Loader2, Wallet, DollarSign, Heart } from "lucide-react";
 import HeartButton from "@/components/ui/heart-button";
 import {
   useVoteForProject,
@@ -381,15 +381,10 @@ export default function ProjectsPage() {
                           <Loader2 className="h-2.5 w-2.5 animate-spin" />
                         ) : (
                           <>
-                            <HeartButton
-                              ariaLabel={`Vote for ${project.name}`}
-                              initialLiked={hasVoted}
-                              variant="vote"
-                              size={11}
-                              onChange={(liked) => {
-                                if (liked && !hasVoted) handleVote(project.id);
-                              }}
-                              className="pointer-events-none"
+                            <Heart
+                              className={`h-[11px] w-[11px] ${
+                                hasVoted ? "fill-current" : ""
+                              }`}
                             />
                             <span>{hasVoted ? "Voted" : "Vote"}</span>
                           </>
