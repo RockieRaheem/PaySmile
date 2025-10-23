@@ -10,15 +10,60 @@ A blockchain-based Progressive Web Application built on **Celo** that empowers U
 
 ## 🌟 The Problem
 
-Uganda processes over **30 million mobile money transactions daily** - people buying airtime, paying for goods, and sending money constantly. However, the spare change (50-200 UGX) from these transactions never contributes to community development.
+**Uganda processes over 30 million daily transactions** across mobile money, payments, and digital services - yet the spare change (50-200 UGX) from these transactions never contributes to community development. This represents a massive untapped opportunity for social impact.
 
-**Key Challenges:**
+### 📊 Daily Transaction Landscape
 
-- ❌ **Zero Trust**: Traditional donation systems lack transparency
-- ❌ **No Verification**: Communities can't track where money goes
-- ❌ **Perception Problem**: People believe small amounts don't matter
-- ❌ **Funding Gaps**: Local projects struggle to raise capital
-- ❌ **Poor Accountability**: No way to measure actual impact
+Every day in Uganda, millions of transactions happen across multiple categories:
+
+- **📱 Airtime Purchases**: ~10M daily transactions (MTN, Airtel)
+- **📡 Data Bundles**: ~8M daily purchases
+- **💸 Money Transfers**: ~5M peer-to-peer transfers (Mobile Money)
+- **🍕 Food Delivery**: Growing platforms like Glovo, Jumia Food
+- **🚗 Ride-Hailing**: Uber, SafeBoda, Faras (50K+ daily rides)
+- **🛒 E-Commerce**: Jiji, Jumia shopping platforms
+- **💡 Utility Bills**: Electricity, water, internet payments
+- **🎓 School Fees**: Educational payments
+
+**Total Daily Volume: ~30M+ transactions = ~$2.8B annual opportunity across East Africa**
+
+### ❌ Current Challenges
+
+**Zero Trust in Traditional Donations:**
+
+- Traditional NGOs and donation systems lack transparency
+- Communities can't verify where money actually goes
+- High overhead costs (30-40% admin fees)
+- Delayed fund disbursement (months)
+- No real-time accountability
+
+**Inaccessibility:**
+
+- Complex donation processes requiring paperwork
+- No way to donate small amounts (<$1)
+- Limited payment method integration
+- No connection to daily transactions people already make
+
+**Perception Problem:**
+
+- People believe small amounts (50 UGX) don't matter
+- "Spare change mentality" leads to waste
+- No visibility into collective impact
+- Missing gamification or recognition
+
+**Funding Gaps for Local Projects:**
+
+- Community projects struggle to raise capital
+- No transparent crowdfunding mechanism
+- Limited access to traditional financing
+- Poor project discovery and visibility
+
+**Poor Accountability:**
+
+- No way to measure actual community impact
+- Lack of before/after documentation
+- Missing blockchain verification
+- No democratic input on fund allocation
 
 ---
 
