@@ -61,7 +61,7 @@ export default function ConnectWalletPage() {
   useEffect(() => {
     if (isConnected && address) {
       setTimeout(() => {
-        router.push("/setup");
+        router.push("/dashboard");
       }, 500);
     }
   }, [isConnected, address, router]);

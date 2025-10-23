@@ -61,13 +61,6 @@
   "categories": ["finance", "social", "utilities"],
   "shortcuts": [
     {
-      "name": "Round-Up Donation",
-      "short_name": "Round-Up",
-      "description": "Make a round-up donation",
-      "url": "/round-up",
-      "icons": [{ "src": "/icons/icon-96x96.png", "sizes": "96x96" }]
-    },
-    {
       "name": "Vote on Projects",
       "short_name": "Vote",
       "description": "Vote for community projects",
