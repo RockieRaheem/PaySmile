@@ -457,7 +457,7 @@ export default function ShopPage() {
                     <div className="absolute right-1 top-1">
                       <Badge
                         variant="secondary"
-                        className="bg-background/80 text-[9px] px-1.5 py-0.5"
+                        className="bg-primary/90 text-primary-foreground text-[9px] px-1.5 py-0.5 font-bold"
                       >
                         {product.category}
                       </Badge>

@@ -173,12 +173,6 @@ export default function DashboardPage() {
           <div className="grid grid-cols-2 gap-4">
             <StatCard label="Projects Supported" value={projectsSupported} />
             <StatCard label="Lives Impacted" value={livesImpacted} />
-            <div className="col-span-2">
-              <StatCard
-                label="Round-ups Made"
-                value={roundupsMade.toLocaleString()}
-              />
-            </div>
           </div>
         </section>
 
