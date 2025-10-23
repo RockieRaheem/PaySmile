@@ -444,7 +444,7 @@ export default function ShopPage() {
                 key={product.id}
                 className="group overflow-hidden transition-shadow hover:shadow-lg"
               >
-                <div className="relative aspect-square overflow-hidden bg-muted">
+                <div className="relative aspect-[3/2] overflow-hidden bg-muted">
                   <Image
                     src={product.image}
                     alt={product.name}
@@ -452,38 +452,43 @@ export default function ShopPage() {
                     className="object-cover transition-transform group-hover:scale-105"
                   />
                   <div className="absolute right-2 top-2">
-                    <Badge variant="secondary" className="bg-background/80">
+                    <Badge
+                      variant="secondary"
+                      className="bg-background/80 text-[10px] px-1.5 py-0.5"
+                    >
                       {product.category}
                     </Badge>
                   </div>
                 </div>
-                <CardHeader className="pb-3">
+                <CardHeader className="pb-2 p-3 space-y-1">
                   <div className="flex items-start justify-between gap-2">
-                    <CardTitle className="text-base">{product.name}</CardTitle>
-                    <div className="flex items-center gap-1 text-sm text-yellow-500">
-                      <Star className="h-4 w-4 fill-current" />
+                    <CardTitle className="text-sm font-semibold">
+                      {product.name}
+                    </CardTitle>
+                    <div className="flex items-center gap-0.5 text-xs text-yellow-500">
+                      <Star className="h-3 w-3 fill-current" />
                       <span>{product.rating}</span>
                     </div>
                   </div>
-                  <CardDescription className="line-clamp-2">
+                  <CardDescription className="line-clamp-2 text-xs">
                     {product.description}
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex items-baseline gap-2">
-                    <p className="text-2xl font-bold text-primary">
+                <CardContent className="space-y-2 p-3 pt-0">
+                  <div className="flex items-baseline gap-1.5">
+                    <p className="text-lg font-bold text-primary">
                       {product.price.toLocaleString()}
                     </p>
-                    <p className="text-sm text-muted-foreground">UGX</p>
+                    <p className="text-xs text-muted-foreground">UGX</p>
                   </div>
                   <Button
-                    className="w-full"
+                    className="w-full h-8 text-xs"
                     onClick={() => handleBuyClick(product)}
                     disabled={!product.inStock}
                   >
                     {product.inStock ? (
                       <>
-                        <ShoppingCart className="mr-2 h-4 w-4" />
+                        <ShoppingCart className="mr-1.5 h-3 w-3" />
                         Buy Now
                       </>
                     ) : (
