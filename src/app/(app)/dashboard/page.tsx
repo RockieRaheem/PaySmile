@@ -10,11 +10,6 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-} from "@/components/ui/carousel";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { useDonorStats, useProjects } from "@/hooks/use-contracts";
 import { getProjectImage } from "@/lib/project-images";
@@ -202,60 +197,53 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
           ) : (
-            <Carousel opts={{ align: "start", loop: true }} className="w-full">
-              <CarouselContent className="-ml-4">
-                {activeProjects.map((project, index) => {
-                  const fundingGoal = parseFloat(
-                    formatEther(project.fundingGoal)
-                  );
-                  const currentFunding = parseFloat(
-                    formatEther(project.currentFunding)
-                  );
-                  const percentFunded =
-                    fundingGoal > 0 ? (currentFunding / fundingGoal) * 100 : 0;
-                  const projectImageUrl = getProjectImage(
-                    project.name,
-                    undefined,
-                    project.description
-                  );
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 w-full">
+              {activeProjects.map((project, index) => {
+                const fundingGoal = parseFloat(
+                  formatEther(project.fundingGoal)
+                );
+                const currentFunding = parseFloat(
+                  formatEther(project.currentFunding)
+                );
+                const percentFunded =
+                  fundingGoal > 0 ? (currentFunding / fundingGoal) * 100 : 0;
+                const projectImageUrl = getProjectImage(
+                  project.name,
+                  undefined,
+                  project.description
+                );
 
-                  return (
-                    <CarouselItem
-                      key={project.id}
-                      className="basis-full pl-4 sm:basis-1/2 md:basis-1/3"
-                    >
-                      <Card className="overflow-hidden">
-                        <div className="relative h-32 w-full">
-                          <Image
-                            src={projectImageUrl}
-                            alt={project.name}
-                            fill
-                            sizes="(max-width: 640px) 80vw, 33vw"
-                            className="object-cover"
-                          />
-                        </div>
-                        <CardContent className="p-4">
-                          <p className="font-bold text-secondary">
-                            {project.name}
-                          </p>
-                          <p className="mt-1 text-sm text-muted-foreground">
-                            Goal: {fundingGoal.toFixed(2)} CELO
-                          </p>
-                          <Progress
-                            value={percentFunded}
-                            className="mt-3 h-2.5 bg-green-100"
-                          />
-                          <p className="mt-1 text-right text-xs text-muted-foreground">
-                            {percentFunded.toFixed(1)}% Funded (
-                            {currentFunding.toFixed(4)} CELO)
-                          </p>
-                        </CardContent>
-                      </Card>
-                    </CarouselItem>
-                  );
-                })}
-              </CarouselContent>
-            </Carousel>
+                return (
+                  <Card key={project.id} className="overflow-hidden">
+                    <div className="relative w-full aspect-[4/3]">
+                      <Image
+                        src={projectImageUrl}
+                        alt={project.name}
+                        fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                        className="object-cover"
+                      />
+                    </div>
+                    <CardContent className="p-2 space-y-1.5">
+                      <p className="font-bold text-xs text-secondary">
+                        {project.name}
+                      </p>
+                      <p className="text-[10px] text-muted-foreground">
+                        Goal: {fundingGoal.toFixed(2)} CELO
+                      </p>
+                      <Progress
+                        value={percentFunded}
+                        className="h-2 bg-green-100"
+                      />
+                      <p className="text-right text-[9px] text-muted-foreground">
+                        {percentFunded.toFixed(1)}% Funded (
+                        {currentFunding.toFixed(4)} CELO)
+                      </p>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
           )}
         </section>
 
@@ -275,45 +263,38 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
           ) : (
-            <Carousel opts={{ align: "start", loop: true }} className="w-full">
-              <CarouselContent className="-ml-4">
-                {fundedProjects.map((project, index) => {
-                  const projectImageUrl = getProjectImage(
-                    project.name,
-                    undefined,
-                    project.description
-                  );
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 w-full">
+              {fundedProjects.map((project, index) => {
+                const projectImageUrl = getProjectImage(
+                  project.name,
+                  undefined,
+                  project.description
+                );
 
-                  return (
-                    <CarouselItem
-                      key={project.id}
-                      className="basis-full pl-4 sm:basis-1/2 md:basis-1/3"
-                    >
-                      <Card className="overflow-hidden">
-                        <div className="relative h-32 w-full">
-                          <Image
-                            src={projectImageUrl}
-                            alt={project.name}
-                            fill
-                            sizes="(max-width: 640px) 80vw, 33vw"
-                            className="object-cover"
-                          />
-                        </div>
-                        <CardContent className="p-4">
-                          <p className="font-bold text-secondary">
-                            {project.name}
-                          </p>
-                          <div className="mt-2 inline-flex items-center gap-2 rounded-full bg-primary/20 px-2.5 py-0.5 text-xs font-semibold text-primary">
-                            <CheckCircle className="h-4 w-4" />
-                            Fully Funded!
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </CarouselItem>
-                  );
-                })}
-              </CarouselContent>
-            </Carousel>
+                return (
+                  <Card key={project.id} className="overflow-hidden">
+                    <div className="relative w-full aspect-[4/3]">
+                      <Image
+                        src={projectImageUrl}
+                        alt={project.name}
+                        fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                        className="object-cover"
+                      />
+                    </div>
+                    <CardContent className="p-2 space-y-1.5">
+                      <p className="font-bold text-xs text-secondary">
+                        {project.name}
+                      </p>
+                      <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/20 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                        <CheckCircle className="h-3 w-3" />
+                        Fully Funded!
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
           )}
         </section>
       </main>
