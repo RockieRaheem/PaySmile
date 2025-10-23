@@ -264,13 +264,13 @@ export default function ProjectsPage() {
         <NetworkChecker />
       </div>
 
-      <div className="flex gap-3 overflow-x-auto whitespace-nowrap px-4 py-2 scrollbar-thin">
+      <div className="flex gap-2 overflow-x-auto px-4 py-2 scrollbar-thin">
         {projectCategories.map((category) => (
           <Button
             key={category}
             variant={activeCategory === category ? "default" : "secondary"}
             size="sm"
-            className="rounded-full bg-primary/20 text-foreground"
+            className="rounded-full bg-primary/20 text-foreground shrink-0 text-xs px-3"
             onClick={() => setActiveCategory(category)}
           >
             {category}
@@ -286,7 +286,7 @@ export default function ProjectsPage() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 w-full">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 w-full">
             {filteredProjects.map((project) => {
               const fundingProgress =
                 project.fundingGoal > BigInt(0)

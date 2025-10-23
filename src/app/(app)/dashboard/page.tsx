@@ -222,7 +222,7 @@ export default function DashboardPage() {
                   return (
                     <CarouselItem
                       key={project.id}
-                      className="basis-4/5 pl-4 md:basis-1/3"
+                      className="basis-full pl-4 sm:basis-1/2 md:basis-1/3"
                     >
                       <Card className="overflow-hidden">
                         <div className="relative h-32 w-full">
@@ -287,7 +287,7 @@ export default function DashboardPage() {
                   return (
                     <CarouselItem
                       key={project.id}
-                      className="basis-4/5 pl-4 md:basis-1/3"
+                      className="basis-full pl-4 sm:basis-1/2 md:basis-1/3"
                     >
                       <Card className="overflow-hidden">
                         <div className="relative h-32 w-full">
