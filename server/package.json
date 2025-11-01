@@ -1,0 +1,32 @@
+{
+  "name": "paysmile-ussd-server",
+  "version": "1.0.0",
+  "description": "PaySmile USSD Backend Server",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "node test-ussd.js"
+  },
+  "keywords": [
+    "ussd",
+    "africa-talking",
+    "paysmile",
+    "celo",
+    "blockchain"
+  ],
+  "author": "Rockie Raheem",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "body-parser": "^1.20.2",
+    "africastalking": "^0.6.3",
+    "dotenv": "^16.3.1",
+    "cors": "^2.8.5",
+    "axios": "^1.6.0",
+    "ethers": "^5.7.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
