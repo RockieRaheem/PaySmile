@@ -26,22 +26,22 @@ async function main() {
   console.log(
     "💰 Balance:",
     balanceInCelo,
-    networkName === "alfajores" ? "CELO" : "ETH"
+    networkName === "sepolia" ? "ETH" : "ETH"
   );
 
-  if (networkName === "alfajores") {
+  if (networkName === "sepolia") {
     console.log(
       "🔗 Explorer:",
-      `https://alfajores.celoscan.io/address/${address}`
+      `https://sepolia.etherscan.io/address/${address}`
     );
   }
 
   // Check if balance is sufficient
   if (parseFloat(balanceInCelo) < 0.1) {
     console.log("\n❌ Insufficient balance!");
-    console.log("   You need at least 0.1 CELO to deploy contracts.");
+    console.log("   You need at least 0.1 ETH to deploy contracts.");
     console.log("\n📝 To get free test tokens:");
-    console.log("   🔗 https://faucet.celo.org/alfajores");
+    console.log("   🔗 https://sepoliafaucet.com/");
     console.log(`   📍 Use address: ${address}\n`);
   } else {
     console.log("\n✅ Balance sufficient for deployment!");

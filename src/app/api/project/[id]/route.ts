@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createPublicClient, http } from "viem";
-import { localhost, celoAlfajores, celo } from "viem/chains";
+import { localhost, sepolia } from "viem/chains";
 import { DONATION_POOL_ABI } from "@/lib/abis/DonationPool";
 
 // Disable caching for this route to always fetch fresh blockchain data
@@ -9,22 +9,24 @@ export const revalidate = 0;
 
 const DONATION_POOL_ADDRESS = process.env
   .NEXT_PUBLIC_DONATION_POOL_ADDRESS as `0x${string}`;
-const CHAIN_ID = parseInt(process.env.NEXT_PUBLIC_CHAIN_ID || "44787");
+const CHAIN_ID = parseInt(process.env.NEXT_PUBLIC_CHAIN_ID || "11155111");
 
 // Configure the chain based on environment
 const getChain = () => {
-  if (CHAIN_ID === 44787) return celoAlfajores;
-  if (CHAIN_ID === 42220) return celo;
+  if (CHAIN_ID === 11155111) return sepolia;
   if (CHAIN_ID === 31337) return localhost;
-  return celoAlfajores; // Default to Celo Alfajores
+  return sepolia; // Default to Sepolia
 };
 
 // Get RPC URL based on chain
 const getRpcUrl = () => {
-  if (CHAIN_ID === 44787) return "https://alfajores-forno.celo-testnet.org";
-  if (CHAIN_ID === 42220) return "https://forno.celo.org";
+  if (CHAIN_ID === 11155111)
+    return (
+      process.env.SEPOLIA_RPC_URL ||
+      "https://ethereum-sepolia-rpc.publicnode.com"
+    );
   if (CHAIN_ID === 31337) return "http://127.0.0.1:8545";
-  return "https://alfajores-forno.celo-testnet.org";
+  return "https://ethereum-sepolia-rpc.publicnode.com";
 };
 
 // Create public client for reading blockchain data

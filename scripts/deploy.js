@@ -1,14 +1,14 @@
 const hre = require("hardhat");
 
 async function main() {
-  console.log("🚀 Deploying PaySmile contracts to Celo Alfajores...");
+  console.log("🚀 Deploying PaySmile contracts to Sepolia...");
 
   // Get the deployer account
   const [deployer] = await hre.ethers.getSigners();
   console.log("📝 Deploying contracts with account:", deployer.address);
 
   const balance = await hre.ethers.provider.getBalance(deployer.address);
-  console.log("💰 Account balance:", hre.ethers.formatEther(balance), "CELO");
+  console.log("💰 Account balance:", hre.ethers.formatEther(balance), "ETH");
 
   // Deploy DonationPool
   console.log("\n📦 Deploying DonationPool...");
@@ -34,19 +34,19 @@ async function main() {
       name: "Clean Water for Kampala",
       description: "Build boreholes in rural Kampala communities",
       recipient: deployer.address, // In production, use real project wallet
-      fundingGoal: hre.ethers.parseEther("100"), // 100 CELO
+      fundingGoal: hre.ethers.parseEther("100"), // 100 ETH
     },
     {
       name: "School Supplies Drive",
       description: "Provide books and materials to underfunded schools",
       recipient: deployer.address,
-      fundingGoal: hre.ethers.parseEther("50"), // 50 CELO
+      fundingGoal: hre.ethers.parseEther("50"), // 50 ETH
     },
     {
       name: "Tree Planting Initiative",
       description: "Plant 1000 trees across Uganda",
       recipient: deployer.address,
-      fundingGoal: hre.ethers.parseEther("75"), // 75 CELO
+      fundingGoal: hre.ethers.parseEther("75"), // 75 ETH
     },
   ];
 
@@ -70,11 +70,11 @@ async function main() {
     contracts: {
       DonationPool: {
         address: donationPoolAddress,
-        explorerUrl: `https://alfajores.celoscan.io/address/${donationPoolAddress}`,
+        explorerUrl: `https://sepolia.etherscan.io/address/${donationPoolAddress}`,
       },
       SmileBadgeNFT: {
         address: smileBadgeNFTAddress,
-        explorerUrl: `https://alfajores.celoscan.io/address/${smileBadgeNFTAddress}`,
+        explorerUrl: `https://sepolia.etherscan.io/address/${smileBadgeNFTAddress}`,
       },
     },
   };
@@ -97,7 +97,7 @@ async function main() {
   console.log("\n🎉 Deployment complete!");
   console.log("\n⏭️  Next steps:");
   console.log("1. Update your .env file with contract addresses");
-  console.log("2. Verify contracts on Celoscan (optional)");
+  console.log("2. Verify contracts on Etherscan (optional)");
   console.log("3. Update frontend configuration");
 }
 
