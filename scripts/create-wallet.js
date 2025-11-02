@@ -3,7 +3,7 @@ const fs = require("fs");
 const path = require("path");
 
 async function main() {
-  console.log("\n🔐 Creating a new Celo testnet wallet...\n");
+  console.log("\n🔐 Creating a new Sepolia testnet wallet...\n");
 
   // Create a random wallet
   const wallet = ethers.Wallet.createRandom();
@@ -22,19 +22,19 @@ async function main() {
   console.log("1️⃣  Save your private key to .env file:");
   console.log(`   echo "PRIVATE_KEY=${wallet.privateKey}" >> .env\n`);
 
-  console.log("2️⃣  Get FREE test CELO tokens from the faucet:");
-  console.log("   🔗 https://faucet.celo.org/alfajores");
+  console.log("2️⃣  Get FREE test ETH tokens from a Sepolia faucet:");
+  console.log("   🔗 https://sepoliafaucet.com/");
   console.log(`   📍 Use this address: ${wallet.address}\n`);
 
   console.log(
     "3️⃣  Verify you received tokens (wait ~30 seconds after faucet):"
   );
   console.log(
-    "   🔗 https://alfajores.celoscan.io/address/" + wallet.address + "\n"
+    "   🔗 https://sepolia.etherscan.io/address/" + wallet.address + "\n"
   );
 
-  console.log("4️⃣  Deploy your contracts to Celo Alfajores:");
-  console.log("   npx hardhat run scripts/deploy.js --network alfajores\n");
+  console.log("4️⃣  Deploy your contracts to Sepolia:");
+  console.log("   npx hardhat run scripts/deploy.js --network sepolia\n");
 
   console.log("═══════════════════════════════════════════════════════════\n");
 
@@ -43,10 +43,10 @@ async function main() {
     address: wallet.address,
     privateKey: wallet.privateKey,
     mnemonic: wallet.mnemonic.phrase,
-    network: "Celo Alfajores Testnet",
-    chainId: 44787,
-    faucet: "https://faucet.celo.org/alfajores",
-    explorer: `https://alfajores.celoscan.io/address/${wallet.address}`,
+    network: "Sepolia Testnet",
+    chainId: 11155111,
+    faucet: "https://sepoliafaucet.com/",
+    explorer: `https://sepolia.etherscan.io/address/${wallet.address}`,
   };
 
   const walletPath = path.join(__dirname, "../.wallet-info.json");

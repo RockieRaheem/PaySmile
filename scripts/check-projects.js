@@ -22,7 +22,7 @@ async function main() {
     console.log(
       `  Funding: ${hre.ethers.formatEther(
         project.currentFunding
-      )} / ${hre.ethers.formatEther(project.fundingGoal)} CELO`
+      )} / ${hre.ethers.formatEther(project.fundingGoal)} ETH`
     );
     console.log(`  Active: ${project.isActive}`);
     console.log(`  Votes: ${project.votesReceived}\n`);

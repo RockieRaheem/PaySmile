@@ -18,7 +18,8 @@ const config = createConfig({
   transports: {
     [localhost.id]: http("http://127.0.0.1:8545"),
     [sepolia.id]: http(
-      process.env.SEPOLIA_RPC_URL || "https://rpc.ankr.com/eth_sepolia"
+      process.env.SEPOLIA_RPC_URL ||
+        "https://ethereum-sepolia-rpc.publicnode.com"
     ),
   },
   ssr: true,
