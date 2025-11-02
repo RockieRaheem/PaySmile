@@ -188,26 +188,6 @@ const RWANDA_PROJECTS = [
   {
     id: 4,
     name: {
-      en: "Orphan School Fees - Kigali",
-      sw: "Ada za Shule za Yatima - Kigali",
-      fr: "Frais de Scolarité des Orphelins - Kigali",
-    },
-    location: {
-      en: "Gasabo District, Kigali",
-      sw: "Wilaya ya Gasabo, Kigali",
-      fr: "District de Gasabo, Kigali",
-    },
-    goal: 28000,
-    raised: 7200,
-    description: {
-      en: "420 genocide orphans at risk of dropping out. Need school fees & supplies to continue education.",
-      sw: "Yatima 420 wa mauaji ya kimbari wako hatarini ya kuacha shule. Wanahitaji ada za shule na vifaa kuendelea na elimu.",
-      fr: "420 orphelins du génocide risquent d'abandonner. Besoin de frais de scolarité et fournitures pour continuer l'éducation.",
-    },
-  },
-  {
-    id: 5,
-    name: {
       en: "Maternal Health Crisis - Gicumbi",
       sw: "Hali ya Dharura ya Afya ya Mama na Mtoto - Gicumbi",
       fr: "Crise de Santé Maternelle - Gicumbi",
@@ -416,7 +396,7 @@ app.post("/ussd", async (req, res) => {
     else if (session.stage === "view_projects") {
       if (userInput === "00") {
         session.stage = "menu";
-        response = `CON ${t(session, "welcome")} 🇷🇼\n\n1. ${t(
+        response = `CON ${t(session, "welcome")} 🌍\n\n1. ${t(
           session,
           "donate"
         )}\n2. ${t(session, "viewProjects")}\n3. ${t(
@@ -425,7 +405,7 @@ app.post("/ussd", async (req, res) => {
         )}\n4. ${t(session, "help")}\n\n0. ${t(session, "selectLang")}`;
       } else if (userInput === "0") {
         session.stage = "menu";
-        response = `CON ${t(session, "welcome")} 🇷🇼\n\n1. ${t(
+        response = `CON ${t(session, "welcome")} 🌍\n\n1. ${t(
           session,
           "donate"
         )}\n2. ${t(session, "viewProjects")}\n3. ${t(
@@ -441,7 +421,7 @@ app.post("/ussd", async (req, res) => {
     else if (session.stage === "view_impact") {
       if (userInput === "00") {
         session.stage = "menu";
-        response = `CON ${t(session, "welcome")} 🇷🇼\n\n1. ${t(
+        response = `CON ${t(session, "welcome")} 🌍\n\n1. ${t(
           session,
           "donate"
         )}\n2. ${t(session, "viewProjects")}\n3. ${t(
@@ -450,7 +430,7 @@ app.post("/ussd", async (req, res) => {
         )}\n4. ${t(session, "help")}\n\n0. ${t(session, "selectLang")}`;
       } else if (userInput === "0") {
         session.stage = "menu";
-        response = `CON ${t(session, "welcome")} 🇷🇼\n\n1. ${t(
+        response = `CON ${t(session, "welcome")} 🌍\n\n1. ${t(
           session,
           "donate"
         )}\n2. ${t(session, "viewProjects")}\n3. ${t(
@@ -466,7 +446,7 @@ app.post("/ussd", async (req, res) => {
     else if (session.stage === "view_help") {
       if (userInput === "00") {
         session.stage = "menu";
-        response = `CON ${t(session, "welcome")} 🇷🇼\n\n1. ${t(
+        response = `CON ${t(session, "welcome")} 🌍\n\n1. ${t(
           session,
           "donate"
         )}\n2. ${t(session, "viewProjects")}\n3. ${t(
@@ -475,7 +455,7 @@ app.post("/ussd", async (req, res) => {
         )}\n4. ${t(session, "help")}\n\n0. ${t(session, "selectLang")}`;
       } else if (userInput === "0") {
         session.stage = "menu";
-        response = `CON ${t(session, "welcome")} 🇷🇼\n\n1. ${t(
+        response = `CON ${t(session, "welcome")} 🌍\n\n1. ${t(
           session,
           "donate"
         )}\n2. ${t(session, "viewProjects")}\n3. ${t(
@@ -491,7 +471,7 @@ app.post("/ussd", async (req, res) => {
     else if (session.stage === "select_project") {
       if (userInput === "00") {
         session.stage = "menu";
-        response = `CON ${t(session, "welcome")} 🇷🇼\n\n1. ${t(
+        response = `CON ${t(session, "welcome")} 🌍\n\n1. ${t(
           session,
           "donate"
         )}\n2. ${t(session, "viewProjects")}\n3. ${t(
@@ -500,7 +480,7 @@ app.post("/ussd", async (req, res) => {
         )}\n4. ${t(session, "help")}\n\n0. ${t(session, "selectLang")}`;
       } else if (userInput === "0") {
         session.stage = "menu";
-        response = `CON ${t(session, "welcome")} 🇷🇼\n\n1. ${t(
+        response = `CON ${t(session, "welcome")} 🌍\n\n1. ${t(
           session,
           "donate"
         )}\n2. ${t(session, "viewProjects")}\n3. ${t(
@@ -539,7 +519,7 @@ app.post("/ussd", async (req, res) => {
     else if (session.stage === "enter_amount") {
       if (userInput === "00") {
         session.stage = "menu";
-        response = `CON ${t(session, "welcome")} 🇷🇼\n\n1. ${t(
+        response = `CON ${t(session, "welcome")} 🌍\n\n1. ${t(
           session,
           "donate"
         )}\n2. ${t(session, "viewProjects")}\n3. ${t(
@@ -599,7 +579,7 @@ app.post("/ussd", async (req, res) => {
     else if (session.stage === "confirm") {
       if (userInput === "00") {
         session.stage = "menu";
-        response = `CON ${t(session, "welcome")} 🇷🇼\n\n1. ${t(
+        response = `CON ${t(session, "welcome")} 🌍\n\n1. ${t(
           session,
           "donate"
         )}\n2. ${t(session, "viewProjects")}\n3. ${t(
