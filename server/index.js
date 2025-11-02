@@ -364,11 +364,11 @@ app.post("/ussd", async (req, res) => {
           break;
 
         case "1": // Buy Airtime
-          session.stage = "enter_airtime_amount";
-          response = `CON ${t(session, "buyAirtime")}\n\n${t(
+          session.stage = "select_airtime_amount";
+          response = `CON ${t(
             session,
-            "enterAmount"
-          )} (RWF):\n(Min: 100, Max: 10,000)\n\n00. ${t(
+            "buyAirtime"
+          )}\n\n1. 500 RWF\n2. 1,000 RWF\n3. 2,000 RWF\n4. 5,000 RWF\n5. 10,000 RWF\n\n00. ${t(
             session,
             "mainMenu"
           )}\n0. ${t(session, "back")}`;
@@ -438,8 +438,8 @@ app.post("/ussd", async (req, res) => {
       }
     }
 
-    // Buy Airtime - Enter Amount
-    else if (session.stage === "enter_airtime_amount") {
+    // Select Airtime Amount
+    else if (session.stage === "select_airtime_amount") {
       if (userInput === "00") {
         session.stage = "menu";
         response = `CON ${t(session, "welcome")} 😊\n\n1. ${t(
@@ -459,8 +459,10 @@ app.post("/ussd", async (req, res) => {
           "viewProjects"
         )}\n5. ${t(session, "myImpact")}\n\n0. ${t(session, "selectLang")}`;
       } else {
-        const amount = parseInt(userInput);
-        if (amount >= 100 && amount <= 10000) {
+        const airtimeAmounts = [500, 1000, 2000, 5000, 10000];
+        const amountIndex = parseInt(userInput) - 1;
+        if (amountIndex >= 0 && amountIndex < airtimeAmounts.length) {
+          const amount = airtimeAmounts[amountIndex];
           session.purchaseAmount = amount;
           session.purchaseType = "airtime";
           const roundedAmount = Math.ceil(amount / 100) * 100;
@@ -470,20 +472,22 @@ app.post("/ussd", async (req, res) => {
 
           // Skip round-up prompt if no change to round up
           if (donationAmount === 0) {
-            session.stage = "menu";
-            response = `END ${t(session, "paymentSuccess")} 😊\n\n${t(
+            session.stage = "confirm_purchase";
+            response = `CON ${t(session, "confirmDonation")}:\n\n${t(
               session,
               "yourPurchase"
-            )}: Airtime\n${t(session, "amount")}: ${formatRWF(amount)}\n\n${t(
+            )}: Airtime\n${t(session, "amount")}: ${formatRWF(
+              amount
+            )}\n\n1. ${t(session, "confirm")}\n2. ${t(
               session,
-              "thankYou"
-            )}`;
+              "cancel"
+            )}\n\n0. ${t(session, "back")}`;
           } else {
             session.stage = "round_up_prompt";
             response = `CON ${t(session, "roundUpDonation")}\n\n${t(
               session,
               "yourPurchase"
-            )}: ${formatRWF(amount)}\n${t(
+            )}: Airtime ${formatRWF(amount)}\n${t(
               session,
               "roundedAmount"
             )}: ${formatRWF(roundedAmount)}\n${t(
@@ -495,10 +499,7 @@ app.post("/ussd", async (req, res) => {
             )}\n2. ${t(session, "noThanks")}\n\n0. ${t(session, "back")}`;
           }
         } else {
-          response = `CON ${t(session, "invalidAmount")}\n${t(
-            session,
-            "enterBetween"
-          )}\n\n00. ${t(session, "mainMenu")}`;
+          response = `END ${t(session, "invalidSelection")}`;
         }
       }
     }
@@ -637,6 +638,40 @@ app.post("/ussd", async (req, res) => {
         } else {
           response = `END ${t(session, "invalidSelection")}`;
         }
+      }
+    }
+
+    // Confirm Purchase (No Round-Up)
+    else if (session.stage === "confirm_purchase") {
+      if (userInput === "0") {
+        session.stage = "menu";
+        response = `CON ${t(session, "welcome")} 😊\n\n1. ${t(
+          session,
+          "buyAirtime"
+        )}\n2. ${t(session, "buyData")}\n3. ${t(session, "payUtility")}\n4. ${t(
+          session,
+          "viewProjects"
+        )}\n5. ${t(session, "myImpact")}\n\n0. ${t(session, "selectLang")}`;
+      } else if (userInput === "1") {
+        // Confirm purchase
+        response = `END ${t(session, "paymentSuccess")} 😊\n\n${t(
+          session,
+          "yourPurchase"
+        )}: ${session.purchaseType}\n${t(session, "amount")}: ${formatRWF(
+          session.purchaseAmount
+        )}\n\n${t(session, "thankYou")} 💚`;
+      } else if (userInput === "2") {
+        // Cancel
+        session.stage = "menu";
+        response = `CON ${t(session, "welcome")} 😊\n\n1. ${t(
+          session,
+          "buyAirtime"
+        )}\n2. ${t(session, "buyData")}\n3. ${t(session, "payUtility")}\n4. ${t(
+          session,
+          "viewProjects"
+        )}\n5. ${t(session, "myImpact")}\n\n0. ${t(session, "selectLang")}`;
+      } else {
+        response = `END ${t(session, "invalidSelection")}`;
       }
     }
 
