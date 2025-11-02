@@ -1,7 +1,7 @@
 "use client";
 
 import { useAccount, useSwitchChain } from "wagmi";
-import { localhost, sepolia } from "wagmi/chains";
+import { localhost, celoAlfajores } from "wagmi/chains";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
@@ -17,8 +17,8 @@ export function NetworkChecker() {
     switch (expectedChainId) {
       case 31337:
         return { name: "Hardhat Localhost", chain: localhost };
-      case 11155111:
-        return { name: "Sepolia Testnet", chain: sepolia };
+      case 44787:
+        return { name: "Celo Sepolia Testnet", chain: celoAlfajores };
       default:
         return { name: "Hardhat Localhost", chain: localhost };
     }
