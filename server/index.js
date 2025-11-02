@@ -123,66 +123,106 @@ const LANGUAGES = {
   },
 };
 
-// Projects with multilingual support
+// Projects with multilingual support - REAL URGENT PROBLEMS IN RWANDA
 const RWANDA_PROJECTS = [
   {
     id: 1,
     name: {
-      en: "Clean Water - Kigali",
-      sw: "Maji Safi - Kigali",
-      fr: "Eau Propre - Kigali",
+      en: "Emergency Food Relief - Bugesera",
+      sw: "Msaada wa Dharura wa Chakula - Bugesera",
+      fr: "Aide Alimentaire d'Urgence - Bugesera",
     },
     location: {
-      en: "Nyarugenge District",
-      sw: "Wilaya ya Nyarugenge",
-      fr: "District de Nyarugenge",
+      en: "Bugesera District (Drought-affected)",
+      sw: "Wilaya ya Bugesera (Imepigwa na ukame)",
+      fr: "District de Bugesera (Touché par la sécheresse)",
     },
-    goal: 2500,
-    raised: 450,
+    goal: 50000,
+    raised: 12800,
     description: {
-      en: "Water filtration systems",
-      sw: "Mifumo ya kuchuja maji",
-      fr: "Systèmes de filtration d'eau",
+      en: "3,500 families facing severe food shortage due to prolonged drought. Need emergency food supplies.",
+      sw: "Familia 3,500 zinakabiliwa na uhaba mkubwa wa chakula kutokana na ukame wa muda mrefu. Wanahitaji chakula cha dharura.",
+      fr: "3 500 familles confrontées à une grave pénurie alimentaire en raison d'une sécheresse prolongée. Besoin de vivres d'urgence.",
     },
   },
   {
     id: 2,
     name: {
-      en: "School Desks - Musanze",
-      sw: "Madawati ya Shule - Musanze",
-      fr: "Bureaux d'école - Musanze",
+      en: "Flood Victims Shelter - Rubavu",
+      sw: "Makazi ya Waathiriwa wa Mafuriko - Rubavu",
+      fr: "Abris pour Victimes d'Inondations - Rubavu",
     },
     location: {
-      en: "Northern Province",
-      sw: "Mkoa wa Kaskazini",
-      fr: "Province du Nord",
+      en: "Rubavu District (Lake Kivu Basin)",
+      sw: "Wilaya ya Rubavu (Bonde la Ziwa Kivu)",
+      fr: "District de Rubavu (Bassin du Lac Kivu)",
     },
-    goal: 1500,
-    raised: 320,
+    goal: 85000,
+    raised: 23400,
     description: {
-      en: "200 wooden desks for students",
-      sw: "Madawati 200 ya mbao kwa wanafunzi",
-      fr: "200 bureaux en bois pour étudiants",
+      en: "850 families displaced by Lake Kivu floods. Urgent need for temporary shelters, blankets & clean water.",
+      sw: "Familia 850 zimehama kutokana na mafuriko ya Ziwa Kivu. Haja ya dharura ya makazi ya muda, blanketi na maji safi.",
+      fr: "850 familles déplacées par les inondations du Lac Kivu. Besoin urgent d'abris temporaires, couvertures et eau potable.",
     },
   },
   {
     id: 3,
     name: {
-      en: "Solar Lights - Rubavu",
-      sw: "Taa za Jua - Rubavu",
-      fr: "Lumières Solaires - Rubavu",
+      en: "Malaria Treatment - Nyagatare",
+      sw: "Matibabu ya Malaria - Nyagatare",
+      fr: "Traitement du Paludisme - Nyagatare",
     },
     location: {
-      en: "Lake Kivu",
-      sw: "Ziwa Kivu",
-      fr: "Lac Kivu",
+      en: "Nyagatare District (Eastern Province)",
+      sw: "Wilaya ya Nyagatare (Mkoa wa Mashariki)",
+      fr: "District de Nyagatare (Province de l'Est)",
     },
-    goal: 1000,
-    raised: 180,
+    goal: 35000,
+    raised: 8900,
     description: {
-      en: "Solar lanterns for 100 homes",
-      sw: "Taa za jua kwa nyumba 100",
-      fr: "Lanternes solaires pour 100 maisons",
+      en: "Severe malaria outbreak affecting 2,100+ children under 5. Need mosquito nets & antimalarial drugs urgently.",
+      sw: "Mlipuko mkubwa wa malaria unaoathiri watoto 2,100+ chini ya miaka 5. Wanahitaji vyandarua na dawa za malaria haraka.",
+      fr: "Grave épidémie de paludisme touchant 2 100+ enfants de moins de 5 ans. Besoin urgent de moustiquaires et antipaludéens.",
+    },
+  },
+  {
+    id: 4,
+    name: {
+      en: "Orphan School Fees - Kigali",
+      sw: "Ada za Shule za Yatima - Kigali",
+      fr: "Frais de Scolarité des Orphelins - Kigali",
+    },
+    location: {
+      en: "Gasabo District, Kigali",
+      sw: "Wilaya ya Gasabo, Kigali",
+      fr: "District de Gasabo, Kigali",
+    },
+    goal: 28000,
+    raised: 7200,
+    description: {
+      en: "420 genocide orphans at risk of dropping out. Need school fees & supplies to continue education.",
+      sw: "Yatima 420 wa mauaji ya kimbari wako hatarini ya kuacha shule. Wanahitaji ada za shule na vifaa kuendelea na elimu.",
+      fr: "420 orphelins du génocide risquent d'abandonner. Besoin de frais de scolarité et fournitures pour continuer l'éducation.",
+    },
+  },
+  {
+    id: 5,
+    name: {
+      en: "Maternal Health Crisis - Gicumbi",
+      sw: "Hali ya Dharura ya Afya ya Mama na Mtoto - Gicumbi",
+      fr: "Crise de Santé Maternelle - Gicumbi",
+    },
+    location: {
+      en: "Gicumbi District (Northern Province)",
+      sw: "Wilaya ya Gicumbi (Mkoa wa Kaskazini)",
+      fr: "District de Gicumbi (Province du Nord)",
+    },
+    goal: 45000,
+    raised: 11500,
+    description: {
+      en: "Rural health center lacks delivery equipment. 600+ pregnant women at risk. Need ambulance & medical supplies.",
+      sw: "Kituo cha afya cha vijijini hakina vifaa vya kujifungua. Wanawake wajawazito 600+ wako hatarini. Wanahitaji ambulensi na vifaa vya matibabu.",
+      fr: "Centre de santé rural manque d'équipement d'accouchement. 600+ femmes enceintes à risque. Besoin d'ambulance et fournitures médicales.",
     },
   },
 ];
@@ -288,22 +328,30 @@ app.post("/ussd", async (req, res) => {
           )}:\n\n1. ${getProjectName(
             RWANDA_PROJECTS[0],
             lang
-          )}\n   ${getProgress(RWANDA_PROJECTS[0])}% - ${getProjectLocation(
-            RWANDA_PROJECTS[0],
-            lang
-          )}\n\n2. ${getProjectName(
+          )}\n   ${getProgress(
+            RWANDA_PROJECTS[0]
+          )}% funded\n\n2. ${getProjectName(
             RWANDA_PROJECTS[1],
             lang
-          )}\n   ${getProgress(RWANDA_PROJECTS[1])}% - ${getProjectLocation(
-            RWANDA_PROJECTS[1],
-            lang
-          )}\n\n3. ${getProjectName(
+          )}\n   ${getProgress(
+            RWANDA_PROJECTS[1]
+          )}% funded\n\n3. ${getProjectName(
             RWANDA_PROJECTS[2],
             lang
-          )}\n   ${getProgress(RWANDA_PROJECTS[2])}% - ${getProjectLocation(
-            RWANDA_PROJECTS[2],
+          )}\n   ${getProgress(
+            RWANDA_PROJECTS[2]
+          )}% funded\n\n4. ${getProjectName(
+            RWANDA_PROJECTS[3],
             lang
-          )}\n\n00. ${t(session, "mainMenu")}\n0. ${t(session, "back")}`;
+          )}\n   ${getProgress(
+            RWANDA_PROJECTS[3]
+          )}% funded\n\n5. ${getProjectName(
+            RWANDA_PROJECTS[4],
+            lang
+          )}\n   ${getProgress(RWANDA_PROJECTS[4])}% funded\n\n00. ${t(
+            session,
+            "mainMenu"
+          )}\n0. ${t(session, "back")}`;
           break;
 
         case "2": // View Projects
