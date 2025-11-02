@@ -292,7 +292,7 @@ app.post("/ussd", async (req, res) => {
     if (text === "") {
       session.stage = "language";
       session.language = null;
-      response = `CON ${LANGUAGES.en.welcome} 🌍\n${LANGUAGES.en.selectLang}:\n\n1. English\n2. Kiswahili\n3. Français`;
+      response = `CON ${LANGUAGES.en.welcome} 😊\n${LANGUAGES.en.selectLang}:\n\n1. English\n2. Kiswahili\n3. Français`;
     }
 
     // Language Selection Handler
@@ -301,7 +301,7 @@ app.post("/ussd", async (req, res) => {
       session.language = langMap[userInput] || "en";
       session.stage = "menu";
 
-      response = `CON ${t(session, "welcome")} 🇷🇼\n\n1. ${t(
+      response = `CON ${t(session, "welcome")} �\n\n1. ${t(
         session,
         "donate"
       )}\n2. ${t(session, "viewProjects")}\n3. ${t(
