@@ -13,7 +13,7 @@ const RWANDA_PROJECTS = [
     description:
       "3,500 families facing severe food shortage due to prolonged drought in Bugesera District. Immediate food aid needed for survival.",
     recipient: process.env.PROJECT_RECIPIENT_ADDRESS || "", // Will use deployer address if not set
-    fundingGoal: parseEther("0.05"), // 50,000 RWF ≈ 0.05 CELO (1 CELO ≈ 1M RWF for demo)
+    fundingGoal: parseEther("50"), // $50 worth of CELO - realistic for emergency relief
     category: "Emergency Relief",
     location: "Bugesera District, Rwanda",
   },
@@ -22,7 +22,7 @@ const RWANDA_PROJECTS = [
     description:
       "850 families displaced by Lake Kivu floods urgently need temporary shelter and essential supplies to rebuild their lives.",
     recipient: process.env.PROJECT_RECIPIENT_ADDRESS || "",
-    fundingGoal: parseEther("0.085"), // 85,000 RWF ≈ 0.085 CELO
+    fundingGoal: parseEther("85"), // $85 worth of CELO - shelter materials
     category: "Disaster Relief",
     location: "Rubavu District, Rwanda",
   },
@@ -31,7 +31,7 @@ const RWANDA_PROJECTS = [
     description:
       "Over 2,100 children affected by malaria outbreak. Critical need for mosquito nets, testing kits, and treatment supplies.",
     recipient: process.env.PROJECT_RECIPIENT_ADDRESS || "",
-    fundingGoal: parseEther("0.035"), // 35,000 RWF ≈ 0.035 CELO
+    fundingGoal: parseEther("35"), // $35 worth of CELO - medical supplies
     category: "Healthcare",
     location: "Nyagatare District, Rwanda",
   },
@@ -40,7 +40,7 @@ const RWANDA_PROJECTS = [
     description:
       "600+ pregnant women at risk due to ambulance and medical equipment shortage. Lives depend on immediate healthcare support.",
     recipient: process.env.PROJECT_RECIPIENT_ADDRESS || "",
-    fundingGoal: parseEther("0.045"), // 45,000 RWF ≈ 0.045 CELO
+    fundingGoal: parseEther("45"), // $45 worth of CELO - medical equipment
     category: "Healthcare",
     location: "Gicumbi District, Rwanda",
   },
@@ -49,12 +49,14 @@ const RWANDA_PROJECTS = [
 async function main() {
   console.log("🇷🇼 Adding Rwanda Crisis Projects to DonationPool...\n");
 
-  // Get contract address from environment
-  const donationPoolAddress = process.env.NEXT_PUBLIC_DONATION_POOL_ADDRESS;
+  // Get contract address from environment (.env.local or .env)
+  const donationPoolAddress =
+    process.env.NEXT_PUBLIC_DONATION_POOL_ADDRESS ||
+    "0xE469dccD949591d120466A5F34E36Dfe4335F625";
 
   if (!donationPoolAddress) {
     throw new Error(
-      "❌ NEXT_PUBLIC_DONATION_POOL_ADDRESS not found in .env.local"
+      "❌ NEXT_PUBLIC_DONATION_POOL_ADDRESS not found in environment"
     );
   }
 
@@ -102,43 +104,39 @@ async function main() {
     console.log(`Description: ${project.description.substring(0, 80)}...`);
 
     try {
-      // Create project on blockchain
+      // Create project on blockchain with high gas to ensure fast confirmation
       const tx = await DonationPool.createProject(
         project.name,
         project.description,
         recipientAddress,
-        project.fundingGoal
+        project.fundingGoal,
+        {
+          gasLimit: 300000,
+          maxPriorityFeePerGas: hre.ethers.parseUnits("10", "gwei"),
+          maxFeePerGas: hre.ethers.parseUnits("100", "gwei"),
+        }
       );
 
-      console.log(`\n⏳ Transaction submitted: ${tx.hash}`);
-      console.log(`⏳ Waiting for confirmation...`);
+      console.log(`\n⏳ Tx: ${tx.hash}`);
 
-      const receipt = await tx.wait();
-      console.log(`✅ Transaction confirmed in block ${receipt.blockNumber}`);
+      const receipt = await tx.wait(1);
+      console.log(`✅ Block ${receipt.blockNumber}`);
 
-      // Get the project ID from the event
-      const projectCreatedEvent = receipt.logs.find(
-        (log) => log.fragment && log.fragment.name === "ProjectCreated"
-      );
-
-      if (projectCreatedEvent) {
-        const projectId = projectCreatedEvent.args[0];
-        console.log(`🎉 Project ID: ${projectId.toString()}`);
-
-        // Verify the project was created
-        const projectData = await DonationPool.getProject(projectId);
-        console.log(`\n📋 Verification:`);
-        console.log(`   - Name: ${projectData.name}`);
-        console.log(
-          `   - Funding Goal: ${hre.ethers.formatEther(
-            projectData.fundingGoal
-          )} CELO`
-        );
-        console.log(`   - Is Active: ${projectData.isActive}`);
-        console.log(`   - Current Funding: ${projectData.currentFunding}`);
+      // Quick verification - get project ID from event
+      const iface = DonationPool.interface;
+      for (const log of receipt.logs) {
+        try {
+          const parsed = iface.parseLog(log);
+          if (parsed && parsed.name === "ProjectCreated") {
+            console.log(`🎉 Project ID: ${parsed.args[0].toString()}`);
+            break;
+          }
+        } catch (e) {
+          // skip unparseable logs
+        }
       }
     } catch (error) {
-      console.error(`\n❌ Error creating project: ${error.message}`);
+      console.error(`\n❌ Error: ${error.message}`);
       throw error;
     }
   }

@@ -163,6 +163,9 @@ export function useProjects() {
 
   const fetchProjects = useCallback(
     async (silent = false) => {
+      // Import local Rwanda projects from data.ts as fallback
+      const { activeProjects: localProjects } = await import("@/lib/data");
+
       if (projectCount !== undefined) {
         // Only show loading state on initial load, not on refetch
         if (!silent) {
@@ -194,13 +197,45 @@ export function useProjects() {
               currentFunding: BigInt(project.currentFunding || "0"),
               votesReceived: BigInt(project.votesReceived || "0"),
             }));
-            setProjects(parsedProjects);
+
+            // Add local Rwanda projects (convert to blockchain format)
+            const rwandaProjects = localProjects.map((proj, idx) => ({
+              id: 1000 + proj.id, // offset IDs to avoid conflicts
+              name: proj.title,
+              description: proj.description,
+              fundingGoal: BigInt(proj.fundingGoal),
+              currentFunding: BigInt(proj.currentFunding),
+              votesReceived: BigInt(0),
+              isActive: true,
+              isFunded: false,
+              category: proj.category,
+              recipient: "0x0000000000000000000000000000000000000000",
+            }));
+
+            // Merge blockchain + local projects
+            setProjects([...parsedProjects, ...rwandaProjects]);
           })
           .finally(() => {
             if (!silent) {
               setIsLoading(false);
             }
           });
+      } else {
+        // No blockchain connection - just show local Rwanda projects
+        const rwandaProjects = localProjects.map((proj, idx) => ({
+          id: 1000 + proj.id,
+          name: proj.title,
+          description: proj.description,
+          fundingGoal: BigInt(proj.fundingGoal),
+          currentFunding: BigInt(proj.currentFunding),
+          votesReceived: BigInt(0),
+          isActive: true,
+          isFunded: false,
+          category: proj.category,
+          recipient: "0x0000000000000000000000000000000000000000",
+        }));
+        setProjects(rwandaProjects);
+        setIsLoading(false);
       }
     },
     [projectCount]
