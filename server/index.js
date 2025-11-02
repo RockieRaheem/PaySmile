@@ -56,6 +56,21 @@ const LANGUAGES = {
     txHash: "TX Hash",
     tier: "Tier",
     invalidSelection: "Invalid selection",
+    // Payment services
+    buyAirtime: "Buy Airtime",
+    buyData: "Buy Data",
+    payUtility: "Pay Utility",
+    enterPhone: "Enter phone number",
+    selectDataBundle: "Select Data Bundle",
+    selectUtility: "Select Utility",
+    paymentSuccess: "Payment Successful!",
+    roundUpDonation: "Round up to donate?",
+    yourPurchase: "Your Purchase",
+    total: "Total",
+    roundedAmount: "Rounded Amount",
+    donationAmount: "Donation",
+    yesRoundUp: "Yes, Round Up",
+    noThanks: "No Thanks",
   },
   sw: {
     welcome: "Karibu PaySmile",
@@ -88,6 +103,21 @@ const LANGUAGES = {
     txHash: "TX Hash",
     tier: "Ngazi",
     invalidSelection: "Chaguo si sahihi",
+    // Payment services
+    buyAirtime: "Nunua Airtime",
+    buyData: "Nunua Data",
+    payUtility: "Lipia Huduma",
+    enterPhone: "Weka nambari ya simu",
+    selectDataBundle: "Chagua Pakiti ya Data",
+    selectUtility: "Chagua Huduma",
+    paymentSuccess: "Malipo Yamefanikiwa!",
+    roundUpDonation: "Ongeza kutoa mchango?",
+    yourPurchase: "Ununuzi Wako",
+    total: "Jumla",
+    roundedAmount: "Kiasi Kilichoongezwa",
+    donationAmount: "Mchango",
+    yesRoundUp: "Ndio, Ongeza",
+    noThanks: "Hapana Asante",
   },
   fr: {
     welcome: "Bienvenue à PaySmile",
@@ -120,6 +150,21 @@ const LANGUAGES = {
     txHash: "TX Hash",
     tier: "Niveau",
     invalidSelection: "Sélection invalide",
+    // Payment services
+    buyAirtime: "Acheter du Crédit",
+    buyData: "Acheter des Données",
+    payUtility: "Payer un Service",
+    enterPhone: "Entrez le numéro",
+    selectDataBundle: "Choisir un Forfait",
+    selectUtility: "Choisir un Service",
+    paymentSuccess: "Paiement Réussi!",
+    roundUpDonation: "Arrondir pour donner?",
+    yourPurchase: "Votre Achat",
+    total: "Total",
+    roundedAmount: "Montant Arrondi",
+    donationAmount: "Don",
+    yesRoundUp: "Oui, Arrondir",
+    noThanks: "Non Merci",
   },
 };
 
@@ -281,13 +326,13 @@ app.post("/ussd", async (req, res) => {
       session.language = langMap[userInput] || "en";
       session.stage = "menu";
 
-      response = `CON ${t(session, "welcome")} �\n\n1. ${t(
+      response = `CON ${t(session, "welcome")} 😊\n\n1. ${t(
         session,
-        "donate"
-      )}\n2. ${t(session, "viewProjects")}\n3. ${t(
+        "buyAirtime"
+      )}\n2. ${t(session, "buyData")}\n3. ${t(session, "payUtility")}\n4. ${t(
         session,
-        "myImpact"
-      )}\n4. ${t(session, "help")}\n\n0. ${t(session, "selectLang")}`;
+        "viewProjects"
+      )}\n5. ${t(session, "myImpact")}\n\n0. ${t(session, "selectLang")}`;
     }
 
     // Main Menu
@@ -299,42 +344,40 @@ app.post("/ussd", async (req, res) => {
           response = `CON ${LANGUAGES.en.welcome} 😊\n${LANGUAGES.en.selectLang}:\n\n1. English\n2. Kiswahili\n3. Français`;
           break;
 
-        case "1": // Donate
-          session.stage = "select_project";
-          const lang = session.language;
-          response = `CON ${t(
+        case "1": // Buy Airtime
+          session.stage = "enter_airtime_amount";
+          response = `CON ${t(session, "buyAirtime")}\n\n${t(
             session,
-            "selectProject"
-          )}:\n\n1. ${getProjectName(
-            RWANDA_PROJECTS[0],
-            lang
-          )}\n   ${getProgress(
-            RWANDA_PROJECTS[0]
-          )}% funded\n\n2. ${getProjectName(
-            RWANDA_PROJECTS[1],
-            lang
-          )}\n   ${getProgress(
-            RWANDA_PROJECTS[1]
-          )}% funded\n\n3. ${getProjectName(
-            RWANDA_PROJECTS[2],
-            lang
-          )}\n   ${getProgress(
-            RWANDA_PROJECTS[2]
-          )}% funded\n\n4. ${getProjectName(
-            RWANDA_PROJECTS[3],
-            lang
-          )}\n   ${getProgress(
-            RWANDA_PROJECTS[3]
-          )}% funded\n\n5. ${getProjectName(
-            RWANDA_PROJECTS[4],
-            lang
-          )}\n   ${getProgress(RWANDA_PROJECTS[4])}% funded\n\n00. ${t(
+            "enterAmount"
+          )} (RWF):\n(Min: 100, Max: 10,000)\n\n00. ${t(
             session,
             "mainMenu"
           )}\n0. ${t(session, "back")}`;
           break;
 
-        case "2": // View Projects
+        case "2": // Buy Data
+          session.stage = "select_data_bundle";
+          response = `CON ${t(
+            session,
+            "selectDataBundle"
+          )}:\n\n1. 50MB - 500 RWF\n2. 200MB - 1,250 RWF\n3. 1GB - 2,750 RWF\n4. 5GB - 8,500 RWF\n5. 10GB - 15,800 RWF\n\n00. ${t(
+            session,
+            "mainMenu"
+          )}\n0. ${t(session, "back")}`;
+          break;
+
+        case "3": // Pay Utility
+          session.stage = "select_utility";
+          response = `CON ${t(
+            session,
+            "selectUtility"
+          )}:\n\n1. Electricity (EUCL)\n2. Water (WASAC)\n3. Internet\n4. TV Subscription\n\n00. ${t(
+            session,
+            "mainMenu"
+          )}\n0. ${t(session, "back")}`;
+          break;
+
+        case "4": // View Projects
           session.stage = "view_projects";
           session.projectViewIndex = 0; // Start at first project
           const lang2 = session.language;
@@ -357,36 +400,276 @@ app.post("/ussd", async (req, res) => {
           }\n00. ${t(session, "mainMenu")}\n0. ${t(session, "back")}`;
           break;
 
-        case "3": // My Impact
+        case "5": // My Impact
           session.stage = "view_impact";
           response = `CON ${t(session, "myImpact")}:\n\n${t(
             session,
-            "donate"
-          )}: 3\n${t(session, "amount")}: 1,500 RWF\n${t(
+            "roundUp"
+          )}: 12\n${t(session, "amount")}: 3,240 RWF\n${t(
             session,
             "project"
-          )}: 2\n\n${t(session, "badge")}: 🥉 Bronze\n\n${t(
+          )}: 5\n\n${t(session, "badge")}: 🥉 Bronze\n\n${t(
             session,
             "thankYou"
           )}\n\n00. ${t(session, "mainMenu")}\n0. ${t(session, "back")}`;
           break;
 
-        case "4": // Help
-          session.stage = "view_help";
-          response = `CON PaySmile - ${t(
-            session,
-            "help"
-          )}\n\n📱 Mobile Money (MTN/Airtel)\n💰 Min: 100 RWF | Max: 10,000 RWF\n\n🎁 ${t(
-            session,
-            "badge"
-          )}:\n- Bronze: 100+ RWF\n- Silver: 1,000+ RWF\n- Gold: 10,000+ RWF\n\n📞 +250788123456\n\n00. ${t(
-            session,
-            "mainMenu"
-          )}\n0. ${t(session, "back")}`;
-          break;
-
         default:
           response = `END ${t(session, "invalidSelection")}`;
+      }
+    }
+
+    // Buy Airtime - Enter Amount
+    else if (session.stage === "enter_airtime_amount") {
+      if (userInput === "00") {
+        session.stage = "menu";
+        response = `CON ${t(session, "welcome")} 😊\n\n1. ${t(
+          session,
+          "buyAirtime"
+        )}\n2. ${t(session, "buyData")}\n3. ${t(session, "payUtility")}\n4. ${t(
+          session,
+          "viewProjects"
+        )}\n5. ${t(session, "myImpact")}\n\n0. ${t(session, "selectLang")}`;
+      } else if (userInput === "0") {
+        session.stage = "menu";
+        response = `CON ${t(session, "welcome")} 😊\n\n1. ${t(
+          session,
+          "buyAirtime"
+        )}\n2. ${t(session, "buyData")}\n3. ${t(session, "payUtility")}\n4. ${t(
+          session,
+          "viewProjects"
+        )}\n5. ${t(session, "myImpact")}\n\n0. ${t(session, "selectLang")}`;
+      } else {
+        const amount = parseInt(userInput);
+        if (amount >= 100 && amount <= 10000) {
+          session.purchaseAmount = amount;
+          session.purchaseType = "airtime";
+          const roundedAmount = Math.ceil(amount / 100) * 100;
+          const donationAmount = roundedAmount - amount;
+          session.roundedAmount = roundedAmount;
+          session.donationAmount = donationAmount;
+          session.stage = "round_up_prompt";
+          response = `CON ${t(session, "roundUpDonation")}\n\n${t(
+            session,
+            "yourPurchase"
+          )}: ${formatRWF(amount)}\n${t(session, "roundedAmount")}: ${formatRWF(
+            roundedAmount
+          )}\n${t(session, "donationAmount")}: ${formatRWF(
+            donationAmount
+          )}\n\n1. ${t(session, "yesRoundUp")}\n2. ${t(
+            session,
+            "noThanks"
+          )}\n\n0. ${t(session, "back")}`;
+        } else {
+          response = `CON ${t(session, "invalidAmount")}\n${t(
+            session,
+            "enterBetween"
+          )}\n\n00. ${t(session, "mainMenu")}`;
+        }
+      }
+    }
+
+    // Select Data Bundle
+    else if (session.stage === "select_data_bundle") {
+      if (userInput === "00") {
+        session.stage = "menu";
+        response = `CON ${t(session, "welcome")} 😊\n\n1. ${t(
+          session,
+          "buyAirtime"
+        )}\n2. ${t(session, "buyData")}\n3. ${t(session, "payUtility")}\n4. ${t(
+          session,
+          "viewProjects"
+        )}\n5. ${t(session, "myImpact")}\n\n0. ${t(session, "selectLang")}`;
+      } else if (userInput === "0") {
+        session.stage = "menu";
+        response = `CON ${t(session, "welcome")} 😊\n\n1. ${t(
+          session,
+          "buyAirtime"
+        )}\n2. ${t(session, "buyData")}\n3. ${t(session, "payUtility")}\n4. ${t(
+          session,
+          "viewProjects"
+        )}\n5. ${t(session, "myImpact")}\n\n0. ${t(session, "selectLang")}`;
+      } else {
+        const dataBundles = [
+          { name: "50MB", amount: 500 },
+          { name: "200MB", amount: 1250 },
+          { name: "1GB", amount: 2750 },
+          { name: "5GB", amount: 8500 },
+          { name: "10GB", amount: 15800 },
+        ];
+        const bundleIndex = parseInt(userInput) - 1;
+        if (bundleIndex >= 0 && bundleIndex < dataBundles.length) {
+          const bundle = dataBundles[bundleIndex];
+          session.purchaseAmount = bundle.amount;
+          session.purchaseType = `data_${bundle.name}`;
+          const roundedAmount = Math.ceil(bundle.amount / 100) * 100;
+          const donationAmount = roundedAmount - bundle.amount;
+          session.roundedAmount = roundedAmount;
+          session.donationAmount = donationAmount;
+          session.stage = "round_up_prompt";
+          response = `CON ${t(session, "roundUpDonation")}\n\n${t(
+            session,
+            "yourPurchase"
+          )}: ${bundle.name} - ${formatRWF(bundle.amount)}\n${t(
+            session,
+            "roundedAmount"
+          )}: ${formatRWF(roundedAmount)}\n${t(
+            session,
+            "donationAmount"
+          )}: ${formatRWF(donationAmount)}\n\n1. ${t(
+            session,
+            "yesRoundUp"
+          )}\n2. ${t(session, "noThanks")}\n\n0. ${t(session, "back")}`;
+        } else {
+          response = `END ${t(session, "invalidSelection")}`;
+        }
+      }
+    }
+
+    // Select Utility
+    else if (session.stage === "select_utility") {
+      if (userInput === "00") {
+        session.stage = "menu";
+        response = `CON ${t(session, "welcome")} 😊\n\n1. ${t(
+          session,
+          "buyAirtime"
+        )}\n2. ${t(session, "buyData")}\n3. ${t(session, "payUtility")}\n4. ${t(
+          session,
+          "viewProjects"
+        )}\n5. ${t(session, "myImpact")}\n\n0. ${t(session, "selectLang")}`;
+      } else if (userInput === "0") {
+        session.stage = "menu";
+        response = `CON ${t(session, "welcome")} 😊\n\n1. ${t(
+          session,
+          "buyAirtime"
+        )}\n2. ${t(session, "buyData")}\n3. ${t(session, "payUtility")}\n4. ${t(
+          session,
+          "viewProjects"
+        )}\n5. ${t(session, "myImpact")}\n\n0. ${t(session, "selectLang")}`;
+      } else {
+        const utilities = [
+          { name: "Electricity", amount: 3450 },
+          { name: "Water", amount: 1280 },
+          { name: "Internet", amount: 25900 },
+          { name: "TV", amount: 8750 },
+        ];
+        const utilityIndex = parseInt(userInput) - 1;
+        if (utilityIndex >= 0 && utilityIndex < utilities.length) {
+          const utility = utilities[utilityIndex];
+          session.purchaseAmount = utility.amount;
+          session.purchaseType = `utility_${utility.name}`;
+          const roundedAmount = Math.ceil(utility.amount / 100) * 100;
+          const donationAmount = roundedAmount - utility.amount;
+          session.roundedAmount = roundedAmount;
+          session.donationAmount = donationAmount;
+          session.stage = "round_up_prompt";
+          response = `CON ${t(session, "roundUpDonation")}\n\n${t(
+            session,
+            "yourPurchase"
+          )}: ${utility.name} - ${formatRWF(utility.amount)}\n${t(
+            session,
+            "roundedAmount"
+          )}: ${formatRWF(roundedAmount)}\n${t(
+            session,
+            "donationAmount"
+          )}: ${formatRWF(donationAmount)}\n\n1. ${t(
+            session,
+            "yesRoundUp"
+          )}\n2. ${t(session, "noThanks")}\n\n0. ${t(session, "back")}`;
+        } else {
+          response = `END ${t(session, "invalidSelection")}`;
+        }
+      }
+    }
+
+    // Round Up Prompt
+    else if (session.stage === "round_up_prompt") {
+      if (userInput === "0") {
+        session.stage = "menu";
+        response = `CON ${t(session, "welcome")} 😊\n\n1. ${t(
+          session,
+          "buyAirtime"
+        )}\n2. ${t(session, "buyData")}\n3. ${t(session, "payUtility")}\n4. ${t(
+          session,
+          "viewProjects"
+        )}\n5. ${t(session, "myImpact")}\n\n0. ${t(session, "selectLang")}`;
+      } else if (userInput === "1") {
+        // Yes, round up and donate
+        session.stage = "select_project_for_donation";
+        const lang = session.language;
+        response = `CON ${t(session, "selectProject")}:\n\n1. ${getProjectName(
+          RWANDA_PROJECTS[0],
+          lang
+        )}\n   ${getProgress(
+          RWANDA_PROJECTS[0]
+        )}% funded\n\n2. ${getProjectName(
+          RWANDA_PROJECTS[1],
+          lang
+        )}\n   ${getProgress(
+          RWANDA_PROJECTS[1]
+        )}% funded\n\n3. ${getProjectName(
+          RWANDA_PROJECTS[2],
+          lang
+        )}\n   ${getProgress(
+          RWANDA_PROJECTS[2]
+        )}% funded\n\n4. ${getProjectName(
+          RWANDA_PROJECTS[3],
+          lang
+        )}\n   ${getProgress(RWANDA_PROJECTS[3])}% funded\n\n0. ${t(
+          session,
+          "back"
+        )}`;
+      } else if (userInput === "2") {
+        // No thanks, complete purchase without donation
+        session.stage = "menu";
+        response = `END ${t(session, "paymentSuccess")}\n\n${t(
+          session,
+          "amount"
+        )}: ${formatRWF(session.purchaseAmount)}\n\n${t(session, "thankYou")}`;
+      } else {
+        response = `END ${t(session, "invalidSelection")}`;
+      }
+    }
+
+    // Select Project for Donation
+    else if (session.stage === "select_project_for_donation") {
+      if (userInput === "0") {
+        session.stage = "menu";
+        response = `CON ${t(session, "welcome")} 😊\n\n1. ${t(
+          session,
+          "buyAirtime"
+        )}\n2. ${t(session, "buyData")}\n3. ${t(session, "payUtility")}\n4. ${t(
+          session,
+          "viewProjects"
+        )}\n5. ${t(session, "myImpact")}\n\n0. ${t(session, "selectLang")}`;
+      } else {
+        const projectIndex = parseInt(userInput) - 1;
+        if (projectIndex >= 0 && projectIndex < RWANDA_PROJECTS.length) {
+          session.selectedProject = RWANDA_PROJECTS[projectIndex];
+          const lang = session.language;
+          // Complete the transaction
+          response = `END ${t(session, "paymentSuccess")} 😊\n\n${t(
+            session,
+            "total"
+          )}: ${formatRWF(session.roundedAmount)}\n${t(
+            session,
+            "yourPurchase"
+          )}: ${formatRWF(session.purchaseAmount)}\n${t(
+            session,
+            "donationAmount"
+          )}: ${formatRWF(session.donationAmount)}\n\n${t(
+            session,
+            "project"
+          )}: ${getProjectName(session.selectedProject, lang)}\n\n${t(
+            session,
+            "badge"
+          )}: ${getBadgeTier(session.donationAmount)}\n\n${t(
+            session,
+            "thankYou"
+          )} 💚`;
+        } else {
+          response = `END ${t(session, "invalidSelection")}`;
+        }
       }
     }
 
