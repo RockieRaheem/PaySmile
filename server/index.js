@@ -277,24 +277,66 @@ app.post("/ussd", async (req, res) => {
           break;
 
         case "2": // View Projects
+          session.stage = "view_projects";
           const lang2 = session.language;
           let projectsList = "";
           RWANDA_PROJECTS.forEach((proj, idx) => {
             projectsList += `\n${idx + 1}. ${getProjectName(proj, lang2)}\n   ${t(session, "goal")}: ${formatRWF(proj.goal)}\n   ${t(session, "raised")}: ${formatRWF(proj.raised)}\n   ${t(session, "location")}: ${getProjectLocation(proj, lang2)}\n`;
           });
-          response = `END ${t(session, "viewProjects")}:${projectsList}\n\n${t(session, "thankYou")}`;
+          response = `CON ${t(session, "viewProjects")}:${projectsList}\n\n00. ${t(session, "mainMenu")}\n0. ${t(session, "back")}`;
           break;
 
         case "3": // My Impact
-          response = `END ${t(session, "myImpact")}:\n\n${t(session, "donate")}: 3\n${t(session, "amount")}: 1,500 RWF\n${t(session, "project")}: 2\n\n${t(session, "badge")}: 🥉 Bronze\n\n${t(session, "thankYou")}`;
+          session.stage = "view_impact";
+          response = `CON ${t(session, "myImpact")}:\n\n${t(session, "donate")}: 3\n${t(session, "amount")}: 1,500 RWF\n${t(session, "project")}: 2\n\n${t(session, "badge")}: 🥉 Bronze\n\n${t(session, "thankYou")}\n\n00. ${t(session, "mainMenu")}\n0. ${t(session, "back")}`;
           break;
 
         case "4": // Help
-          response = `END PaySmile - ${t(session, "help")}\n\n📱 Mobile Money (MTN/Airtel)\n💰 Min: 100 RWF | Max: 10,000 RWF\n\n🎁 ${t(session, "badge")}:\n- Bronze: 100+ RWF\n- Silver: 1,000+ RWF\n- Gold: 10,000+ RWF\n\n📞 +250788123456`;
+          session.stage = "view_help";
+          response = `CON PaySmile - ${t(session, "help")}\n\n📱 Mobile Money (MTN/Airtel)\n💰 Min: 100 RWF | Max: 10,000 RWF\n\n🎁 ${t(session, "badge")}:\n- Bronze: 100+ RWF\n- Silver: 1,000+ RWF\n- Gold: 10,000+ RWF\n\n📞 +250788123456\n\n00. ${t(session, "mainMenu")}\n0. ${t(session, "back")}`;
           break;
 
         default:
           response = `END ${t(session, "invalidSelection")}`;
+      }
+    }
+
+    // View Projects Handler
+    else if (session.stage === "view_projects") {
+      if (userInput === "00") {
+        session.stage = "menu";
+        response = `CON ${t(session, "welcome")} 🇷🇼\n\n1. ${t(session, "donate")}\n2. ${t(session, "viewProjects")}\n3. ${t(session, "myImpact")}\n4. ${t(session, "help")}\n\n0. ${t(session, "selectLang")}`;
+      } else if (userInput === "0") {
+        session.stage = "menu";
+        response = `CON ${t(session, "welcome")} 🇷🇼\n\n1. ${t(session, "donate")}\n2. ${t(session, "viewProjects")}\n3. ${t(session, "myImpact")}\n4. ${t(session, "help")}\n\n0. ${t(session, "selectLang")}`;
+      } else {
+        response = `END ${t(session, "invalidSelection")}`;
+      }
+    }
+
+    // View Impact Handler
+    else if (session.stage === "view_impact") {
+      if (userInput === "00") {
+        session.stage = "menu";
+        response = `CON ${t(session, "welcome")} 🇷🇼\n\n1. ${t(session, "donate")}\n2. ${t(session, "viewProjects")}\n3. ${t(session, "myImpact")}\n4. ${t(session, "help")}\n\n0. ${t(session, "selectLang")}`;
+      } else if (userInput === "0") {
+        session.stage = "menu";
+        response = `CON ${t(session, "welcome")} 🇷🇼\n\n1. ${t(session, "donate")}\n2. ${t(session, "viewProjects")}\n3. ${t(session, "myImpact")}\n4. ${t(session, "help")}\n\n0. ${t(session, "selectLang")}`;
+      } else {
+        response = `END ${t(session, "invalidSelection")}`;
+      }
+    }
+
+    // View Help Handler
+    else if (session.stage === "view_help") {
+      if (userInput === "00") {
+        session.stage = "menu";
+        response = `CON ${t(session, "welcome")} 🇷🇼\n\n1. ${t(session, "donate")}\n2. ${t(session, "viewProjects")}\n3. ${t(session, "myImpact")}\n4. ${t(session, "help")}\n\n0. ${t(session, "selectLang")}`;
+      } else if (userInput === "0") {
+        session.stage = "menu";
+        response = `CON ${t(session, "welcome")} 🇷🇼\n\n1. ${t(session, "donate")}\n2. ${t(session, "viewProjects")}\n3. ${t(session, "myImpact")}\n4. ${t(session, "help")}\n\n0. ${t(session, "selectLang")}`;
+      } else {
+        response = `END ${t(session, "invalidSelection")}`;
       }
     }
 
