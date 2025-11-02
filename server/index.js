@@ -71,6 +71,12 @@ const LANGUAGES = {
     donationAmount: "Donation",
     yesRoundUp: "Yes, Round Up",
     noThanks: "No Thanks",
+    // Encouraging messages
+    youAreAHero: "You are a hero!",
+    makingDifference: "Your kindness is changing lives",
+    gratefulMessage: "families are grateful for your generosity",
+    keepGoing: "Every donation counts!",
+    yourImpactMatters: "You're making Rwanda better",
   },
   sw: {
     welcome: "Karibu PaySmile",
@@ -118,6 +124,12 @@ const LANGUAGES = {
     donationAmount: "Mchango",
     yesRoundUp: "Ndio, Ongeza",
     noThanks: "Hapana Asante",
+    // Encouraging messages
+    youAreAHero: "Wewe ni shujaa!",
+    makingDifference: "Huruma yako inabadilisha maisha",
+    gratefulMessage: "familia zinashukuru ukarimu wako",
+    keepGoing: "Kila mchango una umuhimu!",
+    yourImpactMatters: "Unafanya Rwanda iwe bora",
   },
   fr: {
     welcome: "Bienvenue à PaySmile",
@@ -165,6 +177,12 @@ const LANGUAGES = {
     donationAmount: "Don",
     yesRoundUp: "Oui, Arrondir",
     noThanks: "Non Merci",
+    // Encouraging messages
+    youAreAHero: "Vous êtes un héros!",
+    makingDifference: "Votre gentillesse change des vies",
+    gratefulMessage: "familles vous remercient pour votre générosité",
+    keepGoing: "Chaque don compte!",
+    yourImpactMatters: "Vous rendez le Rwanda meilleur",
   },
 };
 
@@ -659,7 +677,10 @@ app.post("/ussd", async (req, res) => {
           "yourPurchase"
         )}: ${session.purchaseType}\n${t(session, "amount")}: ${formatRWF(
           session.purchaseAmount
-        )}\n\n${t(session, "thankYou")} 💚`;
+        )}\n\n${t(
+          session,
+          "thankYou"
+        )} 💚\n\nConsider rounding up next time to help families! ✨`;
       } else if (userInput === "2") {
         // Cancel
         session.stage = "menu";
@@ -715,10 +736,13 @@ app.post("/ussd", async (req, res) => {
       } else if (userInput === "2") {
         // No thanks, complete purchase without donation
         session.stage = "menu";
-        response = `END ${t(session, "paymentSuccess")}\n\n${t(
+        response = `END ${t(session, "paymentSuccess")} ✅\n\n${t(
           session,
           "amount"
-        )}: ${formatRWF(session.purchaseAmount)}\n\n${t(session, "thankYou")}`;
+        )}: ${formatRWF(session.purchaseAmount)}\n\n${t(
+          session,
+          "thankYou"
+        )}\n\nNext time, round up to help families in need! 💚`;
       } else {
         response = `END ${t(session, "invalidSelection")}`;
       }
@@ -740,26 +764,33 @@ app.post("/ussd", async (req, res) => {
         if (projectIndex >= 0 && projectIndex < RWANDA_PROJECTS.length) {
           session.selectedProject = RWANDA_PROJECTS[projectIndex];
           const lang = session.language;
-          // Complete the transaction
+
+          // Calculate how many families this helps (estimate)
+          const familiesHelped = Math.floor(session.donationAmount / 50);
+          const impactMessage =
+            familiesHelped > 0
+              ? `\n\n${familiesHelped}+ ${t(session, "gratefulMessage")}`
+              : "";
+
+          // Complete the transaction with encouraging message
           response = `END ${t(session, "paymentSuccess")} 😊\n\n${t(
             session,
-            "total"
-          )}: ${formatRWF(session.roundedAmount)}\n${t(
+            "youAreAHero"
+          )} 🌟\n\n${t(session, "total")}: ${formatRWF(
+            session.roundedAmount
+          )}\n${t(session, "yourPurchase")}: ${formatRWF(
+            session.purchaseAmount
+          )}\n${t(session, "donationAmount")}: ${formatRWF(
+            session.donationAmount
+          )}\n\n${t(session, "project")}: ${getProjectName(
+            session.selectedProject,
+            lang
+          )}\n\n${t(session, "badge")}: ${getBadgeTier(
+            session.donationAmount
+          )}${impactMessage}\n\n${t(session, "makingDifference")} 💚\n${t(
             session,
-            "yourPurchase"
-          )}: ${formatRWF(session.purchaseAmount)}\n${t(
-            session,
-            "donationAmount"
-          )}: ${formatRWF(session.donationAmount)}\n\n${t(
-            session,
-            "project"
-          )}: ${getProjectName(session.selectedProject, lang)}\n\n${t(
-            session,
-            "badge"
-          )}: ${getBadgeTier(session.donationAmount)}\n\n${t(
-            session,
-            "thankYou"
-          )} 💚`;
+            "keepGoing"
+          )} ✨`;
         } else {
           response = `END ${t(session, "invalidSelection")}`;
         }
