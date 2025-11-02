@@ -252,6 +252,9 @@ const RWANDA_PROJECTS = [
   },
 ];
 
+// Session timeout management (30 minutes)
+const SESSION_TIMEOUT = 30 * 60 * 1000; // 30 minutes in milliseconds
+
 // Helper functions
 function getSession(sessionId) {
   if (!sessions.has(sessionId)) {
@@ -261,10 +264,26 @@ function getSession(sessionId) {
       selectedProject: null,
       amount: null,
       phoneNumber: null,
+      lastActivity: Date.now(),
     });
+  } else {
+    // Update last activity timestamp
+    const session = sessions.get(sessionId);
+    session.lastActivity = Date.now();
   }
   return sessions.get(sessionId);
 }
+
+// Clean up expired sessions every 10 minutes
+setInterval(() => {
+  const now = Date.now();
+  for (const [sessionId, session] of sessions.entries()) {
+    if (now - session.lastActivity > SESSION_TIMEOUT) {
+      sessions.delete(sessionId);
+      console.log(`Session expired and cleaned up: ${sessionId}`);
+    }
+  }
+}, 10 * 60 * 1000); // Run cleanup every 10 minutes
 
 function t(session, key) {
   const lang = session.language || "en";
@@ -448,18 +467,33 @@ app.post("/ussd", async (req, res) => {
           const donationAmount = roundedAmount - amount;
           session.roundedAmount = roundedAmount;
           session.donationAmount = donationAmount;
-          session.stage = "round_up_prompt";
-          response = `CON ${t(session, "roundUpDonation")}\n\n${t(
-            session,
-            "yourPurchase"
-          )}: ${formatRWF(amount)}\n${t(session, "roundedAmount")}: ${formatRWF(
-            roundedAmount
-          )}\n${t(session, "donationAmount")}: ${formatRWF(
-            donationAmount
-          )}\n\n1. ${t(session, "yesRoundUp")}\n2. ${t(
-            session,
-            "noThanks"
-          )}\n\n0. ${t(session, "back")}`;
+
+          // Skip round-up prompt if no change to round up
+          if (donationAmount === 0) {
+            session.stage = "menu";
+            response = `END ${t(session, "paymentSuccess")} 😊\n\n${t(
+              session,
+              "yourPurchase"
+            )}: Airtime\n${t(session, "amount")}: ${formatRWF(amount)}\n\n${t(
+              session,
+              "thankYou"
+            )}`;
+          } else {
+            session.stage = "round_up_prompt";
+            response = `CON ${t(session, "roundUpDonation")}\n\n${t(
+              session,
+              "yourPurchase"
+            )}: ${formatRWF(amount)}\n${t(
+              session,
+              "roundedAmount"
+            )}: ${formatRWF(roundedAmount)}\n${t(
+              session,
+              "donationAmount"
+            )}: ${formatRWF(donationAmount)}\n\n1. ${t(
+              session,
+              "yesRoundUp"
+            )}\n2. ${t(session, "noThanks")}\n\n0. ${t(session, "back")}`;
+          }
         } else {
           response = `CON ${t(session, "invalidAmount")}\n${t(
             session,
@@ -506,20 +540,32 @@ app.post("/ussd", async (req, res) => {
           const donationAmount = roundedAmount - bundle.amount;
           session.roundedAmount = roundedAmount;
           session.donationAmount = donationAmount;
-          session.stage = "round_up_prompt";
-          response = `CON ${t(session, "roundUpDonation")}\n\n${t(
-            session,
-            "yourPurchase"
-          )}: ${bundle.name} - ${formatRWF(bundle.amount)}\n${t(
-            session,
-            "roundedAmount"
-          )}: ${formatRWF(roundedAmount)}\n${t(
-            session,
-            "donationAmount"
-          )}: ${formatRWF(donationAmount)}\n\n1. ${t(
-            session,
-            "yesRoundUp"
-          )}\n2. ${t(session, "noThanks")}\n\n0. ${t(session, "back")}`;
+
+          // Skip round-up prompt if no change to round up
+          if (donationAmount === 0) {
+            session.stage = "menu";
+            response = `END ${t(session, "paymentSuccess")} 😊\n\n${t(
+              session,
+              "yourPurchase"
+            )}: ${bundle.name}\n${t(session, "amount")}: ${formatRWF(
+              bundle.amount
+            )}\n\n${t(session, "thankYou")}`;
+          } else {
+            session.stage = "round_up_prompt";
+            response = `CON ${t(session, "roundUpDonation")}\n\n${t(
+              session,
+              "yourPurchase"
+            )}: ${bundle.name} - ${formatRWF(bundle.amount)}\n${t(
+              session,
+              "roundedAmount"
+            )}: ${formatRWF(roundedAmount)}\n${t(
+              session,
+              "donationAmount"
+            )}: ${formatRWF(donationAmount)}\n\n1. ${t(
+              session,
+              "yesRoundUp"
+            )}\n2. ${t(session, "noThanks")}\n\n0. ${t(session, "back")}`;
+          }
         } else {
           response = `END ${t(session, "invalidSelection")}`;
         }
@@ -562,20 +608,32 @@ app.post("/ussd", async (req, res) => {
           const donationAmount = roundedAmount - utility.amount;
           session.roundedAmount = roundedAmount;
           session.donationAmount = donationAmount;
-          session.stage = "round_up_prompt";
-          response = `CON ${t(session, "roundUpDonation")}\n\n${t(
-            session,
-            "yourPurchase"
-          )}: ${utility.name} - ${formatRWF(utility.amount)}\n${t(
-            session,
-            "roundedAmount"
-          )}: ${formatRWF(roundedAmount)}\n${t(
-            session,
-            "donationAmount"
-          )}: ${formatRWF(donationAmount)}\n\n1. ${t(
-            session,
-            "yesRoundUp"
-          )}\n2. ${t(session, "noThanks")}\n\n0. ${t(session, "back")}`;
+
+          // Skip round-up prompt if no change to round up
+          if (donationAmount === 0) {
+            session.stage = "menu";
+            response = `END ${t(session, "paymentSuccess")} 😊\n\n${t(
+              session,
+              "yourPurchase"
+            )}: ${utility.name}\n${t(session, "amount")}: ${formatRWF(
+              utility.amount
+            )}\n\n${t(session, "thankYou")}`;
+          } else {
+            session.stage = "round_up_prompt";
+            response = `CON ${t(session, "roundUpDonation")}\n\n${t(
+              session,
+              "yourPurchase"
+            )}: ${utility.name} - ${formatRWF(utility.amount)}\n${t(
+              session,
+              "roundedAmount"
+            )}: ${formatRWF(roundedAmount)}\n${t(
+              session,
+              "donationAmount"
+            )}: ${formatRWF(donationAmount)}\n\n1. ${t(
+              session,
+              "yesRoundUp"
+            )}\n2. ${t(session, "noThanks")}\n\n0. ${t(session, "back")}`;
+          }
         } else {
           response = `END ${t(session, "invalidSelection")}`;
         }
