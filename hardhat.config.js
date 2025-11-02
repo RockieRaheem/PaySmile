@@ -27,11 +27,17 @@ module.exports = {
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
       chainId: 11155111,
     },
-    // Celo Sepolia Testnet (formerly Alfajores)
+    // Celo Sepolia Testnet (NEW - true Sepolia network)
     celoSepolia: {
-      url: "https://alfajores-forno.celo-testnet.org",
+      url: "https://forno.celo-sepolia.celo-testnet.org",
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
-      chainId: 44787,
+      chainId: 11142220,
+    },
+    // Celo Sepolia Testnet (NEW - true Celo Sepolia)
+    celoSepolia: {
+      url: "https://forno.celo-sepolia.celo-testnet.org",
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
+      chainId: 11142220,
     },
     // Local development
     localhost: {
@@ -53,10 +59,10 @@ module.exports = {
     customChains: [
       {
         network: "celoSepolia",
-        chainId: 44787,
+        chainId: 11142220,
         urls: {
-          apiURL: "https://api-alfajores.celoscan.io/api",
-          browserURL: "https://alfajores.celoscan.io",
+          apiURL: "https://api-sepolia.celoscan.io/api",
+          browserURL: "https://sepolia.celoscan.io",
         },
       },
     ],

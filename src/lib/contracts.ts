@@ -10,9 +10,9 @@ export const CONTRACTS = {
     DonationPool: "",
     SmileBadgeNFT: "",
   },
-  // Celo Sepolia Testnet (formerly Alfajores)
+  // Celo Sepolia Testnet (Chain ID: 11142220)
   celoSepolia: {
-    chainId: 44787,
+    chainId: 11142220,
     DonationPool: process.env.NEXT_PUBLIC_DONATION_POOL_ADDRESS || "",
     SmileBadgeNFT: process.env.NEXT_PUBLIC_SMILE_BADGE_NFT_ADDRESS || "",
   },
@@ -25,7 +25,7 @@ export function getContractAddresses(chainId: number) {
   switch (chainId) {
     case 31337:
       return CONTRACTS.localhost;
-    case 44787:
+    case 11142220:
       return CONTRACTS.celoSepolia;
     default:
       console.warn(`Unsupported chain ID: ${chainId}, using localhost`);

@@ -1,14 +1,38 @@
 "use client";
 
 import { WagmiProvider as WagmiProviderBase, createConfig, http } from "wagmi";
-import { celoAlfajores, localhost } from "wagmi/chains";
+import { localhost } from "wagmi/chains";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactNode } from "react";
 import { injected } from "wagmi/connectors";
+import { defineChain } from "viem";
 
-// Initialize with Celo Sepolia testnet (formerly Alfajores)
+// Define Celo Sepolia Testnet (Chain ID: 11142220)
+export const celoSepolia = defineChain({
+  id: 11142220,
+  name: "Celo Sepolia Testnet",
+  nativeCurrency: {
+    decimals: 18,
+    name: "CELO",
+    symbol: "CELO",
+  },
+  rpcUrls: {
+    default: {
+      http: ["https://forno.celo-sepolia.celo-testnet.org"],
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: "CeloScan",
+      url: "https://sepolia.celoscan.io",
+    },
+  },
+  testnet: true,
+});
+
+// Initialize with Celo Sepolia testnet
 const config = createConfig({
-  chains: [celoAlfajores, localhost],
+  chains: [celoSepolia, localhost],
   connectors: [
     // Injected wallets (MetaMask, etc.)
     injected({
@@ -17,7 +41,7 @@ const config = createConfig({
   ],
   transports: {
     [localhost.id]: http("http://127.0.0.1:8545"),
-    [celoAlfajores.id]: http("https://alfajores-forno.celo-testnet.org"),
+    [celoSepolia.id]: http("https://forno.celo-sepolia.celo-testnet.org"),
   },
   ssr: true,
 });
