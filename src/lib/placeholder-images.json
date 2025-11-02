@@ -20,15 +20,27 @@
     },
     {
       "id": "active-project-1",
-      "description": "People in a meeting for a community project",
-      "imageUrl": "https://images.unsplash.com/photo-1517048676732-d65bc937f952?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwZW9wbGUlMjBtZWV0aW5nfGVufDB8fHx8MTc2MDg5NTI3Nnww&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "people meeting"
+      "description": "Emergency food distribution in rural Africa - families receiving food aid",
+      "imageUrl": "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxhZnJpY2ElMjBmb29kJTIwYWlkfGVufDB8fHx8MTc2MDkwMTkyMHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "africa food aid distribution families"
     },
     {
       "id": "active-project-2",
-      "description": "School children in a classroom",
-      "imageUrl": "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxzY2hvb2wlMjBjaGlsZHJlbnxlbnwwfHx8fDE3NjA5MDE5MjB8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "school children"
+      "description": "Flood victims shelter - temporary housing and disaster relief in Africa",
+      "imageUrl": "https://images.unsplash.com/photo-1618477461853-cf6ed80faba5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxhZnJpY2ElMjBkaXNhc3RlciUyMHJlbGllZnxlbnwwfHx8fDE3NjA5MDE5MjB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "africa disaster relief shelter humanitarian"
+    },
+    {
+      "id": "active-project-3",
+      "description": "Malaria treatment center - healthcare workers treating children in Africa",
+      "imageUrl": "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxhZnJpY2ElMjBoZWFsdGhjYXJlJTIwY2hpbGRyZW58ZW58MHx8fHwxNzYwOTAxOTIwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "africa healthcare children medical treatment"
+    },
+    {
+      "id": "active-project-4",
+      "description": "Maternal health crisis - pregnant women receiving medical care in Africa",
+      "imageUrl": "https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxhZnJpY2ElMjBtYXRlcm5hbCUyMGhlYWx0aHxlbnwwfHx8fDE3NjA5MDE5MjB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "africa maternal health pregnant women medical"
     },
     {
       "id": "funded-project-1",
