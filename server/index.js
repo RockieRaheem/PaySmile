@@ -20,7 +20,7 @@ const AT = africastalking({
 
 const sms = AT.SMS;
 
-// In-memory session storage (use Redis in production)
+// In-memory session storage
 const sessions = new Map();
 
 // Multilingual support
@@ -50,6 +50,12 @@ const LANGUAGES = {
     badge: "Badge",
     smsReceipt: "SMS receipt sent",
     thankYou: "Thank you!",
+    invalidAmount: "Invalid amount!",
+    enterBetween: "Enter between 100-10,000 RWF",
+    roundUp: "Round up",
+    txHash: "TX Hash",
+    tier: "Tier",
+    invalidSelection: "Invalid selection",
   },
   sw: {
     welcome: "Karibu PaySmile",
@@ -76,6 +82,12 @@ const LANGUAGES = {
     badge: "Tuzo",
     smsReceipt: "Risiti ya SMS imetumwa",
     thankYou: "Asante sana!",
+    invalidAmount: "Kiasi si sahihi!",
+    enterBetween: "Weka kati ya 100-10,000 RWF",
+    roundUp: "Ongeza",
+    txHash: "TX Hash",
+    tier: "Ngazi",
+    invalidSelection: "Chaguo si sahihi",
   },
   fr: {
     welcome: "Bienvenue à PaySmile",
@@ -102,10 +114,16 @@ const LANGUAGES = {
     badge: "Badge",
     smsReceipt: "Reçu SMS envoyé",
     thankYou: "Merci beaucoup!",
+    invalidAmount: "Montant invalide!",
+    enterBetween: "Entrez entre 100-10,000 RWF",
+    roundUp: "Arrondir",
+    txHash: "TX Hash",
+    tier: "Niveau",
+    invalidSelection: "Sélection invalide",
   },
 };
 
-// Rwanda projects for USSD
+// Projects with multilingual support
 const RWANDA_PROJECTS = [
   {
     id: 1,
@@ -169,7 +187,7 @@ const RWANDA_PROJECTS = [
   },
 ];
 
-// Helper function to get or create session
+// Helper functions
 function getSession(sessionId) {
   if (!sessions.has(sessionId)) {
     sessions.set(sessionId, {
@@ -178,19 +196,16 @@ function getSession(sessionId) {
       selectedProject: null,
       amount: null,
       phoneNumber: null,
-      history: [],
     });
   }
   return sessions.get(sessionId);
 }
 
-// Helper to get translated text
 function t(session, key) {
   const lang = session.language || "en";
   return LANGUAGES[lang][key] || key;
 }
 
-// Helper to get project name in language
 function getProjectName(project, lang) {
   return project.name[lang] || project.name.en;
 }
@@ -203,14 +218,18 @@ function getProjectDescription(project, lang) {
   return project.description[lang] || project.description.en;
 }
 
-// Helper function to format currency
 function formatRWF(amount) {
   return `${amount.toLocaleString()} RWF`;
 }
 
-// Helper function to calculate project progress
 function getProgress(project) {
   return Math.round((project.raised / project.goal) * 100);
+}
+
+function getBadgeTier(amount) {
+  if (amount >= 10000) return "Gold";
+  if (amount >= 1000) return "Silver";
+  return "Bronze";
 }
 
 // USSD Route Handler
@@ -227,246 +246,183 @@ app.post("/ussd", async (req, res) => {
 
     let response = "";
     const userInput = text.split("*").pop();
-    const inputArray = text.split("*");
 
-    // Main Menu (Initial State)
+    // Language Selection (Initial)
     if (text === "") {
-      session.stage = "menu";
-      response = `CON Murakaza neza kuri PaySmile 🇷🇼
-1. Tanga Impano (Donate)
-2. Reba Imishinga (View Projects)
-3. Ingaruka Zanjye (My Impact)
-4. Ubufasha (Help)`;
+      session.stage = "language";
+      response = `CON ${LANGUAGES.en.welcome} 🌍\n${LANGUAGES.en.selectLang}:\n\n1. English\n2. Kiswahili\n3. Français`;
     }
 
-    // Main Menu Selection
-    else if (session.stage === "menu" || inputArray.length === 1) {
+    // Language Selection Handler
+    else if (session.stage === "language") {
+      const langMap = { "1": "en", "2": "sw", "3": "fr" };
+      session.language = langMap[userInput] || "en";
+      session.stage = "menu";
+
+      response = `CON ${t(session, "welcome")} 🇷🇼\n\n1. ${t(session, "donate")}\n2. ${t(session, "viewProjects")}\n3. ${t(session, "myImpact")}\n4. ${t(session, "help")}\n\n0. ${t(session, "selectLang")}`;
+    }
+
+    // Main Menu
+    else if (session.stage === "menu") {
       switch (userInput) {
+        case "0": // Change Language
+          session.stage = "language";
+          response = `CON ${LANGUAGES.en.welcome} 🌍\n${LANGUAGES.en.selectLang}:\n\n1. English\n2. Kiswahili\n3. Français`;
+          break;
+
         case "1": // Donate
           session.stage = "select_project";
-          response = `CON Hitamo Umushinga (Select Project):
-1. ${RWANDA_PROJECTS[0].name}
-   ${getProgress(RWANDA_PROJECTS[0])}% - ${RWANDA_PROJECTS[0].location}
-2. ${RWANDA_PROJECTS[1].name}
-   ${getProgress(RWANDA_PROJECTS[1])}% - ${RWANDA_PROJECTS[1].location}
-3. ${RWANDA_PROJECTS[2].name}
-   ${getProgress(RWANDA_PROJECTS[2])}% - ${RWANDA_PROJECTS[2].location}
-0. Gusubira (Back)`;
+          const lang = session.language;
+          response = `CON ${t(session, "selectProject")}:\n\n1. ${getProjectName(RWANDA_PROJECTS[0], lang)}\n   ${getProgress(RWANDA_PROJECTS[0])}% - ${getProjectLocation(RWANDA_PROJECTS[0], lang)}\n\n2. ${getProjectName(RWANDA_PROJECTS[1], lang)}\n   ${getProgress(RWANDA_PROJECTS[1])}% - ${getProjectLocation(RWANDA_PROJECTS[1], lang)}\n\n3. ${getProjectName(RWANDA_PROJECTS[2], lang)}\n   ${getProgress(RWANDA_PROJECTS[2])}% - ${getProjectLocation(RWANDA_PROJECTS[2], lang)}\n\n00. ${t(session, "mainMenu")}\n0. ${t(session, "back")}`;
           break;
 
         case "2": // View Projects
-          response = `END Imishinga ya PaySmile:
-
-1. ${RWANDA_PROJECTS[0].name}
-   Intego: ${formatRWF(RWANDA_PROJECTS[0].goal)}
-   Byakusanyijwe: ${formatRWF(RWANDA_PROJECTS[0].raised)}
-   Aho iherereye: ${RWANDA_PROJECTS[0].location}
-
-2. ${RWANDA_PROJECTS[1].name}
-   Intego: ${formatRWF(RWANDA_PROJECTS[1].goal)}
-   Byakusanyijwe: ${formatRWF(RWANDA_PROJECTS[1].raised)}
-   Aho iherereye: ${RWANDA_PROJECTS[1].location}
-
-3. ${RWANDA_PROJECTS[2].name}
-   Intego: ${formatRWF(RWANDA_PROJECTS[2].goal)}
-   Byakusanyijwe: ${formatRWF(RWANDA_PROJECTS[2].raised)}
-   Aho iherereye: ${RWANDA_PROJECTS[2].location}
-
-Kanda *384*123# gutanga impano`;
+          const lang2 = session.language;
+          let projectsList = "";
+          RWANDA_PROJECTS.forEach((proj, idx) => {
+            projectsList += `\n${idx + 1}. ${getProjectName(proj, lang2)}\n   ${t(session, "goal")}: ${formatRWF(proj.goal)}\n   ${t(session, "raised")}: ${formatRWF(proj.raised)}\n   ${t(session, "location")}: ${getProjectLocation(proj, lang2)}\n`;
+          });
+          response = `END ${t(session, "viewProjects")}:${projectsList}\n\n${t(session, "thankYou")}`;
           break;
 
         case "3": // My Impact
-          response = `END Ingaruka Zawe:
-
-Impano Zawe: 3
-Amafaranga Yose: 1,500 RWF
-Imishinga Wafashije: 2
-
-Icyiciro: 🥉 Bronze Badge
-
-Murakoze kubera impinduka yawe!
-Kanda *384*123# gukomeza.`;
+          response = `END ${t(session, "myImpact")}:\n\n${t(session, "donate")}: 3\n${t(session, "amount")}: 1,500 RWF\n${t(session, "project")}: 2\n\n${t(session, "badge")}: 🥉 Bronze\n\n${t(session, "thankYou")}`;
           break;
 
         case "4": // Help
-          response = `END PaySmile - Ubufasha
-
-📱 Gukoresha:
-1. Hitamo "1" gutanga impano
-2. Hitamo umushinga
-3. Injiza amafaranga (RWF)
-4. Emeza impano yawe
-
-💰 Uburyo bwo Kwishyura:
-- Mobile Money (MTN/Airtel)
-- Min: 100 RWF
-- Max: 10,000 RWF
-
-🎁 Ibihembo:
-- Bronze: 100+ RWF
-- Silver: 1,000+ RWF
-- Gold: 10,000+ RWF
-
-📞 Ikibazo? Hamagara: 0788-123-456
-📧 Email: support@paysmile.rw`;
+          response = `END PaySmile - ${t(session, "help")}\n\n📱 Mobile Money (MTN/Airtel)\n💰 Min: 100 RWF | Max: 10,000 RWF\n\n🎁 ${t(session, "badge")}:\n- Bronze: 100+ RWF\n- Silver: 1,000+ RWF\n- Gold: 10,000+ RWF\n\n📞 +250788123456`;
           break;
 
         default:
-          response = `END Ihitamo ridakwiye. Kanda *384*123# gusubira.`;
+          response = `END ${t(session, "invalidSelection")}`;
       }
     }
 
     // Project Selection
     else if (session.stage === "select_project") {
-      if (userInput === "0") {
+      if (userInput === "00") {
         session.stage = "menu";
-        response = `CON Murakaza neza kuri PaySmile 🇷🇼
-1. Tanga Impano (Donate)
-2. Reba Imishinga (View Projects)
-3. Ingaruka Zanjye (My Impact)
-4. Ubufasha (Help)`;
+        response = `CON ${t(session, "welcome")} 🇷🇼\n\n1. ${t(session, "donate")}\n2. ${t(session, "viewProjects")}\n3. ${t(session, "myImpact")}\n4. ${t(session, "help")}\n\n0. ${t(session, "selectLang")}`;
+      } else if (userInput === "0") {
+        session.stage = "menu";
+        response = `CON ${t(session, "welcome")} 🇷🇼\n\n1. ${t(session, "donate")}\n2. ${t(session, "viewProjects")}\n3. ${t(session, "myImpact")}\n4. ${t(session, "help")}\n\n0. ${t(session, "selectLang")}`;
       } else {
         const projectIndex = parseInt(userInput) - 1;
         if (projectIndex >= 0 && projectIndex < RWANDA_PROJECTS.length) {
           session.selectedProject = RWANDA_PROJECTS[projectIndex];
           session.stage = "enter_amount";
-          response = `CON ${session.selectedProject.name}
-${session.selectedProject.description}
-
-Intego: ${formatRWF(session.selectedProject.goal)}
-Byakusanyijwe: ${formatRWF(session.selectedProject.raised)}
-Aho: ${session.selectedProject.location}
-
-Injiza amafaranga (RWF):
-(Min: 100, Max: 10,000)`;
+          const lang = session.language;
+          response = `CON ${getProjectName(session.selectedProject, lang)}\n${getProjectDescription(session.selectedProject, lang)}\n\n${t(session, "goal")}: ${formatRWF(session.selectedProject.goal)}\n${t(session, "raised")}: ${formatRWF(session.selectedProject.raised)}\n\n${t(session, "enterAmount")} (RWF):\n${t(session, "minMax")}\n\n00. ${t(session, "mainMenu")}\n0. ${t(session, "back")}`;
         } else {
-          response = `END Ihitamo ridakwiye. Kanda *384*123# gusubira.`;
+          response = `END ${t(session, "invalidSelection")}`;
         }
       }
     }
 
     // Amount Entry
     else if (session.stage === "enter_amount") {
-      const amount = parseInt(userInput);
-
-      if (isNaN(amount) || amount < 100 || amount > 10000) {
-        response = `CON Amafaranga adakwiye!
-Injiza hagati ya 100-10,000 RWF:`;
+      if (userInput === "00") {
+        session.stage = "menu";
+        response = `CON ${t(session, "welcome")} 🇷🇼\n\n1. ${t(session, "donate")}\n2. ${t(session, "viewProjects")}\n3. ${t(session, "myImpact")}\n4. ${t(session, "help")}\n\n0. ${t(session, "selectLang")}`;
+      } else if (userInput === "0") {
+        session.stage = "select_project";
+        const lang = session.language;
+        response = `CON ${t(session, "selectProject")}:\n\n1. ${getProjectName(RWANDA_PROJECTS[0], lang)}\n   ${getProgress(RWANDA_PROJECTS[0])}% - ${getProjectLocation(RWANDA_PROJECTS[0], lang)}\n\n2. ${getProjectName(RWANDA_PROJECTS[1], lang)}\n   ${getProgress(RWANDA_PROJECTS[1])}% - ${getProjectLocation(RWANDA_PROJECTS[1], lang)}\n\n3. ${getProjectName(RWANDA_PROJECTS[2], lang)}\n   ${getProgress(RWANDA_PROJECTS[2])}% - ${getProjectLocation(RWANDA_PROJECTS[2], lang)}\n\n00. ${t(session, "mainMenu")}\n0. ${t(session, "back")}`;
       } else {
-        session.amount = amount;
-        session.stage = "confirm";
-
-        // Calculate round-up
-        const roundUpAmount = Math.ceil(amount / 100) * 100;
-        const spareChange = roundUpAmount - amount;
-
-        response = `CON Emeza Impano:
-
-Umushinga: ${session.selectedProject.name}
-Amafaranga: ${formatRWF(amount)}
-${
-  spareChange > 0
-    ? `Kuzuza: ${formatRWF(roundUpAmount)} (+${formatRWF(spareChange)})`
-    : ""
-}
-
-1. Emeza Impano (Confirm)
-2. Hindura Amafaranga (Change)
-0. Hagarika (Cancel)`;
+        const amount = parseInt(userInput);
+        if (isNaN(amount) || amount < 100 || amount > 10000) {
+          response = `CON ${t(session, "invalidAmount")}\n${t(session, "enterBetween")}:\n\n00. ${t(session, "mainMenu")}\n0. ${t(session, "back")}`;
+        } else {
+          session.amount = amount;
+          session.stage = "confirm";
+          const roundUp = Math.ceil(amount / 100) * 100;
+          const roundUpAmount = roundUp - amount;
+          const lang = session.language;
+          response = `CON ${t(session, "confirmDonation")}:\n\n${t(session, "project")}: ${getProjectName(session.selectedProject, lang)}\n${t(session, "amount")}: ${formatRWF(amount)}\n${t(session, "roundUp")}: ${formatRWF(roundUp)} (+${roundUpAmount} RWF)\n\n1. ${t(session, "confirm")}\n2. ${t(session, "change")}\n00. ${t(session, "mainMenu")}\n0. ${t(session, "cancel")}`;
+        }
       }
     }
 
     // Confirmation
     else if (session.stage === "confirm") {
-      switch (userInput) {
-        case "1": // Confirm
-          session.stage = "processing";
+      if (userInput === "00") {
+        session.stage = "menu";
+        response = `CON ${t(session, "welcome")} 🇷🇼\n\n1. ${t(session, "donate")}\n2. ${t(session, "viewProjects")}\n3. ${t(session, "myImpact")}\n4. ${t(session, "help")}\n\n0. ${t(session, "selectLang")}`;
+      } else if (userInput === "0") {
+        sessions.delete(sessionId);
+        response = `END ${t(session, "thankYou")}`;
+      } else if (userInput === "2") {
+        session.stage = "enter_amount";
+        const lang = session.language;
+        response = `CON ${getProjectName(session.selectedProject, lang)}\n${getProjectDescription(session.selectedProject, lang)}\n\n${t(session, "goal")}: ${formatRWF(session.selectedProject.goal)}\n${t(session, "raised")}: ${formatRWF(session.selectedProject.raised)}\n\n${t(session, "enterAmount")} (RWF):\n${t(session, "minMax")}\n\n00. ${t(session, "mainMenu")}\n0. ${t(session, "back")}`;
+      } else if (userInput === "1") {
+        const lang = session.language;
+        const badge = getBadgeTier(session.amount);
+        const txHash = `0x${Math.random().toString(16).substr(2, 8)}...`;
+        
+        // Send SMS receipt
+        try {
+          await sms.send({
+            to: [phoneNumber],
+            message: `PaySmile Receipt: Donated ${formatRWF(session.amount)} to ${getProjectName(session.selectedProject, lang)} (${getProjectLocation(session.selectedProject, lang)}). TX: ${txHash}. Badge: ${badge}. Visit: paysmile.rw`,
+            from: process.env.AT_SENDER_ID || "PaySmile",
+          });
+        } catch (error) {
+          console.error("SMS Error:", error);
+        }
 
-          // Send SMS receipt
-          await sendSMSReceipt(session);
-
-          // Process donation (simulate blockchain transaction)
-          const txHash = `0x${Math.random().toString(36).substring(2, 15)}`;
-
-          response = `END ✅ Impano Yatanzwe Neza!
-
-Umushinga: ${session.selectedProject.name}
-Amafaranga: ${formatRWF(session.amount)}
-
-TX Hash: ${txHash.substring(0, 10)}...
-
-🏆 Icyiciro: Bronze Badge
-📱 SMS receipt yoherejwe
-
-Murakoze cyane! 💚
-Kanda *384*123# gukomeza.`;
-
-          // Clear session
-          sessions.delete(sessionId);
-          break;
-
-        case "2": // Change amount
-          session.stage = "enter_amount";
-          response = `CON Injiza amafaranga gishya (RWF):
-(Min: 100, Max: 10,000)`;
-          break;
-
-        case "0": // Cancel
-          response = `END Impano yahagaritswe.
-Murakoze! Kanda *384*123# kugerageza.`;
-          sessions.delete(sessionId);
-          break;
-
-        default:
-          response = `END Ihitamo ridakwiye. Kanda *384*123# gusubira.`;
-          sessions.delete(sessionId);
+        response = `END ✅ ${t(session, "success")}\n\n${t(session, "project")}: ${getProjectName(session.selectedProject, lang)}\n${t(session, "amount")}: ${formatRWF(session.amount)}\n${t(session, "txHash")}: ${txHash}\n\n🏆 ${t(session, "tier")}: ${badge} ${t(session, "badge")}\n📱 ${t(session, "smsReceipt")}\n\n${t(session, "thankYou")} 💚`;
+        sessions.delete(sessionId);
+      } else {
+        response = `END ${t(session, "invalidSelection")}`;
       }
     }
 
-    // Unknown stage
+    // Fallback
     else {
-      response = `END Ikosa ryabaye. Kanda *384*123# gutangira.`;
-      sessions.delete(sessionId);
+      response = `END ${t(session, "invalidSelection")}`;
     }
 
-    // Log response
-    console.log(`USSD Response: ${response}`);
-
-    // Send response
     res.set("Content-Type", "text/plain");
     res.send(response);
   } catch (error) {
     console.error("USSD Error:", error);
-    res.set("Content-Type", "text/plain");
-    res.send("END Ikosa ryabaye. Gerageza nyuma.");
+    res.send("END Service temporarily unavailable. Please try again.");
   }
 });
 
-// Helper function to send SMS receipt
-async function sendSMSReceipt(session) {
-  try {
-    const message = `PaySmile Receipt:
-Donated ${session.amount} RWF to ${session.selectedProject.name}
-Location: ${session.selectedProject.location}
-Badge: Bronze 🥉
-Thank you! Murakoze!
-www.paysmile.rw`;
+// Test endpoint
+app.post("/test-ussd", (req, res) => {
+  const { phoneNumber, text } = req.body;
+  const sessionId = `test-${Date.now()}`;
+  
+  req.body.sessionId = sessionId;
+  req.body.serviceCode = "*384*123#";
+  
+  app.request.body = req.body;
+  
+  return app._router.handle(
+    { ...req, url: "/ussd", method: "POST" },
+    res,
+    () => {}
+  );
+});
 
-    const result = await sms.send({
-      to: [session.phoneNumber],
-      message: message,
-      from: process.env.AT_SENDER_ID || "PaySmile",
-    });
+// API endpoints
+app.get("/api/projects", (req, res) => {
+  const lang = req.query.lang || "en";
+  const projects = RWANDA_PROJECTS.map((proj) => ({
+    id: proj.id,
+    name: getProjectName(proj, lang),
+    location: getProjectLocation(proj, lang),
+    description: getProjectDescription(proj, lang),
+    goal: proj.goal,
+    raised: proj.raised,
+    progress: getProgress(proj),
+  }));
+  res.json({ success: true, projects });
+});
 
-    console.log("SMS sent:", result);
-    return result;
-  } catch (error) {
-    console.error("SMS Error:", error);
-    return null;
-  }
-}
-
-// Health check endpoint
 app.get("/health", (req, res) => {
   res.json({
     status: "online",
@@ -476,45 +432,19 @@ app.get("/health", (req, res) => {
   });
 });
 
-// Test endpoint to simulate USSD
-app.post("/test-ussd", (req, res) => {
-  const { phoneNumber, text } = req.body;
-  const testSessionId = `test_${Date.now()}`;
-
-  req.body.sessionId = testSessionId;
-  req.body.serviceCode = "*384*123#";
-
-  // Forward to USSD handler
-  req.url = "/ussd";
-  app.handle(req, res);
-});
-
-// API endpoint to get projects (for web app)
-app.get("/api/projects", (req, res) => {
-  res.json({
-    success: true,
-    projects: RWANDA_PROJECTS,
-  });
-});
-
 // Start server
 app.listen(PORT, () => {
   console.log(`
 ╔═══════════════════════════════════════════╗
-║   PaySmile USSD Server 🇷🇼               ║
+║   PaySmile USSD Server 🌍                ║
 ║   Running on port ${PORT}                  ║
-║   USSD Code: *384*123#                    ║
-║   Environment: ${process.env.NODE_ENV}    ║
+║   Languages: EN, SW, FR                  ║
+║   Environment: ${process.env.NODE_ENV || "development"}    ║
 ╚═══════════════════════════════════════════╝
   `);
-  console.log(`\nEndpoints:`);
-  console.log(`  POST /ussd          - USSD callback`);
-  console.log(`  POST /test-ussd     - Test USSD locally`);
-  console.log(`  GET  /api/projects  - Get Rwanda projects`);
-  console.log(`  GET  /health        - Health check`);
-  console.log(
-    `\nTest USSD: curl -X POST http://localhost:${PORT}/test-ussd -H "Content-Type: application/json" -d '{"phoneNumber": "+250788123456", "text": ""}'\n`
-  );
+  console.log("Endpoints:");
+  console.log("  POST /ussd          - USSD callback");
+  console.log("  POST /test-ussd     - Test USSD locally");
+  console.log("  GET  /api/projects  - Get projects");
+  console.log("  GET  /health        - Health check\n");
 });
-
-module.exports = app;
