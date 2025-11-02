@@ -296,7 +296,7 @@ app.post("/ussd", async (req, res) => {
         case "0": // Change Language
           session.stage = "language";
           session.language = null;
-          response = `CON ${LANGUAGES.en.welcome} 🌍\n${LANGUAGES.en.selectLang}:\n\n1. English\n2. Kiswahili\n3. Français`;
+          response = `CON ${LANGUAGES.en.welcome} 😊\n${LANGUAGES.en.selectLang}:\n\n1. English\n2. Kiswahili\n3. Français`;
           break;
 
         case "1": // Donate
@@ -395,7 +395,7 @@ app.post("/ussd", async (req, res) => {
       if (userInput === "00") {
         session.stage = "menu";
         session.projectViewIndex = 0;
-        response = `CON ${t(session, "welcome")} 🌍\n\n1. ${t(
+        response = `CON ${t(session, "welcome")} 😊\n\n1. ${t(
           session,
           "donate"
         )}\n2. ${t(session, "viewProjects")}\n3. ${t(
@@ -405,7 +405,7 @@ app.post("/ussd", async (req, res) => {
       } else if (userInput === "0") {
         session.stage = "menu";
         session.projectViewIndex = 0;
-        response = `CON ${t(session, "welcome")} 🌍\n\n1. ${t(
+        response = `CON ${t(session, "welcome")} 😊\n\n1. ${t(
           session,
           "donate"
         )}\n2. ${t(session, "viewProjects")}\n3. ${t(
@@ -443,7 +443,7 @@ app.post("/ussd", async (req, res) => {
     else if (session.stage === "view_impact") {
       if (userInput === "00") {
         session.stage = "menu";
-        response = `CON ${t(session, "welcome")} 🌍\n\n1. ${t(
+        response = `CON ${t(session, "welcome")} 😊\n\n1. ${t(
           session,
           "donate"
         )}\n2. ${t(session, "viewProjects")}\n3. ${t(
@@ -452,7 +452,7 @@ app.post("/ussd", async (req, res) => {
         )}\n4. ${t(session, "help")}\n\n0. ${t(session, "selectLang")}`;
       } else if (userInput === "0") {
         session.stage = "menu";
-        response = `CON ${t(session, "welcome")} 🌍\n\n1. ${t(
+        response = `CON ${t(session, "welcome")} 😊\n\n1. ${t(
           session,
           "donate"
         )}\n2. ${t(session, "viewProjects")}\n3. ${t(
@@ -468,7 +468,7 @@ app.post("/ussd", async (req, res) => {
     else if (session.stage === "view_help") {
       if (userInput === "00") {
         session.stage = "menu";
-        response = `CON ${t(session, "welcome")} 🌍\n\n1. ${t(
+        response = `CON ${t(session, "welcome")} 😊\n\n1. ${t(
           session,
           "donate"
         )}\n2. ${t(session, "viewProjects")}\n3. ${t(
@@ -477,7 +477,7 @@ app.post("/ussd", async (req, res) => {
         )}\n4. ${t(session, "help")}\n\n0. ${t(session, "selectLang")}`;
       } else if (userInput === "0") {
         session.stage = "menu";
-        response = `CON ${t(session, "welcome")} 🌍\n\n1. ${t(
+        response = `CON ${t(session, "welcome")} 😊\n\n1. ${t(
           session,
           "donate"
         )}\n2. ${t(session, "viewProjects")}\n3. ${t(
@@ -493,7 +493,7 @@ app.post("/ussd", async (req, res) => {
     else if (session.stage === "select_project") {
       if (userInput === "00") {
         session.stage = "menu";
-        response = `CON ${t(session, "welcome")} 🌍\n\n1. ${t(
+        response = `CON ${t(session, "welcome")} 😊\n\n1. ${t(
           session,
           "donate"
         )}\n2. ${t(session, "viewProjects")}\n3. ${t(
@@ -502,7 +502,7 @@ app.post("/ussd", async (req, res) => {
         )}\n4. ${t(session, "help")}\n\n0. ${t(session, "selectLang")}`;
       } else if (userInput === "0") {
         session.stage = "menu";
-        response = `CON ${t(session, "welcome")} 🌍\n\n1. ${t(
+        response = `CON ${t(session, "welcome")} 😊\n\n1. ${t(
           session,
           "donate"
         )}\n2. ${t(session, "viewProjects")}\n3. ${t(
@@ -541,7 +541,7 @@ app.post("/ussd", async (req, res) => {
     else if (session.stage === "enter_amount") {
       if (userInput === "00") {
         session.stage = "menu";
-        response = `CON ${t(session, "welcome")} 🌍\n\n1. ${t(
+        response = `CON ${t(session, "welcome")} 😊\n\n1. ${t(
           session,
           "donate"
         )}\n2. ${t(session, "viewProjects")}\n3. ${t(
@@ -601,7 +601,7 @@ app.post("/ussd", async (req, res) => {
     else if (session.stage === "confirm") {
       if (userInput === "00") {
         session.stage = "menu";
-        response = `CON ${t(session, "welcome")} 🌍\n\n1. ${t(
+        response = `CON ${t(session, "welcome")} 😊\n\n1. ${t(
           session,
           "donate"
         )}\n2. ${t(session, "viewProjects")}\n3. ${t(
