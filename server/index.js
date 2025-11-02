@@ -77,6 +77,15 @@ const LANGUAGES = {
     gratefulMessage: "families are grateful for your generosity",
     keepGoing: "Every donation counts!",
     yourImpactMatters: "You're making Rwanda better",
+    // Trust & Support
+    trustInfo: "Your Safety & Trust",
+    verifiedProjects: "All projects verified",
+    transparentTracking: "Blockchain tracking",
+    support24: "24/7 Support",
+    contactUs: "Contact",
+    projectsWebsite: "Projects",
+    securePayments: "Secure payments",
+    governmentApproved: "Govt approved NGOs",
   },
   sw: {
     welcome: "Karibu PaySmile",
@@ -130,6 +139,15 @@ const LANGUAGES = {
     gratefulMessage: "familia zinashukuru ukarimu wako",
     keepGoing: "Kila mchango una umuhimu!",
     yourImpactMatters: "Unafanya Rwanda iwe bora",
+    // Trust & Support
+    trustInfo: "Usalama na Uaminifu Wako",
+    verifiedProjects: "Miradi yote imethibitishwa",
+    transparentTracking: "Ufuatiliaji wa Blockchain",
+    support24: "Msaada 24/7",
+    contactUs: "Wasiliana",
+    projectsWebsite: "Miradi",
+    securePayments: "Malipo salama",
+    governmentApproved: "NGO zilizoidhinishwa na Serikali",
   },
   fr: {
     welcome: "Bienvenue à PaySmile",
@@ -183,6 +201,15 @@ const LANGUAGES = {
     gratefulMessage: "familles vous remercient pour votre générosité",
     keepGoing: "Chaque don compte!",
     yourImpactMatters: "Vous rendez le Rwanda meilleur",
+    // Trust & Support
+    trustInfo: "Votre Sécurité et Confiance",
+    verifiedProjects: "Tous les projets vérifiés",
+    transparentTracking: "Suivi Blockchain",
+    support24: "Support 24/7",
+    contactUs: "Contact",
+    projectsWebsite: "Projets",
+    securePayments: "Paiements sécurisés",
+    governmentApproved: "ONG approuvées par le gouvernement",
   },
 };
 
@@ -369,7 +396,10 @@ app.post("/ussd", async (req, res) => {
       )}\n2. ${t(session, "buyData")}\n3. ${t(session, "payUtility")}\n4. ${t(
         session,
         "viewProjects"
-      )}\n5. ${t(session, "myImpact")}\n\n0. ${t(session, "selectLang")}`;
+      )}\n5. ${t(session, "myImpact")}\n6. ${t(session, "help")} & ${t(
+        session,
+        "trustInfo"
+      )}\n\n0. ${t(session, "selectLang")}`;
     }
 
     // Main Menu
@@ -449,6 +479,23 @@ app.post("/ussd", async (req, res) => {
             session,
             "thankYou"
           )}\n\n00. ${t(session, "mainMenu")}\n0. ${t(session, "back")}`;
+          break;
+
+        case "6": // Help & Trust Info
+          session.stage = "view_help";
+          response = `CON ${t(session, "trustInfo")} 🛡️\n\n✓ ${t(
+            session,
+            "verifiedProjects"
+          )}\n✓ ${t(session, "governmentApproved")}\n✓ ${t(
+            session,
+            "transparentTracking"
+          )}\n✓ ${t(session, "securePayments")}\n\n📞 ${t(
+            session,
+            "support24"
+          )}: +250788123456\n🌐 paysmile.rw/projects\n\n00. ${t(
+            session,
+            "mainMenu"
+          )}\n0. ${t(session, "back")}`;
           break;
 
         default:
