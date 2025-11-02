@@ -336,27 +336,25 @@ app.post("/ussd", async (req, res) => {
 
         case "2": // View Projects
           session.stage = "view_projects";
+          session.projectViewIndex = 0; // Start at first project
           const lang2 = session.language;
-          let projectsList = "";
-          RWANDA_PROJECTS.forEach((proj, idx) => {
-            projectsList += `\n${idx + 1}. ${getProjectName(
-              proj,
-              lang2
-            )}\n   ${t(session, "goal")}: ${formatRWF(proj.goal)}\n   ${t(
-              session,
-              "raised"
-            )}: ${formatRWF(proj.raised)}\n   ${t(
-              session,
-              "location"
-            )}: ${getProjectLocation(proj, lang2)}\n`;
-          });
-          response = `CON ${t(
+          const currentProj = RWANDA_PROJECTS[session.projectViewIndex];
+          response = `CON ${t(session, "viewProjects")} (${
+            session.projectViewIndex + 1
+          }/${RWANDA_PROJECTS.length}):\n\n${getProjectName(
+            currentProj,
+            lang2
+          )}\n${t(session, "goal")}: ${formatRWF(currentProj.goal)}\n${t(
             session,
-            "viewProjects"
-          )}:${projectsList}\n\n00. ${t(session, "mainMenu")}\n0. ${t(
+            "raised"
+          )}: ${formatRWF(currentProj.raised)}\n${t(
             session,
-            "back"
-          )}`;
+            "location"
+          )}: ${getProjectLocation(currentProj, lang2)}\n\n${
+            session.projectViewIndex < RWANDA_PROJECTS.length - 1
+              ? "9. Next"
+              : ""
+          }\n00. ${t(session, "mainMenu")}\n0. ${t(session, "back")}`;
           break;
 
         case "3": // My Impact
@@ -396,6 +394,7 @@ app.post("/ussd", async (req, res) => {
     else if (session.stage === "view_projects") {
       if (userInput === "00") {
         session.stage = "menu";
+        session.projectViewIndex = 0;
         response = `CON ${t(session, "welcome")} 🌍\n\n1. ${t(
           session,
           "donate"
@@ -405,6 +404,7 @@ app.post("/ussd", async (req, res) => {
         )}\n4. ${t(session, "help")}\n\n0. ${t(session, "selectLang")}`;
       } else if (userInput === "0") {
         session.stage = "menu";
+        session.projectViewIndex = 0;
         response = `CON ${t(session, "welcome")} 🌍\n\n1. ${t(
           session,
           "donate"
@@ -412,6 +412,28 @@ app.post("/ussd", async (req, res) => {
           session,
           "myImpact"
         )}\n4. ${t(session, "help")}\n\n0. ${t(session, "selectLang")}`;
+      } else if (
+        userInput === "9" &&
+        session.projectViewIndex < RWANDA_PROJECTS.length - 1
+      ) {
+        // Show next project
+        session.projectViewIndex++;
+        const lang = session.language;
+        const currentProj = RWANDA_PROJECTS[session.projectViewIndex];
+        response = `CON ${t(session, "viewProjects")} (${
+          session.projectViewIndex + 1
+        }/${RWANDA_PROJECTS.length}):\n\n${getProjectName(
+          currentProj,
+          lang
+        )}\n${t(session, "goal")}: ${formatRWF(currentProj.goal)}\n${t(
+          session,
+          "raised"
+        )}: ${formatRWF(currentProj.raised)}\n${t(
+          session,
+          "location"
+        )}: ${getProjectLocation(currentProj, lang)}\n\n${
+          session.projectViewIndex < RWANDA_PROJECTS.length - 1 ? "9. Next" : ""
+        }\n00. ${t(session, "mainMenu")}\n0. ${t(session, "back")}`;
       } else {
         response = `END ${t(session, "invalidSelection")}`;
       }
