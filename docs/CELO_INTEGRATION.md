@@ -64,10 +64,10 @@ Download **Valora** app or use **MetaMask**
 
 #### Step 2: Get FREE Test CELO
 
-Visit the Celo faucet:
+Visit a Sepolia faucet (example):
 
 ```
-https://faucet.celo.org/alfajores
+https://sepoliafaucet.com/
 ```
 
 Enter your wallet address and get FREE testnet CELO!
@@ -92,10 +92,10 @@ Enter your wallet address and get FREE testnet CELO!
 echo "PRIVATE_KEY=0xyour_private_key_here" > .env
 ```
 
-#### Step 5: Deploy to Alfajores
+#### Step 5: Deploy to Sepolia
 
 ```bash
-npx hardhat run scripts/deploy.js --network alfajores
+npx hardhat run scripts/deploy.js --network sepolia
 ```
 
 You'll see:
@@ -120,7 +120,7 @@ NEXT_PUBLIC_SMILE_BADGE_NFT_ADDRESS=0x5678...
 
 1. Open app: `npm run dev`
 2. Connect wallet
-3. **Switch MetaMask to Celo Alfajores network**
+3. **Switch MetaMask to Sepolia network**
 4. Test donations with free testnet CELO!
 
 #### Step 8: Verify on Celoscan
@@ -128,7 +128,7 @@ NEXT_PUBLIC_SMILE_BADGE_NFT_ADDRESS=0x5678...
 View your contracts:
 
 ```
-https://alfajores.celoscan.io/address/0xyour_contract_address
+https://sepolia.etherscan.io/address/0xyour_contract_address
 ```
 
 ---

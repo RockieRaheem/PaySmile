@@ -142,7 +142,7 @@ export default function ProjectsPage() {
 
       toast({
         title: "Donation Submitted! ⏳",
-        description: `Donating ${amount} CELO to ${selectedProject.name}`,
+        description: `Donating ${amount} ETH to ${selectedProject.name}`,
       });
 
       // Don't clear donatingProjectId or amount here - wait for confirmation
@@ -220,7 +220,7 @@ export default function ProjectsPage() {
               <Wallet className="h-12 w-12 text-muted-foreground" />
               <h2 className="text-xl font-bold">Connect Your Wallet</h2>
               <p className="text-center text-muted-foreground">
-                Please connect your Celo wallet to view and donate to projects.
+                Please connect your wallet to view and donate to projects.
               </p>
               <Button asChild className="w-full">
                 <Link href="/connect">Connect Wallet</Link>
@@ -333,7 +333,7 @@ export default function ProjectsPage() {
                       />
                       <div className="flex items-center justify-between text-[10px] text-muted-foreground font-medium">
                         <span>
-                          {formatEther(project.currentFunding).slice(0, 4)} CELO
+                          {formatEther(project.currentFunding).slice(0, 4)} ETH
                         </span>
                         <span>{project.votesReceived.toString()} votes</span>
                       </div>
@@ -405,12 +405,12 @@ export default function ProjectsPage() {
           <DialogHeader>
             <DialogTitle>Donate to {selectedProject?.name}</DialogTitle>
             <DialogDescription>
-              Enter the amount you'd like to donate in CELO
+              Enter the amount you'd like to donate in ETH
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="amount">Amount (CELO)</Label>
+              <Label htmlFor="amount">Amount (ETH)</Label>
               <Input
                 id="amount"
                 type="number"
@@ -421,7 +421,7 @@ export default function ProjectsPage() {
                 onChange={(e) => setDonationAmount(e.target.value)}
               />
               <p className="text-xs text-muted-foreground">
-                Minimum donation: 0.01 CELO
+                Minimum donation: 0.01 ETH
               </p>
             </div>
           </div>

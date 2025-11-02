@@ -151,12 +151,12 @@ export default function DashboardPage() {
                     {balance
                       ? parseFloat(formatEther(balance.value)).toFixed(4)
                       : "0.0000"}{" "}
-                    {balance?.symbol || "CELO"}
+                    {balance?.symbol || "ETH"}
                   </p>
                   <p className="text-sm">Your Wallet Balance</p>
                   <div className="mt-4 pt-4 border-t border-secondary-foreground/20">
                     <p className="text-2xl font-bold tracking-tight">
-                      {totalDonationsNum.toFixed(4)} {balance?.symbol || "CELO"}
+                      {totalDonationsNum.toFixed(4)} {balance?.symbol || "ETH"}
                     </p>
                     <p className="text-sm">Your Total Donations</p>
                   </div>
@@ -242,8 +242,8 @@ export default function DashboardPage() {
                           </p>
                           <div className="space-y-1 pt-0.5">
                             <div className="flex justify-between text-[10px] text-muted-foreground">
-                              <span>Goal: {fundingGoal.toFixed(2)} CELO</span>
-                              <span>{currentFunding.toFixed(2)} CELO</span>
+                              <span>Goal: {fundingGoal.toFixed(2)} ETH</span>
+                              <span>{currentFunding.toFixed(2)} ETH</span>
                             </div>
                             <Progress
                               value={percentFunded}
@@ -326,7 +326,7 @@ export default function DashboardPage() {
                               Raised:
                             </span>
                             <span className="text-primary font-bold">
-                              {currentFunding.toFixed(2)} CELO
+                              {currentFunding.toFixed(2)} ETH
                             </span>
                           </div>
                           <div className="inline-flex items-center gap-1 bg-primary/10 px-2 py-0.5 rounded-full">

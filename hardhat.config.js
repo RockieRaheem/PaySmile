@@ -19,17 +19,11 @@ module.exports = {
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
       chainId: 42220,
     },
-    // Celo Alfajores Testnet
-    alfajores: {
-      url: "https://alfajores-forno.celo-testnet.org",
+    // Sepolia (Ethereum testnet)
+    sepolia: {
+      url: process.env.SEPOLIA_RPC_URL || "https://rpc.ankr.com/eth_sepolia",
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
-      chainId: 44787,
-    },
-    // Celo Alfajores Testnet (alias)
-    celoAlfajores: {
-      url: "https://alfajores-forno.celo-testnet.org",
-      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
-      chainId: 44787,
+      chainId: 11155111,
     },
     // Local development
     localhost: {
@@ -45,26 +39,7 @@ module.exports = {
   },
   etherscan: {
     apiKey: {
-      alfajores: process.env.CELOSCAN_API_KEY || "",
-      celo: process.env.CELOSCAN_API_KEY || "",
+      sepolia: process.env.ETHERSCAN_API_KEY || "",
     },
-    customChains: [
-      {
-        network: "alfajores",
-        chainId: 44787,
-        urls: {
-          apiURL: "https://api-alfajores.celoscan.io/api",
-          browserURL: "https://alfajores.celoscan.io",
-        },
-      },
-      {
-        network: "celo",
-        chainId: 42220,
-        urls: {
-          apiURL: "https://api.celoscan.io/api",
-          browserURL: "https://celoscan.io",
-        },
-      },
-    ],
   },
 };

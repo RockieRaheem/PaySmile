@@ -1,6 +1,6 @@
 /**
  * Script to add 4 real Rwanda crisis projects to the DonationPool contract
- * Run: npx hardhat run scripts/add-rwanda-projects.js --network alfajores
+ * Run: npx hardhat run scripts/add-rwanda-projects.js --network sepolia
  */
 
 const hre = require("hardhat");
@@ -98,7 +98,7 @@ async function main() {
     console.log(`Location: ${project.location}`);
     console.log(`Category: ${project.category}`);
     console.log(
-      `Funding Goal: ${hre.ethers.formatEther(project.fundingGoal)} CELO`
+      `Funding Goal: ${hre.ethers.formatEther(project.fundingGoal)} ETH`
     );
     console.log(`Recipient: ${recipientAddress}`);
     console.log(`Description: ${project.description.substring(0, 80)}...`);

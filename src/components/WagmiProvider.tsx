@@ -1,14 +1,14 @@
 "use client";
 
 import { WagmiProvider as WagmiProviderBase, createConfig, http } from "wagmi";
-import { celo, celoAlfajores, localhost } from "wagmi/chains";
+import { sepolia, localhost } from "wagmi/chains";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactNode } from "react";
 import { injected } from "wagmi/connectors";
 
-// Initialize with Celo Alfajores testnet as default
+// Initialize with Sepolia testnet as default
 const config = createConfig({
-  chains: [celoAlfajores, celo, localhost],
+  chains: [sepolia, localhost],
   connectors: [
     // Injected wallets (MetaMask, etc.)
     injected({
@@ -17,8 +17,9 @@ const config = createConfig({
   ],
   transports: {
     [localhost.id]: http("http://127.0.0.1:8545"),
-    [celo.id]: http("https://forno.celo.org"),
-    [celoAlfajores.id]: http("https://alfajores-forno.celo-testnet.org"),
+    [sepolia.id]: http(
+      process.env.SEPOLIA_RPC_URL || "https://rpc.ankr.com/eth_sepolia"
+    ),
   },
   ssr: true,
 });
