@@ -23,31 +23,149 @@ const sms = AT.SMS;
 // In-memory session storage (use Redis in production)
 const sessions = new Map();
 
+// Multilingual support
+const LANGUAGES = {
+  en: {
+    welcome: "Welcome to PaySmile",
+    selectLang: "Select Language",
+    donate: "Donate",
+    viewProjects: "View Projects",
+    myImpact: "My Impact",
+    help: "Help",
+    back: "Back",
+    mainMenu: "Main Menu",
+    selectProject: "Select Project",
+    enterAmount: "Enter amount",
+    confirm: "Confirm",
+    cancel: "Cancel",
+    change: "Change Amount",
+    success: "Donation Successful!",
+    project: "Project",
+    amount: "Amount",
+    goal: "Goal",
+    raised: "Raised",
+    location: "Location",
+    minMax: "(Min: 100, Max: 10,000)",
+    confirmDonation: "Confirm Donation",
+    badge: "Badge",
+    smsReceipt: "SMS receipt sent",
+    thankYou: "Thank you!",
+  },
+  sw: {
+    welcome: "Karibu PaySmile",
+    selectLang: "Chagua Lugha",
+    donate: "Toa Mchango",
+    viewProjects: "Tazama Miradi",
+    myImpact: "Athari Zangu",
+    help: "Msaada",
+    back: "Rudi Nyuma",
+    mainMenu: "Menu Kuu",
+    selectProject: "Chagua Mradi",
+    enterAmount: "Weka kiasi",
+    confirm: "Thibitisha",
+    cancel: "Ghairi",
+    change: "Badilisha Kiasi",
+    success: "Mchango Umefanikiwa!",
+    project: "Mradi",
+    amount: "Kiasi",
+    goal: "Lengo",
+    raised: "Imekusanywa",
+    location: "Mahali",
+    minMax: "(Chini: 100, Juu: 10,000)",
+    confirmDonation: "Thibitisha Mchango",
+    badge: "Tuzo",
+    smsReceipt: "Risiti ya SMS imetumwa",
+    thankYou: "Asante sana!",
+  },
+  fr: {
+    welcome: "Bienvenue à PaySmile",
+    selectLang: "Sélectionner la langue",
+    donate: "Faire un don",
+    viewProjects: "Voir les projets",
+    myImpact: "Mon impact",
+    help: "Aide",
+    back: "Retour",
+    mainMenu: "Menu principal",
+    selectProject: "Sélectionner un projet",
+    enterAmount: "Entrer le montant",
+    confirm: "Confirmer",
+    cancel: "Annuler",
+    change: "Changer le montant",
+    success: "Don réussi!",
+    project: "Projet",
+    amount: "Montant",
+    goal: "Objectif",
+    raised: "Collecté",
+    location: "Lieu",
+    minMax: "(Min: 100, Max: 10,000)",
+    confirmDonation: "Confirmer le don",
+    badge: "Badge",
+    smsReceipt: "Reçu SMS envoyé",
+    thankYou: "Merci beaucoup!",
+  },
+};
+
 // Rwanda projects for USSD
 const RWANDA_PROJECTS = [
   {
     id: 1,
-    name: "Clean Water - Kigali",
-    location: "Nyarugenge District",
+    name: {
+      en: "Clean Water - Kigali",
+      sw: "Maji Safi - Kigali",
+      fr: "Eau Propre - Kigali",
+    },
+    location: {
+      en: "Nyarugenge District",
+      sw: "Wilaya ya Nyarugenge",
+      fr: "District de Nyarugenge",
+    },
     goal: 2500,
     raised: 450,
-    description: "Water filtration systems",
+    description: {
+      en: "Water filtration systems",
+      sw: "Mifumo ya kuchuja maji",
+      fr: "Systèmes de filtration d'eau",
+    },
   },
   {
     id: 2,
-    name: "School Desks - Musanze",
-    location: "Northern Province",
+    name: {
+      en: "School Desks - Musanze",
+      sw: "Madawati ya Shule - Musanze",
+      fr: "Bureaux d'école - Musanze",
+    },
+    location: {
+      en: "Northern Province",
+      sw: "Mkoa wa Kaskazini",
+      fr: "Province du Nord",
+    },
     goal: 1500,
     raised: 320,
-    description: "200 wooden desks",
+    description: {
+      en: "200 wooden desks for students",
+      sw: "Madawati 200 ya mbao kwa wanafunzi",
+      fr: "200 bureaux en bois pour étudiants",
+    },
   },
   {
     id: 3,
-    name: "Solar Lights - Rubavu",
-    location: "Lake Kivu",
+    name: {
+      en: "Solar Lights - Rubavu",
+      sw: "Taa za Jua - Rubavu",
+      fr: "Lumières Solaires - Rubavu",
+    },
+    location: {
+      en: "Lake Kivu",
+      sw: "Ziwa Kivu",
+      fr: "Lac Kivu",
+    },
     goal: 1000,
     raised: 180,
-    description: "Solar lanterns for 100 homes",
+    description: {
+      en: "Solar lanterns for 100 homes",
+      sw: "Taa za jua kwa nyumba 100",
+      fr: "Lanternes solaires pour 100 maisons",
+    },
   },
 ];
 
@@ -55,13 +173,34 @@ const RWANDA_PROJECTS = [
 function getSession(sessionId) {
   if (!sessions.has(sessionId)) {
     sessions.set(sessionId, {
-      stage: "initial",
+      stage: "language",
+      language: null,
       selectedProject: null,
       amount: null,
       phoneNumber: null,
+      history: [],
     });
   }
   return sessions.get(sessionId);
+}
+
+// Helper to get translated text
+function t(session, key) {
+  const lang = session.language || "en";
+  return LANGUAGES[lang][key] || key;
+}
+
+// Helper to get project name in language
+function getProjectName(project, lang) {
+  return project.name[lang] || project.name.en;
+}
+
+function getProjectLocation(project, lang) {
+  return project.location[lang] || project.location.en;
+}
+
+function getProjectDescription(project, lang) {
+  return project.description[lang] || project.description.en;
 }
 
 // Helper function to format currency
