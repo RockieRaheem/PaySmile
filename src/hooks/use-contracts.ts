@@ -163,10 +163,7 @@ export function useProjects() {
 
   const fetchProjects = useCallback(
     async (silent = false) => {
-      // Import local Rwanda projects from data.ts as fallback
-      const { activeProjects: localProjects } = await import("@/lib/data");
-
-      if (projectCount !== undefined) {
+      if (projectCount !== undefined && projectCount > 0) {
         // Only show loading state on initial load, not on refetch
         if (!silent) {
           setIsLoading(true);
@@ -198,22 +195,8 @@ export function useProjects() {
               votesReceived: BigInt(project.votesReceived || "0"),
             }));
 
-            // Add local Rwanda projects (convert to blockchain format)
-            const rwandaProjects = localProjects.map((proj, idx) => ({
-              id: 1000 + proj.id, // offset IDs to avoid conflicts
-              name: proj.title,
-              description: proj.description,
-              fundingGoal: BigInt(proj.fundingGoal),
-              currentFunding: BigInt(proj.currentFunding),
-              votesReceived: BigInt(0),
-              isActive: true,
-              isFunded: false,
-              category: proj.category,
-              recipient: "0x0000000000000000000000000000000000000000",
-            }));
-
-            // Merge blockchain + local projects
-            setProjects([...parsedProjects, ...rwandaProjects]);
+            // Show blockchain projects only
+            setProjects(parsedProjects);
           })
           .finally(() => {
             if (!silent) {
@@ -221,21 +204,9 @@ export function useProjects() {
             }
           });
       } else {
-        // No blockchain connection - just show local Rwanda projects
-        const rwandaProjects = localProjects.map((proj, idx) => ({
-          id: 1000 + proj.id,
-          name: proj.title,
-          description: proj.description,
-          fundingGoal: BigInt(proj.fundingGoal),
-          currentFunding: BigInt(proj.currentFunding),
-          votesReceived: BigInt(0),
-          isActive: true,
-          isFunded: false,
-          category: proj.category,
-          recipient: "0x0000000000000000000000000000000000000000",
-        }));
-        setProjects(rwandaProjects);
-        setIsLoading(false);
+        // No projects yet or still loading projectCount
+        setProjects([]);
+        setIsLoading(projectCount === undefined); // Only show loading if count is undefined (still fetching)
       }
     },
     [projectCount]
