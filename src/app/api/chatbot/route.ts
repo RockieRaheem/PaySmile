@@ -4,6 +4,9 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 // Initialize Gemini AI
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
+// Use Gemini 2.5 Flash - fast, free, and reliable
+const MODEL_NAME = "gemini-2.5-flash";
+
 // System prompt for PaySmile context
 const SYSTEM_PROMPT = `You are Smiley Helper, a friendly and knowledgeable AI assistant for PaySmile, a blockchain-based donation platform built on the Celo network. Your role is to help users understand blockchain technology, cryptocurrency, and how to use PaySmile.
 
@@ -65,8 +68,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Initialize the model
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    // Initialize the model with the updated model name
+    const model = genAI.getGenerativeModel({ model: MODEL_NAME });
 
     // Build conversation history
     const history: Message[] = conversationHistory || [];
