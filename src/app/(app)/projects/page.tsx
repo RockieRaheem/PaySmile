@@ -314,6 +314,8 @@ export default function ProjectsPage() {
                         alt={project.name}
                         fill
                         className="object-cover"
+                        quality={100}
+                        style={{ imageRendering: "crisp-edges" }}
                         unoptimized
                       />
                     </div>

@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { createPublicClient, http, defineChain } from "viem";
 import { localhost } from "viem/chains";
 import { DONATION_POOL_ABI } from "@/lib/abis/DonationPool";
+import {
+  getProjectDisplayName,
+  getProjectDisplayDescription,
+} from "@/lib/project-names";
 
 // Disable caching for this route to always fetch fresh blockchain data
 export const dynamic = "force-dynamic";
@@ -70,10 +74,12 @@ export async function GET(
     });
 
     // Parse the contract response
+    const blockchainName = data[0] as string;
+    const blockchainDescription = data[1] as string;
     const project = {
       id: projectId,
-      name: data[0] as string,
-      description: data[1] as string,
+      name: getProjectDisplayName(blockchainName), // Use display name instead of blockchain name
+      description: getProjectDisplayDescription(blockchainDescription), // Use display description
       recipient: data[2] as string,
       fundingGoal: (data[3] as bigint).toString(),
       currentFunding: (data[4] as bigint).toString(),
@@ -81,7 +87,7 @@ export async function GET(
       isFunded: data[6] as boolean,
       votesReceived: (data[7] as bigint).toString(),
       // Add category mapping based on project name or description
-      category: categorizeProject(data[0] as string, data[1] as string),
+      category: categorizeProject(blockchainName, blockchainDescription),
     };
 
     return NextResponse.json(project, {

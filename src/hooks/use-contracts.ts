@@ -169,18 +169,21 @@ export function useProjects() {
           setIsLoading(true);
         }
         const count = Number(projectCount);
+
+        // Exclude duplicate projects (IDs 4 and 5)
+        const duplicateProjectIds = [4, 5];
         const projectPromises = [];
 
         for (let i = 0; i < count; i++) {
-          // Add cache-busting timestamp to force fresh data
-          const timestamp = Date.now();
+          // Skip duplicate projects
+          if (duplicateProjectIds.includes(i)) {
+            continue;
+          }
+
+          // Fetch without cache-busting for better performance
           projectPromises.push(
-            fetch(`/api/project/${i}?t=${timestamp}`, {
-              cache: "no-store",
-              headers: {
-                "Cache-Control": "no-cache, no-store, must-revalidate",
-                Pragma: "no-cache",
-              },
+            fetch(`/api/project/${i}`, {
+              next: { revalidate: 30 }, // Cache for 30 seconds
             }).then((res) => res.json())
           );
         }
@@ -195,7 +198,7 @@ export function useProjects() {
               votesReceived: BigInt(project.votesReceived || "0"),
             }));
 
-            // Show blockchain projects only
+            // Show blockchain projects only (excluding duplicates)
             setProjects(parsedProjects);
           })
           .finally(() => {
