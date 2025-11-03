@@ -148,7 +148,8 @@ function AIChatWindow({ onClose }: AIChatWindowProps) {
     } finally {
       setIsLoading(false);
     }
-  };  const handleSuggestedQuestion = (question: string) => {
+  };
+  const handleSuggestedQuestion = (question: string) => {
     handleSendMessage(question);
   };
 
