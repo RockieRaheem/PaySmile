@@ -2,6 +2,7 @@
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { WagmiProvider } from "@/components/WagmiProvider";
+import { AIChatButton } from "@/components/AIChat";
 import { useEffect } from "react";
 
 export default function RootLayout({
@@ -88,6 +89,7 @@ export default function RootLayout({
         <body className="antialiased">
           {children}
           <Toaster />
+          <AIChatButton />
         </body>
       </html>
     </WagmiProvider>
