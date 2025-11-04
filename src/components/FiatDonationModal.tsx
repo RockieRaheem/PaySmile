@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useAccount } from "wagmi";
+import { parseEther } from "viem";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,6 +22,8 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CreditCard, Smartphone, Wallet } from "lucide-react";
+import { useDonateToProject } from "@/hooks/use-contracts";
+import { useToast } from "@/hooks/use-toast";
 
 interface FiatDonationModalProps {
   projectId: number;
@@ -46,6 +50,17 @@ export function FiatDonationModal({
   );
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState("");
+  const [activeTab, setActiveTab] = useState("fiat");
+
+  // Crypto donation states
+  const [cryptoAmount, setCryptoAmount] = useState("");
+  const { address, isConnected } = useAccount();
+  const { toast } = useToast();
+  const {
+    donateToProject,
+    isPending: isDonating,
+    isConfirming,
+  } = useDonateToProject();
 
   const currencies = [
     { value: "RWF", label: "Rwandan Franc (RWF)", symbol: "FRw" },
@@ -107,6 +122,54 @@ export function FiatDonationModal({
     }
   };
 
+  const handleCryptoSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!isConnected) {
+      toast({
+        variant: "destructive",
+        title: "Wallet Not Connected",
+        description: "Please connect your wallet to donate with crypto.",
+      });
+      return;
+    }
+
+    try {
+      const amount = parseFloat(cryptoAmount);
+      if (isNaN(amount) || amount <= 0) {
+        toast({
+          variant: "destructive",
+          title: "Invalid Amount",
+          description: "Please enter a valid donation amount.",
+        });
+        return;
+      }
+
+      setIsProcessing(true);
+
+      await donateToProject(projectId, amount.toString());
+
+      toast({
+        title: "Donation Submitted! ⏳",
+        description: `Donating ${amount} CELO to ${projectName}`,
+      });
+
+      // Close modal after submission
+      setTimeout(() => {
+        onClose();
+      }, 1000);
+    } catch (error: any) {
+      console.error("Crypto donation error:", error);
+      toast({
+        variant: "destructive",
+        title: "Donation Failed",
+        description: error.message || "Failed to process donation",
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px]">
@@ -117,13 +180,13 @@ export function FiatDonationModal({
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs defaultValue="fiat" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="fiat">
               <CreditCard className="mr-2 h-4 w-4" />
               Mobile Money / Card
             </TabsTrigger>
-            <TabsTrigger value="crypto" onClick={onCryptoSwitch}>
+            <TabsTrigger value="crypto">
               <Wallet className="mr-2 h-4 w-4" />
               Crypto Wallet
             </TabsTrigger>
@@ -270,6 +333,80 @@ export function FiatDonationModal({
                 Secured by Flutterwave • Your data is encrypted
               </p>
             </form>
+          </TabsContent>
+
+          {/* Crypto Wallet Tab */}
+          <TabsContent value="crypto" className="space-y-4 mt-4">
+            {!isConnected ? (
+              <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md p-4">
+                <p className="text-sm text-yellow-900 dark:text-yellow-100 text-center">
+                  <strong>⚠️ Wallet Not Connected</strong>
+                  <br />
+                  Please connect your MetaMask wallet to donate with
+                  cryptocurrency.
+                </p>
+              </div>
+            ) : (
+              <form onSubmit={handleCryptoSubmit} className="space-y-4">
+                {/* Amount in CELO */}
+                <div className="space-y-2">
+                  <Label htmlFor="cryptoAmount">Amount (CELO)</Label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                      CELO
+                    </span>
+                    <Input
+                      id="cryptoAmount"
+                      type="number"
+                      step="0.01"
+                      min="0.01"
+                      placeholder="0.1"
+                      value={cryptoAmount}
+                      onChange={(e) => setCryptoAmount(e.target.value)}
+                      className="pl-16"
+                      required
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Minimum donation: 0.01 CELO
+                  </p>
+                </div>
+
+                {/* Wallet Info */}
+                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md p-4 text-sm">
+                  <p className="text-blue-900 dark:text-blue-100">
+                    <strong>✅ Wallet Connected</strong>
+                    <br />
+                    <span className="text-xs font-mono">
+                      {address?.slice(0, 6)}...{address?.slice(-4)}
+                    </span>
+                    <br />
+                    <br />
+                    Your donation will be sent directly to the project&apos;s
+                    smart contract on the Celo blockchain. You&apos;ll receive
+                    an NFT badge as proof of your contribution!
+                  </p>
+                </div>
+
+                {/* Submit Button */}
+                <Button
+                  type="submit"
+                  className="w-full"
+                  size="lg"
+                  disabled={isProcessing || isDonating || isConfirming}
+                >
+                  {isProcessing || isDonating || isConfirming ? (
+                    <>Processing...</>
+                  ) : (
+                    <>Donate {cryptoAmount && `${cryptoAmount} CELO`}</>
+                  )}
+                </Button>
+
+                <p className="text-xs text-center text-muted-foreground">
+                  Secured by Blockchain • Transaction recorded on-chain
+                </p>
+              </form>
+            )}
           </TabsContent>
         </Tabs>
       </DialogContent>

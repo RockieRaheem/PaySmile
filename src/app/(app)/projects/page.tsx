@@ -109,14 +109,8 @@ export default function ProjectsPage() {
   };
 
   const handleDonateClick = (project: BlockchainProject) => {
-    if (!isConnected) {
-      toast({
-        variant: "destructive",
-        title: "Wallet Not Connected",
-        description: "Please connect your wallet to donate.",
-      });
-      return;
-    }
+    // Open the fiat donation modal - no wallet check needed
+    // The modal handles both crypto and fiat options
     setSelectedProject(project);
     setDonationAmount("");
     setShowDonateDialog(true);
@@ -402,48 +396,26 @@ export default function ProjectsPage() {
         )}
       </main>
 
-      {/* Donation Dialog */}
-      <Dialog open={showDonateDialog} onOpenChange={setShowDonateDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Donate to {selectedProject?.name}</DialogTitle>
-            <DialogDescription>
-              Enter the amount you'd like to donate in CELO
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="amount">Amount (CELO)</Label>
-              <Input
-                id="amount"
-                type="number"
-                step="0.01"
-                min="0.01"
-                placeholder="0.1"
-                value={donationAmount}
-                onChange={(e) => setDonationAmount(e.target.value)}
-              />
-              <p className="text-xs text-muted-foreground">
-                Minimum donation: 0.01 CELO
-              </p>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setShowDonateDialog(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleDonateSubmit}
-              disabled={!donationAmount || parseFloat(donationAmount) < 0.01}
-            >
-              Donate
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Donation Modal - Supports both Fiat and Crypto */}
+      {selectedProject && (
+        <FiatDonationModal
+          projectId={selectedProject.id}
+          projectName={selectedProject.name}
+          isOpen={showDonateDialog}
+          onClose={() => setShowDonateDialog(false)}
+          onCryptoSwitch={() => {
+            // Handle crypto payment with existing logic
+            if (!isConnected) {
+              toast({
+                variant: "destructive",
+                title: "Wallet Not Connected",
+                description:
+                  "Please connect your wallet to donate with crypto.",
+              });
+            }
+          }}
+        />
+      )}
     </div>
   );
 }

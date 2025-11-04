@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
       amount: amount,
       currency: currency,
       redirect_url: `${
-        process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+        process.env.NEXT_PUBLIC_APP_URL || "http://localhost:9002"
       }/donation-success?project=${projectId}&ref=${txRef}`,
       payment_options:
         paymentMethod === "mobilemoney"
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
         title: `Donate to ${projectName}`,
         description: `PaySmile Charitable Donation - Project #${projectId}`,
         logo: `${
-          process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+          process.env.NEXT_PUBLIC_APP_URL || "http://localhost:9002"
         }/logo.png`,
       },
       meta: {
@@ -70,23 +70,38 @@ export async function POST(request: NextRequest) {
       },
     };
 
-    // Create payment link
-    const response = await flw.Charge.card(payload);
-
-    console.log("Flutterwave payment initiated:", {
+    console.log("Initializing Flutterwave payment with payload:", {
       txRef,
-      projectId,
       amount,
       currency,
+      paymentMethod,
     });
 
-    // Return payment URL to redirect user
-    return NextResponse.json({
-      success: true,
-      paymentUrl: response.meta.authorization.redirect,
-      transactionRef: txRef,
-      message: "Payment initialized successfully",
+    // Use Flutterwave Direct API call (most reliable)
+    const flutterwaveUrl = "https://api.flutterwave.com/v3/payments";
+
+    const directResponse = await fetch(flutterwaveUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.FLUTTERWAVE_SECRET_KEY}`,
+      },
+      body: JSON.stringify(payload),
     });
+
+    const directData = await directResponse.json();
+    console.log("Direct API response:", directData);
+
+    if (directData.status === "success" && directData.data?.link) {
+      return NextResponse.json({
+        success: true,
+        paymentUrl: directData.data.link,
+        transactionRef: txRef,
+        message: "Payment initialized successfully",
+      });
+    }
+
+    throw new Error(directData.message || "Failed to create payment link");
   } catch (error: any) {
     console.error("Flutterwave API error:", error);
 

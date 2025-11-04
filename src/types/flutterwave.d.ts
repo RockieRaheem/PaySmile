@@ -4,6 +4,11 @@ declare module "flutterwave-node-v3" {
 
     Charge: {
       card(payload: any): Promise<any>;
+      inline(payload: any): Promise<any>;
+    };
+
+    PaymentLink: {
+      create(payload: any): Promise<any>;
     };
 
     Transaction: {
