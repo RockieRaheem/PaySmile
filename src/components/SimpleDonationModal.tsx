@@ -136,11 +136,63 @@ export function SimpleDonationModal({
         description: `Successfully donated ${walletAmount} CELO`,
       });
 
+      // Mint badge NFT for the donation
+      const mintBadgeAsync = async () => {
+        try {
+          // Convert CELO to USD (approximate: 1 CELO = $0.50)
+          const celoToUsdRate = 0.5;
+          const amountUSD = parseFloat(walletAmount) * celoToUsdRate;
+
+          // Only mint if donation is $10 or more
+          if (amountUSD >= 10) {
+            const response = await fetch("/api/badges/mint", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                recipientAddress: address,
+                donationAmount: amountUSD.toFixed(2),
+                projectId: projectId,
+                projectName: projectName || "Community Support",
+                transactionHash: hash,
+              }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+              toast({
+                title: "Badge Earned! 🏅",
+                description: `You earned a ${data.tierName} badge for your donation!`,
+              });
+            } else {
+              console.error("Badge minting failed:", data.error);
+              // Don't show error to user, badge minting is optional
+            }
+          }
+        } catch (error) {
+          console.error("Error minting badge:", error);
+          // Don't show error to user, badge minting is optional
+        }
+      };
+
+      mintBadgeAsync();
+
       setTimeout(() => {
         handleClose();
       }, 5000);
     }
-  }, [isSuccess, step, hash, walletAmount, paymentMethod]);
+  }, [
+    isSuccess,
+    step,
+    hash,
+    walletAmount,
+    paymentMethod,
+    address,
+    projectId,
+    projectName,
+  ]);
 
   const handleDonation = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -290,6 +342,60 @@ export function SimpleDonationModal({
                 title: "Payment Confirmed! 🎉",
                 description: `Successfully donated ${fiatAmount} ${currency}`,
               });
+
+              // Mint badge NFT for the donation
+              const mintBadgeAsync = async () => {
+                try {
+                  // Convert currency to USD if needed
+                  let amountUSD = parseFloat(fiatAmount);
+                  if (currency !== "USD") {
+                    // Simple conversion (in production, use real exchange rates)
+                    // For now, assume NGN rate of 1600:1, KES 150:1, etc.
+                    const conversionRates: { [key: string]: number } = {
+                      NGN: 1600,
+                      KES: 150,
+                      GHS: 15,
+                      ZAR: 18,
+                      UGX: 3700,
+                    };
+                    amountUSD = amountUSD / (conversionRates[currency] || 1);
+                  }
+
+                  // Only mint if donation is $10 or more
+                  if (amountUSD >= 10) {
+                    const response = await fetch("/api/badges/mint", {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                      },
+                      body: JSON.stringify({
+                        recipientAddress: address || donorEmail, // Use email as fallback identifier
+                        donationAmount: amountUSD.toFixed(2),
+                        projectId: projectId,
+                        projectName: projectName || "Community Support",
+                        transactionHash: data.tx_ref,
+                      }),
+                    });
+
+                    const badgeData = await response.json();
+
+                    if (response.ok) {
+                      toast({
+                        title: "Badge Earned! 🏅",
+                        description: `You earned a ${badgeData.tierName} badge for your donation!`,
+                      });
+                    } else {
+                      console.error("Badge minting failed:", badgeData.error);
+                      // Don't show error to user, badge minting is optional
+                    }
+                  }
+                } catch (error) {
+                  console.error("Error minting badge:", error);
+                  // Don't show error to user, badge minting is optional
+                }
+              };
+
+              mintBadgeAsync();
 
               setTimeout(() => {
                 handleClose();

@@ -313,3 +313,76 @@ export function useUserBadges(address?: string) {
     isLoading,
   };
 }
+
+/**
+ * Badge types from SmileBadgeNFT contract
+ */
+export enum BadgeType {
+  FIRST_STEP = 0, // First donation
+  COMMUNITY_BUILDER = 1, // Donated to all regions
+  EDUCATION_CHAMPION = 2, // 3 education projects
+  WATER_WARRIOR = 3, // Clean water project
+  HEALTH_HERO = 4, // 5 health projects
+  GREEN_GUARDIAN = 5, // Environmental project
+}
+
+/**
+ * Hook to mint a badge NFT
+ */
+export function useMintBadge() {
+  const { SmileBadgeNFT } = useContractAddresses();
+  const { writeContract, data: hash, isPending, error } = useWriteContract();
+  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
+    hash,
+  });
+
+  const mintBadge = async (
+    recipientAddress: string,
+    badgeType: BadgeType,
+    tokenURI: string
+  ) => {
+    return writeContract({
+      address: SmileBadgeNFT as `0x${string}`,
+      abi: SMILE_BADGE_NFT_ABI,
+      functionName: "mintBadge",
+      args: [recipientAddress as `0x${string}`, badgeType, tokenURI],
+    });
+  };
+
+  return {
+    mintBadge,
+    isPending,
+    isConfirming,
+    isSuccess,
+    error,
+    hash,
+  };
+}
+
+/**
+ * Utility function to determine badge type based on donation amount (USD)
+ * Maps donation tiers to badge types from the contract
+ */
+export function getBadgeTypeFromAmount(amountUSD: number): BadgeType {
+  if (amountUSD >= 250) {
+    return BadgeType.HEALTH_HERO; // Platinum tier -> HEALTH_HERO
+  } else if (amountUSD >= 100) {
+    return BadgeType.GREEN_GUARDIAN; // Gold tier -> GREEN_GUARDIAN
+  } else if (amountUSD >= 50) {
+    return BadgeType.EDUCATION_CHAMPION; // Silver tier -> EDUCATION_CHAMPION
+  } else if (amountUSD >= 10) {
+    return BadgeType.FIRST_STEP; // Bronze tier -> FIRST_STEP
+  }
+  return BadgeType.FIRST_STEP; // Default to FIRST_STEP for donations below $10
+}
+
+/**
+ * Utility function to get badge tier name from amount
+ */
+export function getBadgeTierName(amountUSD: number): string {
+  if (amountUSD >= 250) return "Platinum";
+  if (amountUSD >= 100) return "Gold";
+  if (amountUSD >= 50) return "Silver";
+  if (amountUSD >= 10) return "Bronze";
+  return "Supporter";
+}
