@@ -117,7 +117,7 @@ export async function GET(request: NextRequest) {
 
     // Verify transaction
     const response = await flw.Transaction.verify({
-      id: transactionId || txRef,
+      id: (transactionId || txRef) as string,
     });
 
     if (
