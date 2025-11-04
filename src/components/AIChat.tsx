@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { X, Send, Sparkles, Trash2 } from "lucide-react";
+import { X, Send, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -34,13 +34,22 @@ export function AIChatButton() {
     <>
       {/* Floating Chat Button */}
       {!isOpen && (
-        <button
-          onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 z-50 flex items-center justify-center w-14 h-14 rounded-full bg-primary shadow-lg hover:scale-110 transition-transform duration-200"
-          aria-label="Open AI Helper Chat"
-        >
-          <Sparkles className="w-6 h-6 text-[#333333]" />
-        </button>
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 group">
+          <span className="opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0 transition-all duration-200 bg-primary text-[#333333] font-semibold px-4 py-2 rounded-full shadow-lg whitespace-nowrap text-sm">
+            Smiley Helper
+          </span>
+          <button
+            onClick={() => setIsOpen(true)}
+            className="flex items-center justify-center w-14 h-14 rounded-full bg-primary shadow-lg hover:scale-110 transition-transform duration-200"
+            aria-label="Open Smiley Helper Chat"
+          >
+            <img
+              src={AI_AVATAR}
+              alt="Smiley Helper"
+              className="w-10 h-10 rounded-full"
+            />
+          </button>
+        </div>
       )}
 
       {/* Chat Window */}
