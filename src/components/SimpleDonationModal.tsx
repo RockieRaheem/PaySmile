@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAccount } from "wagmi";
+import { parseEther } from "viem";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,6 +28,7 @@ import {
   Wallet,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useDonateToProject } from "@/hooks/use-contracts";
 
 interface SimpleDonationModalProps {
   projectId: number;
@@ -40,7 +43,19 @@ export function SimpleDonationModal({
   isOpen,
   onClose,
 }: SimpleDonationModalProps) {
-  const [step, setStep] = useState<"form" | "processing" | "success">("form");
+  const [step, setStep] = useState<
+    "form" | "processing" | "payment" | "success"
+  >("form");
+  const [paymentLink, setPaymentLink] = useState<string>("");
+
+  // Wallet connection
+  const { address, isConnected } = useAccount();
+  const {
+    donateToProject,
+    isPending: isDonating,
+    isSuccess,
+    hash,
+  } = useDonateToProject();
 
   // Separate state for wallet vs fiat
   const [walletAmount, setWalletAmount] = useState("");
@@ -49,6 +64,12 @@ export function SimpleDonationModal({
   const [donorName, setDonorName] = useState("");
   const [donorEmail, setDonorEmail] = useState("");
   const [donorPhone, setDonorPhone] = useState("");
+
+  // Card-specific fields
+  const [cardNumber, setCardNumber] = useState("");
+  const [cardExpiry, setCardExpiry] = useState("");
+  const [cardCvv, setCardCvv] = useState("");
+
   const [paymentMethod, setPaymentMethod] = useState<
     "wallet" | "mobilemoney" | "card"
   >("wallet");
@@ -62,6 +83,23 @@ export function SimpleDonationModal({
   ];
 
   const selectedCurrency = currencies.find((c) => c.value === currency);
+
+  // Watch for transaction success
+  useEffect(() => {
+    if (isSuccess && step === "processing" && paymentMethod === "wallet") {
+      setStep("success");
+      setTransactionRef(hash || "");
+
+      toast({
+        title: "Donation Confirmed! 🎉",
+        description: `Successfully donated ${walletAmount} CELO`,
+      });
+
+      setTimeout(() => {
+        handleClose();
+      }, 5000);
+    }
+  }, [isSuccess, step, hash, walletAmount, paymentMethod]);
 
   const handleDonation = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -87,8 +125,17 @@ export function SimpleDonationModal({
       return;
     }
 
+    if (paymentMethod === "card" && (!cardNumber || !cardExpiry || !cardCvv)) {
+      toast({
+        title: "Missing Card Information",
+        description: "Please fill in all card details",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (
-      paymentMethod !== "wallet" &&
+      paymentMethod === "mobilemoney" &&
       (!donorName || !donorEmail || !donorPhone)
     ) {
       toast({
@@ -101,13 +148,54 @@ export function SimpleDonationModal({
 
     // Handle wallet payment (crypto donation)
     if (paymentMethod === "wallet") {
-      toast({
-        title: "Wallet Payment",
-        description: "Please connect your wallet to donate with crypto",
-      });
-      onClose();
-      // Note: The crypto wallet flow should be handled by the parent component
-      // This modal focuses on fiat payments
+      if (!isConnected || !address) {
+        toast({
+          title: "Wallet Not Connected",
+          description: "Please connect your wallet first",
+          variant: "destructive",
+        });
+        onClose();
+        return;
+      }
+
+      try {
+        setStep("processing");
+
+        toast({
+          title: "Confirm Transaction",
+          description:
+            "Please confirm the transaction in your wallet (MetaMask)",
+        });
+
+        // Donate via smart contract
+        await donateToProject(projectId, walletAmount);
+
+        toast({
+          title: "Transaction Submitted",
+          description: "Waiting for blockchain confirmation...",
+        });
+
+        // Success is now handled by useEffect watching isSuccess
+        // Timeout fallback after 2 minutes
+        setTimeout(() => {
+          if (!isSuccess && step === "processing") {
+            setStep("form");
+            toast({
+              title: "Transaction Timeout",
+              description: "Please check your wallet and try again",
+              variant: "destructive",
+            });
+          }
+        }, 120000);
+      } catch (error: any) {
+        console.error("Wallet donation error:", error);
+        setStep("form");
+        toast({
+          title: "Transaction Failed",
+          description: error?.message || "Failed to process donation",
+          variant: "destructive",
+        });
+      }
       return;
     }
 
@@ -122,13 +210,11 @@ export function SimpleDonationModal({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          amount: parseFloat(amount),
+          amount: parseFloat(fiatAmount),
           currency,
-          customer: {
-            name: donorName,
-            email: donorEmail,
-            phone_number: donorPhone,
-          },
+          donorName,
+          donorEmail,
+          donorPhone,
           projectId,
           projectName,
           paymentMethod,
@@ -144,14 +230,8 @@ export function SimpleDonationModal({
       // Open Flutterwave payment link
       if (data.link) {
         setTransactionRef(data.tx_ref);
-        window.open(data.link, "_blank", "width=600,height=700");
-
-        // Show message that payment window opened
-        toast({
-          title: "Payment Window Opened",
-          description:
-            "Complete payment in the new window. Don't close this page.",
-        });
+        setPaymentLink(data.link);
+        setStep("payment");
 
         // Poll for payment status
         const checkPaymentStatus = setInterval(async () => {
@@ -207,16 +287,24 @@ export function SimpleDonationModal({
 
   const handleClose = () => {
     setStep("form");
-    setAmount("");
+    setWalletAmount("");
+    setFiatAmount("");
     setDonorName("");
     setDonorEmail("");
     setDonorPhone("");
+    setCardNumber("");
+    setCardExpiry("");
+    setCardCvv("");
+    setTransactionRef("");
+    setPaymentLink("");
     onClose();
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[450px]">
+      <DialogContent
+        className={step === "payment" ? "sm:max-w-[650px]" : "sm:max-w-[450px]"}
+      >
         {step === "form" && (
           <>
             <DialogHeader>
@@ -334,15 +422,132 @@ export function SimpleDonationModal({
                 )}
               </div>
 
-              {/* Fiat payment fields - Only show for mobile/card */}
-              {paymentMethod !== "wallet" && (
+              {/* Card-specific fields */}
+              {paymentMethod === "card" && (
+                <>
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="cardNumber"
+                      className="text-base font-semibold"
+                    >
+                      Card Number
+                    </Label>
+                    <Input
+                      id="cardNumber"
+                      type="text"
+                      placeholder="1234 5678 9012 3456"
+                      value={cardNumber}
+                      onChange={(e) => {
+                        const formatted = e.target.value
+                          .replace(/\s/g, "")
+                          .replace(/(\d{4})/g, "$1 ")
+                          .trim();
+                        setCardNumber(formatted);
+                      }}
+                      className="h-14 text-base"
+                      maxLength={19}
+                      required
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label
+                        htmlFor="cardExpiry"
+                        className="text-base font-semibold"
+                      >
+                        Expiry Date
+                      </Label>
+                      <Input
+                        id="cardExpiry"
+                        type="text"
+                        placeholder="MM/YY"
+                        value={cardExpiry}
+                        onChange={(e) => {
+                          let value = e.target.value.replace(/\D/g, "");
+                          if (value.length >= 2) {
+                            value = value.slice(0, 2) + "/" + value.slice(2, 4);
+                          }
+                          setCardExpiry(value);
+                        }}
+                        className="h-14 text-base"
+                        maxLength={5}
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label
+                        htmlFor="cardCvv"
+                        className="text-base font-semibold"
+                      >
+                        CVV
+                      </Label>
+                      <Input
+                        id="cardCvv"
+                        type="text"
+                        placeholder="123"
+                        value={cardCvv}
+                        onChange={(e) =>
+                          setCardCvv(e.target.value.replace(/\D/g, ""))
+                        }
+                        className="h-14 text-base"
+                        maxLength={4}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="cardName"
+                      className="text-base font-semibold"
+                    >
+                      Cardholder Name
+                    </Label>
+                    <Input
+                      id="cardName"
+                      type="text"
+                      placeholder="John Doe"
+                      value={donorName}
+                      onChange={(e) => setDonorName(e.target.value)}
+                      className="h-14 text-base"
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="cardEmail"
+                      className="text-base font-semibold"
+                    >
+                      Email Address
+                    </Label>
+                    <Input
+                      id="cardEmail"
+                      type="email"
+                      placeholder="john@example.com"
+                      value={donorEmail}
+                      onChange={(e) => setDonorEmail(e.target.value)}
+                      className="h-14 text-base"
+                      required
+                    />
+                  </div>
+                </>
+              )}
+
+              {/* Mobile Money fields */}
+              {paymentMethod === "mobilemoney" && (
                 <>
                   {/* Name */}
                   <div className="space-y-2">
-                    <Label htmlFor="name" className="text-base font-semibold">Full Name</Label>
+                    <Label htmlFor="name" className="text-base font-semibold">
+                      Full Name
+                    </Label>
                     <Input
                       id="name"
                       type="text"
+                      placeholder="John Doe"
                       value={donorName}
                       onChange={(e) => setDonorName(e.target.value)}
                       className="h-14 text-base"
@@ -352,38 +557,60 @@ export function SimpleDonationModal({
 
                   {/* Email */}
                   <div className="space-y-2">
-                    <Label htmlFor="email" className="text-base font-semibold">Email Address</Label>
+                    <Label htmlFor="email" className="text-base font-semibold">
+                      Email Address
+                    </Label>
                     <Input
                       id="email"
                       type="email"
+                      placeholder="john@example.com"
                       value={donorEmail}
                       onChange={(e) => setDonorEmail(e.target.value)}
+                      className="h-14 text-base"
                       required
                     />
                   </div>
 
                   {/* Phone */}
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Phone Number</Label>
+                    <Label htmlFor="phone" className="text-base font-semibold">
+                      Phone Number
+                    </Label>
                     <Input
                       id="phone"
                       type="tel"
                       placeholder="+250 780 000 000"
                       value={donorPhone}
                       onChange={(e) => setDonorPhone(e.target.value)}
+                      className="h-14 text-base"
                       required
                     />
-                  </div>
-
-                  {/* Fiat Info */}
-                  <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md p-3 text-sm">
-                    <p className="text-green-900 dark:text-green-100">
-                      ✨ <strong>Easy & Secure:</strong> No wallet needed!
-                      Payment processed instantly. Donation recorded on
-                      blockchain for transparency.
+                    <p className="text-xs text-muted-foreground">
+                      Format: +250 780 000 000
                     </p>
                   </div>
                 </>
+              )}
+
+              {/* Info Messages */}
+              {paymentMethod === "mobilemoney" && (
+                <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md p-3 text-sm">
+                  <p className="text-green-900 dark:text-green-100">
+                    ✨ <strong>Easy & Secure:</strong> No wallet needed! Payment
+                    processed instantly. Donation recorded on blockchain for
+                    transparency.
+                  </p>
+                </div>
+              )}
+
+              {paymentMethod === "card" && (
+                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md p-3 text-sm">
+                  <p className="text-blue-900 dark:text-blue-100">
+                    💳 <strong>Secure Card Payment:</strong> All transactions
+                    are encrypted and secure. Accepted cards: Visa, Mastercard,
+                    Amex.
+                  </p>
+                </div>
               )}
 
               {/* Wallet Info */}
@@ -398,17 +625,53 @@ export function SimpleDonationModal({
               )}
 
               {/* Submit */}
-              <Button type="submit" className="w-full" size="lg">
+              <Button
+                type="submit"
+                className="w-full h-14 text-lg font-semibold"
+                size="lg"
+              >
                 {paymentMethod === "wallet"
                   ? "Connect Wallet & Donate"
-                  : "Complete Donation"}
-                {amount &&
+                  : `Pay with ${
+                      paymentMethod === "mobilemoney" ? "Mobile Money" : "Card"
+                    }`}
+                {fiatAmount &&
                   paymentMethod !== "wallet" &&
-                  ` (${selectedCurrency?.symbol}${amount})`}
-                {amount && paymentMethod === "wallet" && ` (${amount} CELO)`}
+                  ` - ${selectedCurrency?.symbol}${fiatAmount}`}
+                {walletAmount &&
+                  paymentMethod === "wallet" &&
+                  ` - ${walletAmount} CELO`}
               </Button>
             </form>
           </>
+        )}
+
+        {step === "payment" && (
+          <div className="space-y-4">
+            <DialogHeader>
+              <DialogTitle>Complete Your Payment</DialogTitle>
+              <DialogDescription>
+                Securely process your{" "}
+                {paymentMethod === "mobilemoney" ? "mobile money" : "card"}{" "}
+                payment below
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="relative w-full rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+              <iframe
+                src={paymentLink}
+                className="w-full h-[600px]"
+                title="Flutterwave Payment"
+                style={{ border: "none" }}
+                allow="payment"
+              />
+            </div>
+
+            <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md p-3">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span>Waiting for payment confirmation...</span>
+            </div>
+          </div>
         )}
 
         {step === "processing" && (
@@ -429,40 +692,53 @@ export function SimpleDonationModal({
         )}
 
         {step === "success" && (
-          <div className="py-12 text-center space-y-6">
+          <div className="py-8 text-center space-y-6">
             <CheckCircle2 className="h-20 w-20 mx-auto text-green-500" />
             <div className="space-y-2">
               <h3 className="text-2xl font-bold">Payment Confirmed</h3>
-              <p className="text-lg text-muted-foreground">
+              <p className="text-base text-muted-foreground">
                 Thank you for your donation to {projectName}
               </p>
             </div>
 
-            <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800 rounded-lg p-6 space-y-3">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Amount:</span>
-                <span className="font-semibold text-lg">
-                  {selectedCurrency?.symbol}
-                  {amount} {currency}
+            <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800 rounded-lg p-5 space-y-4">
+              <div className="flex items-start justify-between gap-3">
+                <span className="text-sm text-muted-foreground whitespace-nowrap">
+                  Amount:
+                </span>
+                <span className="font-semibold text-lg text-right">
+                  {paymentMethod === "wallet"
+                    ? `${walletAmount} CELO`
+                    : `${selectedCurrency?.symbol}${fiatAmount} ${currency}`}
                 </span>
               </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Receipt sent to:</span>
-                <span className="font-medium">{donorEmail}</span>
+              {donorEmail && (
+                <div className="flex items-start justify-between gap-3">
+                  <span className="text-sm text-muted-foreground whitespace-nowrap">
+                    Receipt sent to:
+                  </span>
+                  <span className="font-medium text-sm text-right break-all">
+                    {donorEmail}
+                  </span>
+                </div>
+              )}
+              <div className="flex items-start justify-between gap-3">
+                <span className="text-sm text-muted-foreground whitespace-nowrap">
+                  Transaction ID:
+                </span>
+                <span className="font-mono text-xs text-right break-all max-w-[200px]">
+                  {transactionRef}
+                </span>
               </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Transaction ID:</span>
-                <span className="font-mono text-xs">{transactionRef}</span>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Status:</span>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Status:</span>
                 <span className="font-medium text-green-600 dark:text-green-400">
-                  Verified
+                  Verified ✓
                 </span>
               </div>
             </div>
 
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground px-4">
               Your contribution will be recorded on the Celo blockchain for full
               transparency
             </p>

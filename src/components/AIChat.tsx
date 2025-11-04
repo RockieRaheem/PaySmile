@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useChatHistory } from "@/hooks/use-chat-history";
+import { FormattedMessage } from "@/components/FormattedMessage";
 
 interface Message {
   id: string;
@@ -220,14 +221,12 @@ function AIChatWindow({ onClose }: AIChatWindowProps) {
                     alt="Smiley Helper"
                     className="w-10 h-10 rounded-full shrink-0"
                   />
-                  <div className="flex flex-col gap-2 items-start">
+                  <div className="flex flex-col gap-2 items-start flex-1">
                     <p className="text-xs text-muted-foreground">
                       Smiley Helper
                     </p>
-                    <div className="p-3 rounded-lg rounded-tl-none bg-muted text-foreground max-w-xs">
-                      <p className="text-sm whitespace-pre-wrap">
-                        {message.content}
-                      </p>
+                    <div className="p-4 rounded-lg rounded-tl-none bg-muted text-foreground w-full max-w-[380px]">
+                      <FormattedMessage content={message.content} />
                     </div>
                   </div>
                 </div>
