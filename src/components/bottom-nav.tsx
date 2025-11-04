@@ -8,6 +8,7 @@ const navItems = [
   { href: "/dashboard", icon: "home", label: "Home" },
   { href: "/shop", icon: "shopping_bag", label: "Shop" },
   { href: "/projects", icon: "volunteer_activism", label: "Donate" },
+  { href: "/history", icon: "history", label: "History" },
   { href: "/badges", icon: "military_tech", label: "Badges" },
 ];
 
