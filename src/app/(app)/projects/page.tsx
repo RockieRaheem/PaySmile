@@ -31,7 +31,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Image from "next/image";
 import { getProjectImage } from "@/lib/project-images";
-import { FiatDonationModal } from "@/components/FiatDonationModal";
+import { SimpleDonationModal } from "@/components/SimpleDonationModal";
 
 // Project data structure from blockchain
 interface BlockchainProject {
@@ -396,24 +396,13 @@ export default function ProjectsPage() {
         )}
       </main>
 
-      {/* Donation Modal - Supports both Fiat and Crypto */}
+      {/* Donation Modal - Simple & Seamless (No external redirects!) */}
       {selectedProject && (
-        <FiatDonationModal
+        <SimpleDonationModal
           projectId={selectedProject.id}
           projectName={selectedProject.name}
           isOpen={showDonateDialog}
           onClose={() => setShowDonateDialog(false)}
-          onCryptoSwitch={() => {
-            // Handle crypto payment with existing logic
-            if (!isConnected) {
-              toast({
-                variant: "destructive",
-                title: "Wallet Not Connected",
-                description:
-                  "Please connect your wallet to donate with crypto.",
-              });
-            }
-          }}
         />
       )}
     </div>
