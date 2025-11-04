@@ -20,24 +20,28 @@ function DonationSuccessContent() {
 
   useEffect(() => {
     const verifyPayment = async () => {
-      if (!transactionId && !txRef) {
+      if (!txRef) {
         setStatus("failed");
         return;
       }
 
       try {
-        const response = await fetch(
-          `/api/donations/fiat?transaction_id=${transactionId || ""}&tx_ref=${
-            txRef || ""
-          }`
-        );
+        const response = await fetch(`/api/donations/verify?tx_ref=${txRef}`);
         const data = await response.json();
 
-        if (data.success && data.status === "successful") {
+        if (data.status === "successful") {
           setStatus("success");
-          setDonationData(data.data);
-        } else {
+          setDonationData(data);
+
+          // Clear any pending transaction from sessionStorage
+          sessionStorage.removeItem("pending_tx_ref");
+          sessionStorage.removeItem("pending_project_id");
+          sessionStorage.removeItem("pending_project_name");
+        } else if (data.status === "failed") {
           setStatus("failed");
+        } else {
+          // Still pending - retry after 2 seconds
+          setTimeout(verifyPayment, 2000);
         }
       } catch (error) {
         console.error("Payment verification failed:", error);
@@ -46,7 +50,7 @@ function DonationSuccessContent() {
     };
 
     verifyPayment();
-  }, [transactionId, txRef]);
+  }, [txRef]);
 
   if (status === "loading") {
     return (

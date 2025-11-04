@@ -84,6 +84,47 @@ export function SimpleDonationModal({
 
   const selectedCurrency = currencies.find((c) => c.value === currency);
 
+  // Check for returning payment on mobile
+  useEffect(() => {
+    // Check if user is returning from mobile payment
+    const pendingTxRef = sessionStorage.getItem("pending_tx_ref");
+    const pendingProjectId = sessionStorage.getItem("pending_project_id");
+
+    if (pendingTxRef && pendingProjectId === projectId.toString() && isOpen) {
+      // Clear the stored data
+      sessionStorage.removeItem("pending_tx_ref");
+      sessionStorage.removeItem("pending_project_id");
+      sessionStorage.removeItem("pending_project_name");
+
+      // Show processing state
+      setStep("processing");
+      setTransactionRef(pendingTxRef);
+
+      // Check payment status
+      fetch(`/api/donations/verify?tx_ref=${pendingTxRef}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.status === "successful") {
+            setStep("success");
+            toast({
+              title: "Payment Confirmed! 🎉",
+              description: "Your donation was successful",
+            });
+          } else {
+            setStep("form");
+            toast({
+              title: "Payment Status",
+              description: "Checking payment status...",
+            });
+          }
+        })
+        .catch((error) => {
+          console.error("Error checking payment:", error);
+          setStep("form");
+        });
+    }
+  }, [isOpen, projectId]);
+
   // Watch for transaction success
   useEffect(() => {
     if (isSuccess && step === "processing" && paymentMethod === "wallet") {
@@ -227,7 +268,7 @@ export function SimpleDonationModal({
         throw new Error(data.error || "Payment initialization failed");
       }
 
-      // Open Flutterwave payment link
+      // Show payment in iframe (stays in modal container)
       if (data.link) {
         setTransactionRef(data.tx_ref);
         setPaymentLink(data.link);
@@ -245,7 +286,11 @@ export function SimpleDonationModal({
               clearInterval(checkPaymentStatus);
               setStep("success");
 
-              // Auto-close after 5 seconds
+              toast({
+                title: "Payment Confirmed! 🎉",
+                description: `Successfully donated ${fiatAmount} ${currency}`,
+              });
+
               setTimeout(() => {
                 handleClose();
               }, 5000);
@@ -261,12 +306,6 @@ export function SimpleDonationModal({
         // Stop polling after 5 minutes
         setTimeout(() => {
           clearInterval(checkPaymentStatus);
-          setStep("form");
-          toast({
-            title: "Payment Timeout",
-            description: "Please try again or contact support",
-            variant: "destructive",
-          });
         }, 300000);
       } else {
         throw new Error("No payment link received");
