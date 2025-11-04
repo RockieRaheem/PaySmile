@@ -18,7 +18,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Smartphone, CreditCard, CheckCircle2, Loader2 } from "lucide-react";
+import {
+  Smartphone,
+  CreditCard,
+  CheckCircle2,
+  Loader2,
+  Wallet,
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface SimpleDonationModalProps {
@@ -35,14 +41,17 @@ export function SimpleDonationModal({
   onClose,
 }: SimpleDonationModalProps) {
   const [step, setStep] = useState<"form" | "processing" | "success">("form");
-  const [amount, setAmount] = useState("");
+
+  // Separate state for wallet vs fiat
+  const [walletAmount, setWalletAmount] = useState("");
+  const [fiatAmount, setFiatAmount] = useState("");
   const [currency, setCurrency] = useState("RWF");
   const [donorName, setDonorName] = useState("");
   const [donorEmail, setDonorEmail] = useState("");
   const [donorPhone, setDonorPhone] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState<"mobilemoney" | "card">(
-    "mobilemoney"
-  );
+  const [paymentMethod, setPaymentMethod] = useState<
+    "wallet" | "mobilemoney" | "card"
+  >("wallet");
   const [transactionRef, setTransactionRef] = useState<string>("");
   const { toast } = useToast();
 
@@ -57,17 +66,31 @@ export function SimpleDonationModal({
   const handleDonation = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    const amount = paymentMethod === "wallet" ? walletAmount : fiatAmount;
+
     // Validation
-    if (!amount || parseFloat(amount) < 100) {
+    if (!amount || parseFloat(amount) <= 0) {
       toast({
         title: "Invalid Amount",
+        description: `Please enter a valid amount`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (paymentMethod !== "wallet" && parseFloat(amount) < 100) {
+      toast({
+        title: "Amount Too Low",
         description: `Minimum donation is 100 ${currency}`,
         variant: "destructive",
       });
       return;
     }
 
-    if (!donorName || !donorEmail || !donorPhone) {
+    if (
+      paymentMethod !== "wallet" &&
+      (!donorName || !donorEmail || !donorPhone)
+    ) {
       toast({
         title: "Missing Information",
         description: "Please fill in all required fields",
@@ -76,7 +99,19 @@ export function SimpleDonationModal({
       return;
     }
 
-    // Start payment processing
+    // Handle wallet payment (crypto donation)
+    if (paymentMethod === "wallet") {
+      toast({
+        title: "Wallet Payment",
+        description: "Please connect your wallet to donate with crypto",
+      });
+      onClose();
+      // Note: The crypto wallet flow should be handled by the parent component
+      // This modal focuses on fiat payments
+      return;
+    }
+
+    // Start fiat payment processing
     setStep("processing");
 
     try {
@@ -187,15 +222,25 @@ export function SimpleDonationModal({
             <DialogHeader>
               <DialogTitle>Donate to {projectName}</DialogTitle>
               <DialogDescription>
-                Support this project with Mobile Money or Card
+                Choose your preferred payment method
               </DialogDescription>
             </DialogHeader>
 
             <form onSubmit={handleDonation} className="space-y-4 mt-4">
-              {/* Payment Method */}
+              {/* Payment Method Priority */}
               <div className="space-y-2">
                 <Label>Payment Method</Label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-3 gap-2">
+                  <Button
+                    type="button"
+                    variant={paymentMethod === "wallet" ? "default" : "outline"}
+                    onClick={() => setPaymentMethod("wallet" as any)}
+                    className="w-full"
+                    title="Recommended"
+                  >
+                    <Wallet className="mr-1 h-4 w-4" />
+                    Wallet
+                  </Button>
                   <Button
                     type="button"
                     variant={
@@ -204,8 +249,8 @@ export function SimpleDonationModal({
                     onClick={() => setPaymentMethod("mobilemoney")}
                     className="w-full"
                   >
-                    <Smartphone className="mr-2 h-4 w-4" />
-                    Mobile Money
+                    <Smartphone className="mr-1 h-4 w-4" />
+                    Mobile
                   </Button>
                   <Button
                     type="button"
@@ -213,101 +258,154 @@ export function SimpleDonationModal({
                     onClick={() => setPaymentMethod("card")}
                     className="w-full"
                   >
-                    <CreditCard className="mr-2 h-4 w-4" />
+                    <CreditCard className="mr-1 h-4 w-4" />
                     Card
                   </Button>
                 </div>
+                {paymentMethod === "wallet" && (
+                  <p className="text-xs text-muted-foreground bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded px-2 py-1.5">
+                    ⚡ <strong>Recommended:</strong> Instant & secure blockchain
+                    donation
+                  </p>
+                )}
               </div>
 
-              {/* Currency */}
-              <div className="space-y-2">
-                <Label htmlFor="currency">Currency</Label>
-                <Select value={currency} onValueChange={setCurrency}>
-                  <SelectTrigger id="currency">
-                    <SelectValue placeholder="Select currency" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {currencies.map((curr) => (
-                      <SelectItem key={curr.value} value={curr.value}>
-                        {curr.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              {/* Currency - Only for fiat payments */}
+              {paymentMethod !== "wallet" && (
+                <div className="space-y-2">
+                  <Label htmlFor="currency">Currency</Label>
+                  <Select value={currency} onValueChange={setCurrency}>
+                    <SelectTrigger id="currency">
+                      <SelectValue placeholder="Select currency" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {currencies.map((curr) => (
+                        <SelectItem key={curr.value} value={curr.value}>
+                          {curr.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
 
               {/* Amount */}
               <div className="space-y-2">
-                <Label htmlFor="amount">Amount (Min: 100 {currency})</Label>
+                <Label htmlFor="amount" className="text-base font-semibold">
+                  {paymentMethod === "wallet" ? "Amount (CELO)" : `Amount`}
+                  {paymentMethod !== "wallet" && (
+                    <span className="text-sm font-normal text-muted-foreground ml-1">
+                      (Minimum: 100 {currency})
+                    </span>
+                  )}
+                </Label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                    {selectedCurrency?.symbol}
-                  </span>
+                  {paymentMethod !== "wallet" && (
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-semibold text-base">
+                      {selectedCurrency?.symbol}
+                    </span>
+                  )}
+                  {paymentMethod === "wallet" && (
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-semibold text-base">
+                      CELO
+                    </span>
+                  )}
                   <Input
                     id="amount"
                     type="number"
-                    placeholder="1000"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                    className="pl-10"
+                    value={
+                      paymentMethod === "wallet" ? walletAmount : fiatAmount
+                    }
+                    onChange={(e) =>
+                      paymentMethod === "wallet"
+                        ? setWalletAmount(e.target.value)
+                        : setFiatAmount(e.target.value)
+                    }
+                    className="pl-20 h-14 text-lg font-semibold"
                     required
-                    min="100"
+                    min={paymentMethod === "wallet" ? "0.01" : "100"}
+                    step={paymentMethod === "wallet" ? "0.01" : "1"}
                   />
                 </div>
+                {paymentMethod === "wallet" && (
+                  <p className="text-xs text-muted-foreground">
+                    Enter amount in CELO tokens
+                  </p>
+                )}
               </div>
 
-              {/* Name */}
-              <div className="space-y-2">
-                <Label htmlFor="name">Your Name</Label>
-                <Input
-                  id="name"
-                  type="text"
-                  placeholder="John Doe"
-                  value={donorName}
-                  onChange={(e) => setDonorName(e.target.value)}
-                  required
-                />
-              </div>
+              {/* Fiat payment fields - Only show for mobile/card */}
+              {paymentMethod !== "wallet" && (
+                <>
+                  {/* Name */}
+                  <div className="space-y-2">
+                    <Label htmlFor="name" className="text-base font-semibold">Full Name</Label>
+                    <Input
+                      id="name"
+                      type="text"
+                      value={donorName}
+                      onChange={(e) => setDonorName(e.target.value)}
+                      className="h-14 text-base"
+                      required
+                    />
+                  </div>
 
-              {/* Email */}
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="john@example.com"
-                  value={donorEmail}
-                  onChange={(e) => setDonorEmail(e.target.value)}
-                  required
-                />
-              </div>
+                  {/* Email */}
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="text-base font-semibold">Email Address</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={donorEmail}
+                      onChange={(e) => setDonorEmail(e.target.value)}
+                      required
+                    />
+                  </div>
 
-              {/* Phone */}
-              <div className="space-y-2">
-                <Label htmlFor="phone">Phone Number</Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  placeholder="+250 780 000 000"
-                  value={donorPhone}
-                  onChange={(e) => setDonorPhone(e.target.value)}
-                  required
-                />
-              </div>
+                  {/* Phone */}
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Phone Number</Label>
+                    <Input
+                      id="phone"
+                      type="tel"
+                      placeholder="+250 780 000 000"
+                      value={donorPhone}
+                      onChange={(e) => setDonorPhone(e.target.value)}
+                      required
+                    />
+                  </div>
 
-              {/* Info */}
-              <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md p-3 text-sm">
-                <p className="text-green-900 dark:text-green-100">
-                  ✨ <strong>Easy & Secure:</strong> No wallet needed! Payment
-                  processed instantly. Donation recorded on blockchain for
-                  transparency.
-                </p>
-              </div>
+                  {/* Fiat Info */}
+                  <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md p-3 text-sm">
+                    <p className="text-green-900 dark:text-green-100">
+                      ✨ <strong>Easy & Secure:</strong> No wallet needed!
+                      Payment processed instantly. Donation recorded on
+                      blockchain for transparency.
+                    </p>
+                  </div>
+                </>
+              )}
+
+              {/* Wallet Info */}
+              {paymentMethod === "wallet" && (
+                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md p-3 text-sm">
+                  <p className="text-blue-900 dark:text-blue-100">
+                    🔐 <strong>Direct Blockchain:</strong> Your donation goes
+                    directly to the project smart contract. Most transparent and
+                    instant method.
+                  </p>
+                </div>
+              )}
 
               {/* Submit */}
               <Button type="submit" className="w-full" size="lg">
-                Complete Donation{" "}
-                {amount && `(${selectedCurrency?.symbol}${amount})`}
+                {paymentMethod === "wallet"
+                  ? "Connect Wallet & Donate"
+                  : "Complete Donation"}
+                {amount &&
+                  paymentMethod !== "wallet" &&
+                  ` (${selectedCurrency?.symbol}${amount})`}
+                {amount && paymentMethod === "wallet" && ` (${amount} CELO)`}
               </Button>
             </form>
           </>
