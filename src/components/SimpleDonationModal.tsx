@@ -268,7 +268,7 @@ export function SimpleDonationModal({
         throw new Error(data.error || "Payment initialization failed");
       }
 
-      // Show payment in iframe (stays in modal container)
+      // Show payment in iframe (embedded in modal)
       if (data.link) {
         setTransactionRef(data.tx_ref);
         setPaymentLink(data.link);
@@ -301,7 +301,7 @@ export function SimpleDonationModal({
           } catch (error) {
             // Continue polling
           }
-        }, 3000); // Check every 3 seconds
+        }, 3000);
 
         // Stop polling after 5 minutes
         setTimeout(() => {
