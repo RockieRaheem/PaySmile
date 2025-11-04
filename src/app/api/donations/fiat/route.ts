@@ -95,8 +95,8 @@ export async function POST(request: NextRequest) {
     if (directData.status === "success" && directData.data?.link) {
       return NextResponse.json({
         success: true,
-        paymentUrl: directData.data.link,
-        transactionRef: txRef,
+        link: directData.data.link,
+        tx_ref: txRef,
         message: "Payment initialized successfully",
       });
     }

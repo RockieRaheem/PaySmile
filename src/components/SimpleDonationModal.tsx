@@ -43,6 +43,7 @@ export function SimpleDonationModal({
   const [paymentMethod, setPaymentMethod] = useState<"mobilemoney" | "card">(
     "mobilemoney"
   );
+  const [transactionRef, setTransactionRef] = useState<string>("");
   const { toast } = useToast();
 
   const currencies = [
@@ -107,6 +108,7 @@ export function SimpleDonationModal({
 
       // Open Flutterwave payment link
       if (data.link) {
+        setTransactionRef(data.tx_ref);
         window.open(data.link, "_blank", "width=600,height=700");
 
         // Show message that payment window opened
@@ -329,26 +331,43 @@ export function SimpleDonationModal({
         )}
 
         {step === "success" && (
-          <div className="py-12 text-center space-y-4">
-            <CheckCircle2 className="h-16 w-16 mx-auto text-green-500" />
-            <h3 className="text-2xl font-bold">Donation Successful! 🎉</h3>
-            <p className="text-muted-foreground">
-              Thank you for donating{" "}
-              <strong>
-                {selectedCurrency?.symbol}
-                {amount} {currency}
-              </strong>{" "}
-              to {projectName}
-            </p>
-            <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md p-4 text-sm">
-              <p className="text-green-900 dark:text-green-100">
-                ✅ Payment confirmed
-                <br />
-                📧 Receipt sent to {donorEmail}
-                <br />
-                🔗 Recording on blockchain...
+          <div className="py-12 text-center space-y-6">
+            <CheckCircle2 className="h-20 w-20 mx-auto text-green-500" />
+            <div className="space-y-2">
+              <h3 className="text-2xl font-bold">Payment Confirmed</h3>
+              <p className="text-lg text-muted-foreground">
+                Thank you for your donation to {projectName}
               </p>
             </div>
+
+            <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800 rounded-lg p-6 space-y-3">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Amount:</span>
+                <span className="font-semibold text-lg">
+                  {selectedCurrency?.symbol}
+                  {amount} {currency}
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Receipt sent to:</span>
+                <span className="font-medium">{donorEmail}</span>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Transaction ID:</span>
+                <span className="font-mono text-xs">{transactionRef}</span>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Status:</span>
+                <span className="font-medium text-green-600 dark:text-green-400">
+                  Verified
+                </span>
+              </div>
+            </div>
+
+            <p className="text-sm text-muted-foreground">
+              Your contribution will be recorded on the Celo blockchain for full
+              transparency
+            </p>
           </div>
         )}
       </DialogContent>
