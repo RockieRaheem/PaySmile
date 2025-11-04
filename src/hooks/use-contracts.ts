@@ -182,9 +182,7 @@ export function useProjects() {
 
           // Fetch without cache-busting for better performance
           projectPromises.push(
-            fetch(`/api/project/${i}`, {
-              next: { revalidate: 30 }, // Cache for 30 seconds
-            }).then((res) => res.json())
+            fetch(`/api/project/${i}`).then((res) => res.json())
           );
         }
 
