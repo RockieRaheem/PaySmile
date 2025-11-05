@@ -400,13 +400,30 @@ export function useProjectDonations(projectId: number) {
       try {
         setIsLoading(true);
         const { createPublicClient, http } = await import("viem");
-        const { celoAlfajores } = await import("viem/chains");
         const { getContractEvents, getBlockNumber } = await import(
           "viem/actions"
         );
+        const { defineChain } = await import("viem");
+
+        // Define Celo Sepolia chain (matching WagmiProvider)
+        const celoSepolia = defineChain({
+          id: 11142220,
+          name: "Celo Sepolia Testnet",
+          nativeCurrency: {
+            decimals: 18,
+            name: "CELO",
+            symbol: "CELO",
+          },
+          rpcUrls: {
+            default: {
+              http: ["https://forno.celo-sepolia.celo-testnet.org"],
+            },
+          },
+          testnet: true,
+        });
 
         const client = createPublicClient({
-          chain: celoAlfajores,
+          chain: celoSepolia,
           transport: http(undefined, {
             timeout: 60_000, // 60 second timeout
             retryCount: 3,
@@ -418,7 +435,7 @@ export function useProjectDonations(projectId: number) {
         const currentBlock = await getBlockNumber(client);
 
         // Only fetch last 50,000 blocks (~1 week on Celo) to avoid timeout
-        // Celo Alfajores has ~5 second block time
+        // Celo has ~5 second block time
         const fromBlock =
           currentBlock > BigInt(50000)
             ? currentBlock - BigInt(50000)

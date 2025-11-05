@@ -25,7 +25,7 @@ import {
 import Image from "next/image";
 import { getProjectImage } from "@/lib/project-images";
 import { SimpleDonationModal } from "@/components/SimpleDonationModal";
-import { projectDetails } from "@/lib/data";
+import { getProjectDetailsByName } from "@/lib/data";
 import {
   useProjects,
   useVoteForProject,
@@ -229,6 +229,9 @@ export default function ProjectDetailPage() {
     project.category || "Education"
   );
 
+  // Get project details by name (not ID) to ensure correct mapping
+  const details = getProjectDetailsByName(project.name);
+
   const hasVoted = votedProjects.has(projectId);
   const donorsCount = donations.length;
   const totalRaised = formatEther(project.currentFunding);
@@ -307,7 +310,7 @@ export default function ProjectDetailPage() {
               </p>
 
               {/* Detailed Information */}
-              {projectDetails[projectId] && (
+              {details && (
                 <Card className="mt-4 border-primary/20">
                   <CardContent className="p-4 space-y-4">
                     <div>
@@ -318,7 +321,7 @@ export default function ProjectDetailPage() {
                         Project Overview
                       </h3>
                       <p className="text-sm text-muted-foreground leading-relaxed">
-                        {projectDetails[projectId].fullDescription}
+                        {details.fullDescription}
                       </p>
                     </div>
 
@@ -332,7 +335,7 @@ export default function ProjectDetailPage() {
                         Current Situation
                       </h3>
                       <p className="text-sm text-muted-foreground leading-relaxed">
-                        {projectDetails[projectId].situation}
+                        {details.situation}
                       </p>
                     </div>
 
@@ -344,7 +347,7 @@ export default function ProjectDetailPage() {
                         Why This is Urgent
                       </h3>
                       <p className="text-sm text-muted-foreground leading-relaxed">
-                        {projectDetails[projectId].urgency}
+                        {details.urgency}
                       </p>
                     </div>
 
@@ -356,7 +359,7 @@ export default function ProjectDetailPage() {
                         Expected Impact
                       </h3>
                       <p className="text-sm text-muted-foreground leading-relaxed">
-                        {projectDetails[projectId].impact}
+                        {details.impact}
                       </p>
                     </div>
                   </CardContent>
@@ -516,41 +519,44 @@ export default function ProjectDetailPage() {
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    {donations.slice(0, 5).map((donation, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between gap-3 p-3 bg-muted/30 rounded-lg"
-                      >
-                        <div className="flex items-center gap-3 min-w-0 flex-1">
-                          <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center shrink-0">
-                            <Heart className="h-5 w-5 text-primary" />
+                    {donations
+                      .filter((d) => d && d.donor && d.amount) // Filter out invalid donations
+                      .slice(0, 5)
+                      .map((donation, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center justify-between gap-3 p-3 bg-muted/30 rounded-lg"
+                        >
+                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                            <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center shrink-0">
+                              <Heart className="h-5 w-5 text-primary" />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="font-medium text-sm truncate">
+                                {donation.donor?.slice(0, 6) || "0x0000"}...
+                                {donation.donor?.slice(-4) || "0000"}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {new Date(
+                                  donation.timestamp * 1000
+                                ).toLocaleDateString()}
+                              </p>
+                            </div>
                           </div>
-                          <div className="min-w-0">
-                            <p className="font-medium text-sm truncate">
-                              {donation.donor.slice(0, 6)}...
-                              {donation.donor.slice(-4)}
+                          <div className="text-right shrink-0">
+                            <p className="font-bold text-primary text-sm">
+                              {Number(formatEther(donation.amount)).toFixed(4)}{" "}
+                              CELO
                             </p>
                             <p className="text-xs text-muted-foreground">
-                              {new Date(
-                                donation.timestamp * 1000
-                              ).toLocaleDateString()}
+                              ≈ $
+                              {(
+                                Number(formatEther(donation.amount)) * 0.5
+                              ).toFixed(2)}
                             </p>
                           </div>
                         </div>
-                        <div className="text-right shrink-0">
-                          <p className="font-bold text-primary text-sm">
-                            {Number(formatEther(donation.amount)).toFixed(4)}{" "}
-                            CELO
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            ≈ $
-                            {(
-                              Number(formatEther(donation.amount)) * 0.5
-                            ).toFixed(2)}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
+                      ))}
 
                     {donations.length > 5 && (
                       <p className="text-center text-sm text-muted-foreground pt-2">

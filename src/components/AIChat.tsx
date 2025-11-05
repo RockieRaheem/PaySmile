@@ -34,7 +34,7 @@ export function AIChatButton() {
     <>
       {/* Floating Chat Button */}
       {!isOpen && (
-        <div className="fixed bottom-24 right-6 z-[100] flex items-center gap-3 group md:bottom-6">
+        <div className="fixed bottom-28 right-6 z-[100] flex items-center gap-3 group md:bottom-8">
           <span className="opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0 transition-all duration-200 bg-primary text-[#333333] font-semibold px-4 py-2 rounded-full shadow-lg whitespace-nowrap text-sm">
             Smiley Helper
           </span>
@@ -164,7 +164,7 @@ function AIChatWindow({ onClose }: AIChatWindowProps) {
   };
 
   return (
-    <div className="fixed bottom-24 right-6 z-[100] w-full max-w-md h-[600px] bg-background border border-border rounded-2xl shadow-2xl flex flex-col overflow-hidden md:bottom-6 sm:right-6 sm:w-[420px]">
+    <div className="fixed bottom-28 right-6 z-[100] w-full max-w-md h-[600px] bg-background border border-border rounded-2xl shadow-2xl flex flex-col overflow-hidden md:bottom-8 sm:right-6 sm:w-[420px]">
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-border bg-card">
         <div className="flex items-center gap-3">
