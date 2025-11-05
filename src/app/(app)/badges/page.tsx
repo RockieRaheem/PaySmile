@@ -79,7 +79,7 @@ export default function BadgesPage() {
   }, [badgeCount]);
 
   return (
-    <div className="flex min-h-screen w-full flex-col bg-gradient-to-b from-background via-primary/5 to-background text-foreground pb-24 overflow-x-hidden">
+    <div className="w-full bg-gradient-to-b from-background via-primary/5 to-background text-foreground overflow-x-hidden">
       {/* Minimal Header */}
       <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-primary/10">
         <div className="flex items-center justify-between p-4">

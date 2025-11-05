@@ -40,8 +40,14 @@ const config = createConfig({
     }),
   ],
   transports: {
-    [localhost.id]: http("http://127.0.0.1:8545"),
-    [celoSepolia.id]: http("https://forno.celo-sepolia.celo-testnet.org"),
+    [localhost.id]: http("http://127.0.0.1:8545", {
+      timeout: 60_000, // 60 second timeout
+    }),
+    [celoSepolia.id]: http("https://forno.celo-sepolia.celo-testnet.org", {
+      timeout: 60_000, // 60 second timeout
+      retryCount: 3,
+      retryDelay: 1000,
+    }),
   },
   ssr: true,
 });

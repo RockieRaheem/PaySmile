@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAccount } from "wagmi";
+import { useRouter } from "next/navigation";
 import { formatEther, parseEther } from "viem";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -49,6 +50,7 @@ interface BlockchainProject {
 export default function ProjectsPage() {
   const [activeCategory, setActiveCategory] = useState("All");
   const { toast } = useToast();
+  const router = useRouter();
   const { address, isConnected } = useAccount();
   const [votingProjectId, setVotingProjectId] = useState<number | null>(null);
   const [donatingProjectId, setDonatingProjectId] = useState<number | null>(
@@ -287,7 +289,7 @@ export default function ProjectsPage() {
   }
 
   return (
-    <div className="flex min-h-screen w-full flex-col bg-background text-foreground overflow-x-hidden">
+    <div className="w-full bg-background text-foreground overflow-x-hidden">
       <header className="sticky top-0 z-10 flex items-center justify-between bg-background p-4 pb-2">
         <Button variant="ghost" size="icon" asChild>
           <Link href="/dashboard">
@@ -343,7 +345,8 @@ export default function ProjectsPage() {
               return (
                 <Card
                   key={project.id}
-                  className="overflow-hidden bg-card shadow-sm"
+                  className="overflow-hidden bg-card shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+                  onClick={() => router.push(`/projects/${project.id}`)}
                 >
                   <CardContent className="space-y-1.5 p-2">
                     {/* Image at top - reduced height 4:3 ratio */}
@@ -393,7 +396,10 @@ export default function ProjectsPage() {
                     </div>
 
                     {/* Buttons - better size */}
-                    <div className="flex gap-1.5 pt-0.5">
+                    <div
+                      className="flex gap-1.5 pt-0.5"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <Button
                         size="sm"
                         className="rounded-md px-2.5 py-1 h-6 text-[10px] flex items-center gap-1 bg-primary text-primary-foreground hover:bg-primary/90 flex-1"

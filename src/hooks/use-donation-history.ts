@@ -40,6 +40,13 @@ export function useDonationHistory() {
     setError(null);
 
     try {
+      // Get current block number
+      const currentBlock = await publicClient.getBlockNumber();
+
+      // Only fetch last 50,000 blocks (~1 week on Celo) to avoid timeout
+      const fromBlock =
+        currentBlock > BigInt(50000) ? currentBlock - BigInt(50000) : BigInt(0);
+
       // Fetch general pool donations (DonationReceived events)
       const generalDonationLogs = await publicClient.getLogs({
         address: DonationPool as `0x${string}`,
@@ -55,7 +62,7 @@ export function useDonationHistory() {
         args: {
           donor: address,
         },
-        fromBlock: BigInt(0),
+        fromBlock: fromBlock,
         toBlock: "latest",
       });
 
@@ -70,7 +77,7 @@ export function useDonationHistory() {
             { type: "uint256", indexed: false, name: "amount" },
           ],
         },
-        fromBlock: BigInt(0),
+        fromBlock: fromBlock,
         toBlock: "latest",
       });
 

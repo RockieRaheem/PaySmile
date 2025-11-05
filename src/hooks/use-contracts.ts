@@ -384,3 +384,82 @@ export function getBadgeTierName(amountUSD: number): string {
   if (amountUSD >= 10) return "Bronze";
   return "Supporter";
 }
+
+/**
+ * Hook to fetch donations for a specific project
+ */
+export function useProjectDonations(projectId: number) {
+  const [donations, setDonations] = useState<
+    Array<{ donor: string; amount: bigint; timestamp: number }>
+  >([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { DonationPool } = useContractAddresses();
+
+  useEffect(() => {
+    const fetchDonations = async () => {
+      try {
+        setIsLoading(true);
+        const { createPublicClient, http } = await import("viem");
+        const { celoAlfajores } = await import("viem/chains");
+        const { getContractEvents, getBlockNumber } = await import(
+          "viem/actions"
+        );
+
+        const client = createPublicClient({
+          chain: celoAlfajores,
+          transport: http(undefined, {
+            timeout: 60_000, // 60 second timeout
+            retryCount: 3,
+            retryDelay: 1000,
+          }),
+        });
+
+        // Get current block number
+        const currentBlock = await getBlockNumber(client);
+
+        // Only fetch last 50,000 blocks (~1 week on Celo) to avoid timeout
+        // Celo Alfajores has ~5 second block time
+        const fromBlock =
+          currentBlock > BigInt(50000)
+            ? currentBlock - BigInt(50000)
+            : BigInt(0);
+
+        // Fetch ProjectFunded events for this project
+        const events = await getContractEvents(client, {
+          address: DonationPool as `0x${string}`,
+          abi: DONATION_POOL_ABI,
+          eventName: "ProjectFunded",
+          fromBlock: fromBlock,
+          toBlock: "latest",
+        });
+
+        // Filter events for this specific project and format
+        const projectDonations = events
+          .filter((event: any) => Number(event.args.projectId) === projectId)
+          .map((event: any) => ({
+            donor: event.args.donor as string,
+            amount: event.args.amount as bigint,
+            timestamp: Number(event.args.timestamp || Date.now() / 1000),
+          }))
+          .sort((a, b) => b.timestamp - a.timestamp); // Sort by most recent
+
+        setDonations(projectDonations);
+      } catch (error) {
+        console.error("Error fetching project donations:", error);
+        // Set empty array on error instead of leaving in loading state
+        setDonations([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (projectId >= 0) {
+      fetchDonations();
+    }
+  }, [projectId, DonationPool]);
+
+  return {
+    donations,
+    isLoading,
+  };
+}

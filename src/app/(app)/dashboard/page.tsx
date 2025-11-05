@@ -104,7 +104,7 @@ export default function DashboardPage() {
     );
   }
   return (
-    <div className="bg-background text-foreground overflow-x-hidden w-full">
+    <div className="bg-background text-foreground overflow-x-hidden w-full min-h-screen">
       <header className="flex items-center justify-between p-4 pb-2">
         <div className="flex items-center gap-2">
           <Smile className="h-8 w-8 text-primary" />

@@ -118,7 +118,7 @@ export default function HistoryPage() {
 
   if (!isConnected) {
     return (
-      <div className="flex min-h-screen flex-col bg-gradient-to-b from-background via-primary/5 to-background">
+      <div className="bg-gradient-to-b from-background via-primary/5 to-background min-h-[calc(100vh-6rem)]">
         <header className="sticky top-0 z-10 flex items-center justify-between bg-background/80 backdrop-blur-md border-b border-primary/10 p-4">
           <Button variant="ghost" size="icon" asChild>
             <Link href="/dashboard">
@@ -149,7 +149,7 @@ export default function HistoryPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-gradient-to-b from-background via-primary/5 to-background pb-24">
+    <div className="bg-gradient-to-b from-background via-primary/5 to-background">
       {/* Header */}
       <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-primary/10">
         <div className="flex items-center justify-between p-4">
