@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAccount } from "wagmi";
+import { useWallet } from "@/hooks/use-wallet";
 import {
   ShoppingCart,
   Heart,
@@ -132,7 +132,7 @@ interface BlockchainProject {
 export default function ShopPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const { address, isConnected } = useAccount();
+  const { address, isConnected } = useWallet();
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [showCheckout, setShowCheckout] = useState(false);

@@ -3,9 +3,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Smile, UserCircle, CheckCircle, LogOut, Loader2 } from "lucide-react";
-import { useAccount, useBalance } from "wagmi";
+import { useBalance } from "wagmi";
 import { formatEther } from "viem";
 import { useEffect, useState } from "react";
+import { useWallet } from "@/hooks/use-wallet";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -46,7 +47,8 @@ function StatCard({ label, value }: { label: string; value: string | number }) {
 }
 
 export default function DashboardPage() {
-  const { address, isConnected } = useAccount();
+  const { address, isConnected, walletType } = useWallet();
+
   const {
     totalDonations,
     isLoading: statsLoading,
@@ -62,7 +64,10 @@ export default function DashboardPage() {
     isLoading: balanceLoading,
     refetch: refetchBalance,
   } = useBalance({
-    address: address,
+    address: address as `0x${string}`,
+    query: {
+      enabled: !!address && walletType === "web3", // Only fetch balance for Web3 wallets
+    },
   });
 
   const [activeProjects, setActiveProjects] = useState<BlockchainProject[]>([]);
@@ -140,7 +145,7 @@ export default function DashboardPage() {
           <Card className="bg-secondary text-secondary-foreground">
             <CardContent className="p-6">
               <p className="text-lg font-medium">Welcome back!</p>
-              {statsLoading || balanceLoading ? (
+              {statsLoading || (balanceLoading && walletType === "web3") ? (
                 <div className="flex items-center gap-2 mt-2">
                   <Loader2 className="h-6 w-6 animate-spin" />
                   <p className="text-sm">Loading your stats...</p>
@@ -148,12 +153,19 @@ export default function DashboardPage() {
               ) : (
                 <>
                   <p className="mt-2 text-4xl font-bold tracking-tight">
-                    {balance
+                    {walletType === "simple"
+                      ? "0.0000"
+                      : balance
                       ? parseFloat(formatEther(balance.value)).toFixed(4)
                       : "0.0000"}{" "}
                     {balance?.symbol || "CELO"}
                   </p>
                   <p className="text-sm">Your Wallet Balance</p>
+                  {walletType === "simple" && (
+                    <p className="text-xs text-secondary-foreground/70 mt-1">
+                      Demo wallet - No real funds
+                    </p>
+                  )}
                   <div className="mt-4 pt-4 border-t border-secondary-foreground/20">
                     <p className="text-2xl font-bold tracking-tight">
                       {totalDonationsNum.toFixed(4)} {balance?.symbol || "CELO"}

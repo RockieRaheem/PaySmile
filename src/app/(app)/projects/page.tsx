@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useAccount } from "wagmi";
 import { useRouter } from "next/navigation";
 import { formatEther, parseEther } from "viem";
+import { useWallet } from "@/hooks/use-wallet";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -51,7 +51,7 @@ export default function ProjectsPage() {
   const [activeCategory, setActiveCategory] = useState("All");
   const { toast } = useToast();
   const router = useRouter();
-  const { address, isConnected } = useAccount();
+  const { address, isConnected } = useWallet();
   const [votingProjectId, setVotingProjectId] = useState<number | null>(null);
   const [donatingProjectId, setDonatingProjectId] = useState<number | null>(
     null

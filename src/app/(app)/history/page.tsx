@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useAccount } from "wagmi";
+import { useWallet } from "@/hooks/use-wallet";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -50,7 +50,7 @@ import {
 } from "@/types/donation-history";
 
 export default function HistoryPage() {
-  const { address, isConnected } = useAccount();
+  const { address, isConnected } = useWallet();
   const { donations, isLoading, error, refetch } = useDonationHistory();
   const stats = useDonationStats(donations);
 

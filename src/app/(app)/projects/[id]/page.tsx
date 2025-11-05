@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useAccount } from "wagmi";
+import { useWallet } from "@/hooks/use-wallet";
 import { formatEther } from "viem";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -61,7 +61,7 @@ export default function ProjectDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
-  const { address, isConnected } = useAccount();
+  const { address, isConnected } = useWallet();
 
   const projectId = parseInt(params.id as string);
   const [showDonateModal, setShowDonateModal] = useState(false);

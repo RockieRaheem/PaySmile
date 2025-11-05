@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useAccount, useReadContract } from "wagmi";
+import { useReadContract } from "wagmi";
+import { useWallet } from "@/hooks/use-wallet";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -51,7 +52,7 @@ const badgeInfo = [
 ];
 
 export default function BadgesPage() {
-  const { address, isConnected } = useAccount();
+  const { address, isConnected } = useWallet();
   const { SmileBadgeNFT } = useContractAddresses();
   const [userBadges, setUserBadges] = useState<number[]>([]);
 
