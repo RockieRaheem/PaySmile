@@ -58,7 +58,20 @@ export default function ProjectsPage() {
   const [showDonateDialog, setShowDonateDialog] = useState(false);
   const [selectedProject, setSelectedProject] =
     useState<BlockchainProject | null>(null);
-  const [votedProjects, setVotedProjects] = useState<Set<number>>(new Set());
+  const [votedProjects, setVotedProjects] = useState<Set<number>>(() => {
+    // Initialize from localStorage if available
+    if (typeof window !== "undefined" && address) {
+      const cached = localStorage.getItem(`voted_projects_${address}`);
+      if (cached) {
+        try {
+          return new Set(JSON.parse(cached));
+        } catch {
+          return new Set();
+        }
+      }
+    }
+    return new Set();
+  });
 
   // Fetch projects from blockchain using the hook
   const { projects, isLoading, refetch, updateProject } = useProjects();
@@ -66,6 +79,36 @@ export default function ProjectsPage() {
   const filteredProjects = projects.filter((project) => {
     return activeCategory === "All" || project.category === activeCategory;
   });
+
+  // Save voted projects to localStorage whenever it changes
+  useEffect(() => {
+    if (address && votedProjects.size > 0) {
+      localStorage.setItem(
+        `voted_projects_${address}`,
+        JSON.stringify(Array.from(votedProjects))
+      );
+    }
+  }, [votedProjects, address]);
+
+  // Clear voted projects when address changes
+  useEffect(() => {
+    if (!address) {
+      setVotedProjects(new Set());
+      return;
+    }
+
+    // Load voted projects for this address
+    const cached = localStorage.getItem(`voted_projects_${address}`);
+    if (cached) {
+      try {
+        setVotedProjects(new Set(JSON.parse(cached)));
+      } catch {
+        setVotedProjects(new Set());
+      }
+    } else {
+      setVotedProjects(new Set());
+    }
+  }, [address]);
 
   // Voting hook
   const { voteForProject, isPending, isConfirming, isSuccess } =
@@ -80,6 +123,11 @@ export default function ProjectsPage() {
   } = useDonateToProject();
 
   const handleVote = async (projectId: number) => {
+    // Check if already voted
+    if (votedProjects.has(projectId)) {
+      return; // Silently ignore if already voted
+    }
+
     if (!isConnected) {
       toast({
         variant: "destructive",
@@ -332,7 +380,15 @@ export default function ProjectsPage() {
                         <span>
                           {formatEther(project.currentFunding).slice(0, 4)} CELO
                         </span>
-                        <span>{project.votesReceived.toString()} votes</span>
+                        <span
+                          className={
+                            project.votesReceived > BigInt(0)
+                              ? "text-primary font-semibold"
+                              : ""
+                          }
+                        >
+                          {project.votesReceived.toString()} votes
+                        </span>
                       </div>
                     </div>
 
@@ -364,12 +420,11 @@ export default function ProjectsPage() {
                         variant={hasVoted ? "default" : "outline"}
                         className={`rounded-md px-2 py-1 h-6 text-[10px] flex items-center gap-1 ${
                           hasVoted
-                            ? "bg-green-600 text-white hover:bg-green-700"
+                            ? "bg-primary text-primary-foreground hover:bg-primary/90"
                             : ""
                         }`}
                         onClick={() => handleVote(project.id)}
                         disabled={
-                          hasVoted ||
                           (isPending && votingProjectId === project.id) ||
                           !project.isActive
                         }
