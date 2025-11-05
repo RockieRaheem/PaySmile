@@ -25,6 +25,7 @@ import {
 import Image from "next/image";
 import { getProjectImage } from "@/lib/project-images";
 import { SimpleDonationModal } from "@/components/SimpleDonationModal";
+import { projectDetails } from "@/lib/data";
 import {
   useProjects,
   useVoteForProject,
@@ -295,28 +296,94 @@ export default function ProjectDetailPage() {
                 {project.category && (
                   <Badge
                     variant="secondary"
-                    className="bg-primary/10 text-primary"
+                    className="bg-primary/10 text-primary shrink-0"
                   >
                     {project.category}
                   </Badge>
                 )}
               </div>
-              <p className="text-muted-foreground">{project.description}</p>
+              <p className="text-muted-foreground leading-relaxed">
+                {project.description}
+              </p>
+
+              {/* Detailed Information */}
+              {projectDetails[projectId] && (
+                <Card className="mt-4 border-primary/20">
+                  <CardContent className="p-4 space-y-4">
+                    <div>
+                      <h3 className="font-semibold text-lg mb-2 flex items-center gap-2">
+                        <span className="material-symbols-outlined text-primary">
+                          info
+                        </span>
+                        Project Overview
+                      </h3>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        {projectDetails[projectId].fullDescription}
+                      </p>
+                    </div>
+
+                    <Separator />
+
+                    <div>
+                      <h3 className="font-semibold text-base mb-2 flex items-center gap-2">
+                        <span className="material-symbols-outlined text-primary text-lg">
+                          warning
+                        </span>
+                        Current Situation
+                      </h3>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        {projectDetails[projectId].situation}
+                      </p>
+                    </div>
+
+                    <Separator />
+
+                    <div>
+                      <h3 className="font-semibold text-base mb-2 flex items-center gap-2">
+                        <Clock className="h-4 w-4 text-primary" />
+                        Why This is Urgent
+                      </h3>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        {projectDetails[projectId].urgency}
+                      </p>
+                    </div>
+
+                    <Separator />
+
+                    <div>
+                      <h3 className="font-semibold text-base mb-2 flex items-center gap-2">
+                        <Target className="h-4 w-4 text-primary" />
+                        Expected Impact
+                      </h3>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        {projectDetails[projectId].impact}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
             </div>
 
             {/* Funding Stats */}
             <Card className="border-primary/20">
               <CardContent className="p-4 space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-3xl font-bold text-primary">
-                      {totalRaised.slice(0, 6)} CELO
+                <div className="flex items-center justify-between gap-4">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-2xl md:text-3xl font-bold text-primary break-words">
+                      {Number(totalRaised) < 0.01
+                        ? totalRaised
+                        : Number(totalRaised).toFixed(2)}{" "}
+                      CELO
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      raised of {goalAmount.slice(0, 6)} CELO goal
+                      raised of{" "}
+                      {Number(goalAmount) < 0.01
+                        ? goalAmount
+                        : Number(goalAmount).toFixed(2)}{" "}
+                      CELO goal
                     </p>
                   </div>
-                  <div className="text-right">
+                  <div className="text-right shrink-0">
                     <p className="text-2xl font-bold">
                       {fundingProgress.toFixed(0)}%
                     </p>
@@ -326,14 +393,16 @@ export default function ProjectDetailPage() {
 
                 <Progress value={fundingProgress} className="h-3" />
 
-                <div className="grid grid-cols-3 gap-4 pt-2">
+                <div className="grid grid-cols-3 gap-2 md:gap-4 pt-2">
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <div className="text-center">
                           <div className="flex items-center justify-center gap-1 text-primary">
-                            <Users className="h-4 w-4" />
-                            <p className="text-xl font-bold">{donorsCount}</p>
+                            <Users className="h-4 w-4 shrink-0" />
+                            <p className="text-lg md:text-xl font-bold truncate">
+                              {donorsCount}
+                            </p>
                           </div>
                           <p className="text-xs text-muted-foreground">
                             Donors
@@ -351,8 +420,8 @@ export default function ProjectDetailPage() {
                       <TooltipTrigger asChild>
                         <div className="text-center">
                           <div className="flex items-center justify-center gap-1 text-primary">
-                            <Heart className="h-4 w-4" />
-                            <p className="text-xl font-bold">
+                            <Heart className="h-4 w-4 shrink-0" />
+                            <p className="text-lg md:text-xl font-bold truncate">
                               {project.votesReceived.toString()}
                             </p>
                           </div>
@@ -370,11 +439,9 @@ export default function ProjectDetailPage() {
                       <TooltipTrigger asChild>
                         <div className="text-center">
                           <div className="flex items-center justify-center gap-1 text-primary">
-                            <TrendingUp className="h-4 w-4" />
-                            <p className="text-xl font-bold">
-                              {(Number(project.currentFunding) * 0.5).toFixed(
-                                0
-                              )}
+                            <TrendingUp className="h-4 w-4 shrink-0" />
+                            <p className="text-lg md:text-xl font-bold truncate">
+                              ${(Number(totalRaised) * 0.5).toFixed(0)}
                             </p>
                           </div>
                           <p className="text-xs text-muted-foreground">USD</p>
@@ -452,14 +519,14 @@ export default function ProjectDetailPage() {
                     {donations.slice(0, 5).map((donation, index) => (
                       <div
                         key={index}
-                        className="flex items-center justify-between p-3 bg-muted/30 rounded-lg"
+                        className="flex items-center justify-between gap-3 p-3 bg-muted/30 rounded-lg"
                       >
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center shrink-0">
                             <Heart className="h-5 w-5 text-primary" />
                           </div>
-                          <div>
-                            <p className="font-medium text-sm">
+                          <div className="min-w-0">
+                            <p className="font-medium text-sm truncate">
                               {donation.donor.slice(0, 6)}...
                               {donation.donor.slice(-4)}
                             </p>
@@ -470,9 +537,10 @@ export default function ProjectDetailPage() {
                             </p>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <p className="font-bold text-primary">
-                            {formatEther(donation.amount).slice(0, 6)} CELO
+                        <div className="text-right shrink-0">
+                          <p className="font-bold text-primary text-sm">
+                            {Number(formatEther(donation.amount)).toFixed(4)}{" "}
+                            CELO
                           </p>
                           <p className="text-xs text-muted-foreground">
                             ≈ $
