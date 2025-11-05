@@ -367,114 +367,117 @@ export default function ProjectsPage() {
               const hasVoted = votedProjects.has(project.id);
 
               return (
-                <Card
+                <Link
                   key={project.id}
-                  className="overflow-hidden bg-card shadow-sm cursor-pointer hover:shadow-md transition-shadow"
-                  onClick={() => router.push(`/projects/${project.id}`)}
+                  href={`/projects/${project.id}`}
+                  prefetch={true}
                 >
-                  <CardContent className="space-y-1.5 p-2">
-                    {/* Image at top - reduced height 4:3 ratio */}
-                    <div className="relative aspect-[4/3] w-full overflow-hidden rounded bg-muted">
-                      <Image
-                        src={getProjectImage(
-                          project.name,
-                          project.category,
-                          project.description
-                        )}
-                        alt={project.name}
-                        fill
-                        className="object-cover"
-                        quality={100}
-                        style={{ imageRendering: "crisp-edges" }}
-                        unoptimized
-                      />
-                    </div>
+                  <Card className="overflow-hidden bg-card shadow-sm cursor-pointer hover:shadow-md transition-shadow">
+                    <CardContent className="space-y-1.5 p-2">
+                      {/* Image at top - reduced height 4:3 ratio */}
+                      <div className="relative aspect-[4/3] w-full overflow-hidden rounded bg-muted">
+                        <Image
+                          src={getProjectImage(
+                            project.name,
+                            project.category,
+                            project.description
+                          )}
+                          alt={project.name}
+                          fill
+                          className="object-cover"
+                          quality={100}
+                          style={{ imageRendering: "crisp-edges" }}
+                          unoptimized
+                        />
+                      </div>
 
-                    {/* Header with title - readable size */}
-                    <div>
-                      <p className="text-xs font-bold leading-tight line-clamp-1">
-                        {project.name}
-                      </p>
-                    </div>
+                      {/* Header with title - readable size */}
+                      <div>
+                        <p className="text-xs font-bold leading-tight line-clamp-1">
+                          {project.name}
+                        </p>
+                      </div>
 
-                    {/* Progress bar and funding - more visible */}
-                    <div className="space-y-1">
-                      <Progress
-                        value={fundingProgress}
-                        className="h-1.5 rounded bg-green-100"
-                      />
-                      <div className="flex items-center justify-between text-[10px] text-muted-foreground font-medium">
-                        <span>
-                          {formatEther(project.currentFunding).slice(0, 4)} CELO
-                        </span>
-                        <span
-                          className={
-                            project.votesReceived > BigInt(0)
-                              ? "text-primary font-semibold"
-                              : ""
+                      {/* Progress bar and funding - more visible */}
+                      <div className="space-y-1">
+                        <Progress
+                          value={fundingProgress}
+                          className="h-1.5 rounded bg-green-100"
+                        />
+                        <div className="flex items-center justify-between text-[10px] text-muted-foreground font-medium">
+                          <span>
+                            {formatEther(project.currentFunding).slice(0, 4)}{" "}
+                            CELO
+                          </span>
+                          <span
+                            className={
+                              project.votesReceived > BigInt(0)
+                                ? "text-primary font-semibold"
+                                : ""
+                            }
+                          >
+                            {project.votesReceived.toString()} votes
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Buttons - better size */}
+                      <div
+                        className="flex gap-1.5 pt-0.5"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <Button
+                          size="sm"
+                          className="rounded-md px-2.5 py-1 h-6 text-[10px] flex items-center gap-1 bg-primary text-primary-foreground hover:bg-primary/90 flex-1"
+                          onClick={() => handleDonateClick(project)}
+                          disabled={
+                            (isDonating && donatingProjectId === project.id) ||
+                            !project.isActive ||
+                            project.isFunded
                           }
                         >
-                          {project.votesReceived.toString()} votes
-                        </span>
+                          {isDonating && donatingProjectId === project.id ? (
+                            <Loader2 className="h-2.5 w-2.5 animate-spin" />
+                          ) : (
+                            <>
+                              <DollarSign className="h-3 w-3" />
+                              <span>Donate</span>
+                            </>
+                          )}
+                        </Button>
+
+                        {/* Vote button with heart - green when voted */}
+                        <Button
+                          size="sm"
+                          variant={hasVoted ? "default" : "outline"}
+                          className={`rounded-md px-2 py-1 h-6 text-[10px] flex items-center gap-1 ${
+                            hasVoted
+                              ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                              : ""
+                          }`}
+                          onClick={() => handleVote(project.id)}
+                          disabled={
+                            (isPending && votingProjectId === project.id) ||
+                            !project.isActive
+                          }
+                        >
+                          {isPending && votingProjectId === project.id ? (
+                            <Loader2 className="h-2.5 w-2.5 animate-spin" />
+                          ) : (
+                            <>
+                              <Heart
+                                className={`h-[11px] w-[11px] ${
+                                  hasVoted ? "fill-current" : ""
+                                }`}
+                              />
+                              <span>{hasVoted ? "Voted" : "Vote"}</span>
+                            </>
+                          )}
+                        </Button>
                       </div>
-                    </div>
-
-                    {/* Buttons - better size */}
-                    <div
-                      className="flex gap-1.5 pt-0.5"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <Button
-                        size="sm"
-                        className="rounded-md px-2.5 py-1 h-6 text-[10px] flex items-center gap-1 bg-primary text-primary-foreground hover:bg-primary/90 flex-1"
-                        onClick={() => handleDonateClick(project)}
-                        disabled={
-                          (isDonating && donatingProjectId === project.id) ||
-                          !project.isActive ||
-                          project.isFunded
-                        }
-                      >
-                        {isDonating && donatingProjectId === project.id ? (
-                          <Loader2 className="h-2.5 w-2.5 animate-spin" />
-                        ) : (
-                          <>
-                            <DollarSign className="h-3 w-3" />
-                            <span>Donate</span>
-                          </>
-                        )}
-                      </Button>
-
-                      {/* Vote button with heart - green when voted */}
-                      <Button
-                        size="sm"
-                        variant={hasVoted ? "default" : "outline"}
-                        className={`rounded-md px-2 py-1 h-6 text-[10px] flex items-center gap-1 ${
-                          hasVoted
-                            ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                            : ""
-                        }`}
-                        onClick={() => handleVote(project.id)}
-                        disabled={
-                          (isPending && votingProjectId === project.id) ||
-                          !project.isActive
-                        }
-                      >
-                        {isPending && votingProjectId === project.id ? (
-                          <Loader2 className="h-2.5 w-2.5 animate-spin" />
-                        ) : (
-                          <>
-                            <Heart
-                              className={`h-[11px] w-[11px] ${
-                                hasVoted ? "fill-current" : ""
-                              }`}
-                            />
-                            <span>{hasVoted ? "Voted" : "Vote"}</span>
-                          </>
-                        )}
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
+                </Link>
               );
             })}
           </div>
