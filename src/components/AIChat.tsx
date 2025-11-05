@@ -29,6 +29,17 @@ const AI_AVATAR =
 
 export function AIChatButton() {
   const [isOpen, setIsOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  // Prevent hydration mismatch by only rendering after mount
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Don't render anything until mounted on client
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <>

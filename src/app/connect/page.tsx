@@ -15,6 +15,8 @@ import {
   Copy,
   Eye,
   EyeOff,
+  User,
+  LogOut,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -72,22 +74,32 @@ export default function ConnectWalletPage() {
     privateKey: string;
   } | null>(null);
   const [showPrivateKey, setShowPrivateKey] = useState(false);
+  const [showWelcomeBack, setShowWelcomeBack] = useState(false);
+  const [savedWalletAddress, setSavedWalletAddress] = useState<string | null>(
+    null
+  );
   const { toast } = useToast();
 
   const valoraLogo = PlaceHolderImages.find((img) => img.id === "valora-logo");
   const celoLogo = PlaceHolderImages.find((img) => img.id === "celo-logo");
 
-  // Check if user already has a simple wallet saved
+  // Check if user already has a wallet saved (simple or web3)
   useEffect(() => {
     const savedWallet = localStorage.getItem("paysmile_simple_wallet");
-    if (savedWallet) {
-      try {
-        const wallet = JSON.parse(savedWallet);
-        setSimpleWallet(wallet);
-        localStorage.setItem("paysmile_wallet_type", "simple");
-        localStorage.setItem("paysmile_connected_address", wallet.address);
-      } catch (e) {
-        console.error("Failed to load saved wallet");
+    const savedAddress = localStorage.getItem("paysmile_connected_address");
+
+    if (savedWallet || savedAddress) {
+      // Show welcome back screen instead of auto-connecting
+      setShowWelcomeBack(true);
+      setSavedWalletAddress(savedAddress);
+
+      if (savedWallet) {
+        try {
+          const wallet = JSON.parse(savedWallet);
+          setSimpleWallet(wallet);
+        } catch (e) {
+          console.error("Failed to load saved wallet");
+        }
       }
     }
   }, []);
@@ -137,8 +149,41 @@ export default function ConnectWalletPage() {
 
   const handleContinueWithSimpleWallet = () => {
     if (simpleWallet) {
+      // Set wallet type and address in localStorage
+      localStorage.setItem("paysmile_wallet_type", "simple");
+      localStorage.setItem("paysmile_connected_address", simpleWallet.address);
       router.push("/dashboard");
     }
+  };
+
+  const handleContinueWithSavedWallet = () => {
+    const walletType = localStorage.getItem("paysmile_wallet_type");
+
+    if (walletType === "simple" && simpleWallet) {
+      localStorage.setItem("paysmile_connected_address", simpleWallet.address);
+      router.push("/dashboard");
+    } else if (walletType === "web3") {
+      // For web3 wallets, we need to reconnect via wagmi
+      // The wallet should auto-connect if it was previously connected
+      router.push("/dashboard");
+    }
+  };
+
+  const handleConnectNewWallet = () => {
+    // Clear saved wallet data
+    localStorage.removeItem("paysmile_simple_wallet");
+    localStorage.removeItem("paysmile_connected_address");
+    localStorage.removeItem("paysmile_wallet_type");
+
+    // Reset state
+    setShowWelcomeBack(false);
+    setSimpleWallet(null);
+    setSavedWalletAddress(null);
+
+    toast({
+      title: "Wallet Cleared",
+      description: "You can now connect a new wallet",
+    });
   };
 
   const copyToClipboard = (text: string, label: string) => {
@@ -150,14 +195,16 @@ export default function ConnectWalletPage() {
   };
 
   useEffect(() => {
-    if (isConnected && address) {
+    // Only auto-navigate if user actively connected (not just cached connection)
+    // and they're not on the welcome back screen
+    if (isConnected && address && !showWelcomeBack && connectingId) {
       localStorage.setItem("paysmile_wallet_type", "web3");
       localStorage.setItem("paysmile_connected_address", address);
       setTimeout(() => {
         router.push("/dashboard");
       }, 500);
     }
-  }, [isConnected, address, router]);
+  }, [isConnected, address, router, showWelcomeBack, connectingId]);
 
   useEffect(() => {
     if (error) {
@@ -166,6 +213,92 @@ export default function ConnectWalletPage() {
   }, [error]);
 
   const injectedConnector = connectors.find((c) => c.id === "injected");
+
+  // Show Welcome Back screen if user has a saved wallet
+  if (showWelcomeBack && savedWalletAddress) {
+    return (
+      <div className="flex min-h-screen flex-col bg-gradient-to-b from-background to-secondary/20">
+        {/* Header */}
+        <header className="flex items-center justify-between p-4">
+          <Button variant="ghost" size="icon" asChild>
+            <Link href="/">
+              <span className="material-symbols-outlined">arrow_back</span>
+            </Link>
+          </Button>
+          <h1 className="flex-1 text-center text-lg font-bold">Welcome Back</h1>
+          <div className="w-10" />
+        </header>
+
+        <main className="flex flex-1 flex-col px-4 py-4 max-w-3xl mx-auto w-full pb-8">
+          {/* Hero Section */}
+          <div className="mb-6 text-center">
+            <div className="mb-4 flex items-center justify-center">
+              <div className="rounded-full bg-primary/10 p-6">
+                <User className="h-16 w-16 text-primary" />
+              </div>
+            </div>
+            <h2 className="mb-2 text-2xl font-bold">Welcome Back!</h2>
+            <p className="text-muted-foreground">
+              We found a saved wallet on this device
+            </p>
+          </div>
+
+          {/* Saved Wallet Info */}
+          <Card className="mb-6 border-primary/20">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                  <Wallet className="h-6 w-6 text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Saved Wallet
+                  </p>
+                  <code className="text-sm font-mono break-all">
+                    {savedWalletAddress.slice(0, 10)}...
+                    {savedWalletAddress.slice(-8)}
+                  </code>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Action Buttons */}
+          <div className="space-y-3">
+            <Button
+              size="lg"
+              className="w-full h-14 text-lg font-semibold"
+              onClick={handleContinueWithSavedWallet}
+            >
+              <ArrowRight className="mr-2 h-5 w-5" />
+              Continue with Saved Wallet
+            </Button>
+
+            <Button
+              size="lg"
+              variant="outline"
+              className="w-full h-14 text-lg font-semibold"
+              onClick={handleConnectNewWallet}
+            >
+              <LogOut className="mr-2 h-5 w-5" />
+              Connect a Different Wallet
+            </Button>
+          </div>
+
+          {/* Information */}
+          <Alert className="mt-6">
+            <Info className="h-4 w-4" />
+            <AlertDescription className="text-xs">
+              <strong>Tip:</strong> If you want to connect a different wallet,
+              click "Connect a Different Wallet" to clear your saved wallet and
+              start fresh. You can always come back to your saved wallet later
+              by restoring it with your private key.
+            </AlertDescription>
+          </Alert>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen flex-col bg-gradient-to-b from-background to-secondary/20">
