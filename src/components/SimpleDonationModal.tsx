@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useDonateToProject } from "@/hooks/use-contracts";
+import { BadgeUnlockAnimation } from "@/components/BadgeUnlockAnimation";
 
 interface SimpleDonationModalProps {
   projectId: number;
@@ -47,6 +48,17 @@ export function SimpleDonationModal({
     "form" | "processing" | "payment" | "success"
   >("form");
   const [paymentLink, setPaymentLink] = useState<string>("");
+
+  // Badge animation state
+  const [showBadgeAnimation, setShowBadgeAnimation] = useState(false);
+  const [badgeData, setBadgeData] = useState<{
+    tier: string;
+    name: string;
+    image: string;
+    achievementTitle: string;
+    achievementMessage: string;
+    transactionHash: string;
+  } | null>(null);
 
   // Wallet connection
   const { address, isConnected } = useAccount();
@@ -162,10 +174,16 @@ export function SimpleDonationModal({
             const data = await response.json();
 
             if (response.ok) {
-              toast({
-                title: "Badge Earned! 🏅",
-                description: `You earned a ${data.tierName} badge for your donation!`,
+              // Show gamified badge unlock animation
+              setBadgeData({
+                tier: data.tier,
+                name: data.badgeName,
+                image: data.badgeImage,
+                achievementTitle: data.achievementTitle,
+                achievementMessage: data.achievementMessage,
+                transactionHash: data.transactionHash,
               });
+              setShowBadgeAnimation(true);
             } else {
               console.error("Badge minting failed:", data.error);
               // Don't show error to user, badge minting is optional
@@ -377,15 +395,25 @@ export function SimpleDonationModal({
                       }),
                     });
 
-                    const badgeData = await response.json();
+                    const badgeDataResponse = await response.json();
 
                     if (response.ok) {
-                      toast({
-                        title: "Badge Earned! 🏅",
-                        description: `You earned a ${badgeData.tierName} badge for your donation!`,
+                      // Show gamified badge unlock animation
+                      setBadgeData({
+                        tier: badgeDataResponse.tier,
+                        name: badgeDataResponse.badgeName,
+                        image: badgeDataResponse.badgeImage,
+                        achievementTitle: badgeDataResponse.achievementTitle,
+                        achievementMessage:
+                          badgeDataResponse.achievementMessage,
+                        transactionHash: badgeDataResponse.transactionHash,
                       });
+                      setShowBadgeAnimation(true);
                     } else {
-                      console.error("Badge minting failed:", badgeData.error);
+                      console.error(
+                        "Badge minting failed:",
+                        badgeDataResponse.error
+                      );
                       // Don't show error to user, badge minting is optional
                     }
                   }
@@ -890,6 +918,18 @@ export function SimpleDonationModal({
           </div>
         )}
       </DialogContent>
+
+      {/* Badge unlock animation modal */}
+      {badgeData && (
+        <BadgeUnlockAnimation
+          isOpen={showBadgeAnimation}
+          onClose={() => {
+            setShowBadgeAnimation(false);
+            setBadgeData(null);
+          }}
+          badgeData={badgeData}
+        />
+      )}
     </Dialog>
   );
 }

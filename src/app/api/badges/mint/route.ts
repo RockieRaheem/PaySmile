@@ -3,6 +3,11 @@ import { createWalletClient, http, publicActions } from "viem";
 import { celoAlfajores } from "viem/chains";
 import { privateKeyToAccount } from "viem/accounts";
 import { SMILE_BADGE_NFT_ABI } from "@/lib/abis/SmileBadgeNFT";
+import {
+  getBadgeForAmount,
+  getBadgeTypeFromAmount,
+  getAchievementMessage,
+} from "@/lib/badge-images";
 
 /**
  * POST /api/badges/mint
@@ -63,15 +68,27 @@ export async function POST(request: NextRequest) {
     }
 
     // Determine badge type based on donation amount
+    const badgeMetadata = getBadgeForAmount(parseFloat(donationAmount));
+
+    if (!badgeMetadata) {
+      return NextResponse.json(
+        { error: "Donation amount must be at least $10 to receive a badge" },
+        { status: 400 }
+      );
+    }
+
     const badgeType = getBadgeTypeFromAmount(parseFloat(donationAmount));
-    const tierName = getBadgeTierName(parseFloat(donationAmount));
+    const [achievementTitle, achievementMessage] = getAchievementMessage(
+      badgeMetadata.tier,
+      projectName
+    );
 
     // Create token URI (metadata for the NFT)
     const tokenURI = generateTokenURI(
       recipientAddress,
       projectName,
       donationAmount,
-      tierName,
+      badgeMetadata,
       projectId,
       transactionHash
     );
@@ -87,17 +104,18 @@ export async function POST(request: NextRequest) {
     console.log("Minting badge:", {
       recipient: recipientAddress,
       badgeType,
-      tierName,
+      tier: badgeMetadata.tier,
       amount: donationAmount,
       project: projectName,
     });
 
-    // Mint the badge
+    // Mint the badge with gas estimation
     const hash = await client.writeContract({
       address: contractAddress as `0x${string}`,
       abi: SMILE_BADGE_NFT_ABI,
       functionName: "mintBadge",
       args: [recipientAddress as `0x${string}`, badgeType, tokenURI],
+      gas: BigInt(500000), // Set reasonable gas limit for minting
     });
 
     // Wait for transaction receipt
@@ -112,7 +130,11 @@ export async function POST(request: NextRequest) {
       success: true,
       transactionHash: hash,
       badgeType,
-      tierName,
+      tier: badgeMetadata.tier,
+      badgeName: badgeMetadata.name,
+      badgeImage: badgeMetadata.image,
+      achievementTitle,
+      achievementMessage,
       tokenURI,
     });
   } catch (error: any) {
@@ -134,54 +156,30 @@ export async function POST(request: NextRequest) {
 }
 
 /**
- * Determine badge type based on donation amount
- * Matches the enum in SmileBadgeNFT contract
- */
-function getBadgeTypeFromAmount(amountUSD: number): number {
-  if (amountUSD >= 250) {
-    return 4; // HEALTH_HERO (Platinum tier)
-  } else if (amountUSD >= 100) {
-    return 5; // GREEN_GUARDIAN (Gold tier)
-  } else if (amountUSD >= 50) {
-    return 2; // EDUCATION_CHAMPION (Silver tier)
-  } else if (amountUSD >= 10) {
-    return 0; // FIRST_STEP (Bronze tier)
-  }
-  return 0; // Default to FIRST_STEP
-}
-
-/**
- * Get badge tier name from amount
- */
-function getBadgeTierName(amountUSD: number): string {
-  if (amountUSD >= 250) return "Platinum";
-  if (amountUSD >= 100) return "Gold";
-  if (amountUSD >= 50) return "Silver";
-  if (amountUSD >= 10) return "Bronze";
-  return "Supporter";
-}
-
-/**
  * Generate metadata URI for the badge NFT
- * In production, this should be IPFS or hosted metadata
- * For now, we use data URIs with JSON metadata
+ * Uses actual badge images and rich metadata
  */
 function generateTokenURI(
   recipient: string,
   projectName: string,
   amount: string,
-  tier: string,
+  badgeMetadata: any,
   projectId: number,
   transactionHash?: string
 ): string {
   const metadata = {
-    name: `PaySmile ${tier} Badge`,
-    description: `Awarded for donating $${amount} to ${projectName}`,
-    image: `https://paysmile.app/badges/${tier.toLowerCase()}.png`, // TODO: Replace with actual badge images
+    name: `PaySmile ${badgeMetadata.name}`,
+    description: `${badgeMetadata.description}\n\nAwarded for donating $${amount} to ${projectName}`,
+    image: badgeMetadata.image,
+    external_url: `https://paysmile.app/badges/${recipient}`,
     attributes: [
       {
         trait_type: "Tier",
-        value: tier,
+        value: badgeMetadata.tier,
+      },
+      {
+        trait_type: "Badge Name",
+        value: badgeMetadata.name,
       },
       {
         trait_type: "Project",
@@ -193,7 +191,13 @@ function generateTokenURI(
       },
       {
         trait_type: "Donation Amount (USD)",
-        value: amount,
+        display_type: "number",
+        value: parseFloat(amount),
+      },
+      {
+        trait_type: "Minimum Amount",
+        display_type: "number",
+        value: badgeMetadata.minAmount,
       },
       {
         trait_type: "Donor",
@@ -201,12 +205,17 @@ function generateTokenURI(
       },
       {
         trait_type: "Date",
-        value: new Date().toISOString(),
+        display_type: "date",
+        value: Math.floor(Date.now() / 1000),
+      },
+      {
+        trait_type: "Achievement",
+        value: badgeMetadata.emoji,
       },
       ...(transactionHash
         ? [
             {
-              trait_type: "Transaction",
+              trait_type: "Transaction Hash",
               value: transactionHash,
             },
           ]
