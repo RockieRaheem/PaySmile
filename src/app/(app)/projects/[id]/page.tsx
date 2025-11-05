@@ -13,7 +13,6 @@ import {
   ArrowLeft,
   Heart,
   Share2,
-  Loader2,
   Calendar,
   Target,
   TrendingUp,
@@ -21,7 +20,9 @@ import {
   DollarSign,
   CheckCircle,
   Clock,
+  Loader2,
 } from "lucide-react";
+import { ProjectDetailSkeleton } from "@/components/loading-skeletons";
 import Image from "next/image";
 import { getProjectImage } from "@/lib/project-images";
 import { SimpleDonationModal } from "@/components/SimpleDonationModal";
@@ -190,11 +191,7 @@ export default function ProjectDetailPage() {
   };
 
   if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
-      </div>
-    );
+    return <ProjectDetailSkeleton />;
   }
 
   if (!project) {

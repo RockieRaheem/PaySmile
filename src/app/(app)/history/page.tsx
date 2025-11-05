@@ -11,12 +11,15 @@ import {
   Calendar,
   Award,
   ExternalLink,
-  Loader2,
   Search,
   X,
   DollarSign,
   Target,
 } from "lucide-react";
+import {
+  HistoryListSkeleton,
+  DashboardStatsSkeleton,
+} from "@/components/loading-skeletons";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -386,11 +389,9 @@ export default function HistoryPage() {
 
         {/* Loading State */}
         {isLoading && (
-          <div className="flex flex-col items-center justify-center py-12 space-y-4">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="text-sm text-muted-foreground">
-              Loading your donation history...
-            </p>
+          <div className="space-y-6">
+            <DashboardStatsSkeleton />
+            <HistoryListSkeleton count={5} />
           </div>
         )}
 

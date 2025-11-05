@@ -30,11 +30,12 @@ export function BottomNav() {
             <Link
               key={item.href}
               href={item.href}
+              prefetch={true}
               className={cn(
-                "flex flex-col items-center justify-center gap-1 text-muted-foreground transition-colors flex-1 min-h-[56px] min-w-[56px] rounded-lg active:bg-accent/50",
+                "flex flex-col items-center justify-center gap-1 text-muted-foreground transition-all duration-200 flex-1 min-h-[56px] min-w-[56px] rounded-lg active:scale-95 active:bg-accent/50",
                 isActive
                   ? "text-primary font-semibold"
-                  : "hover:text-foreground"
+                  : "hover:text-foreground hover:bg-accent/30"
               )}
             >
               <span

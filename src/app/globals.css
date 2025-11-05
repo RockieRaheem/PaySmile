@@ -186,6 +186,16 @@
   }
 }
 
+/* Animations */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
 /* Mobile-specific optimizations */
 @media (max-width: 768px) {
   /* Larger touch targets on mobile */

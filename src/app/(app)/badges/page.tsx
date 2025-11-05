@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Award, Trophy, Lock, Sparkles, Star } from "lucide-react";
+import { BadgesGridSkeleton } from "@/components/loading-skeletons";
 import { useContractAddresses } from "@/hooks/use-contracts";
 import { SMILE_BADGE_NFT_ABI } from "@/lib/abis/SmileBadgeNFT";
 
@@ -103,8 +104,19 @@ export default function BadgesPage() {
       <main className="flex-1 p-4 space-y-6">
         {/* Loading State */}
         {isLoading && (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <div className="space-y-6">
+            <div className="flex flex-col items-center py-4 space-y-2">
+              <div className="h-24 w-24 rounded-full bg-muted animate-pulse" />
+              <div className="flex gap-1">
+                {[1, 2, 3, 4].map((i) => (
+                  <div
+                    key={i}
+                    className="h-3 w-3 rounded-full bg-muted animate-pulse"
+                  />
+                ))}
+              </div>
+            </div>
+            <BadgesGridSkeleton count={5} />
           </div>
         )}
 

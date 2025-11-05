@@ -2,7 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Smile, UserCircle, CheckCircle, LogOut, Loader2 } from "lucide-react";
+import { Smile, UserCircle, CheckCircle, LogOut } from "lucide-react";
+import {
+  DashboardStatsSkeleton,
+  ActivityFeedSkeleton,
+} from "@/components/loading-skeletons";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useBalance } from "wagmi";
 import { formatEther } from "viem";
 import { useEffect, useState } from "react";
@@ -146,9 +151,13 @@ export default function DashboardPage() {
             <CardContent className="p-6">
               <p className="text-lg font-medium">Welcome back!</p>
               {statsLoading || (balanceLoading && walletType === "web3") ? (
-                <div className="flex items-center gap-2 mt-2">
-                  <Loader2 className="h-6 w-6 animate-spin" />
-                  <p className="text-sm">Loading your stats...</p>
+                <div className="space-y-3 mt-4">
+                  <Skeleton className="h-12 w-48" />
+                  <Skeleton className="h-4 w-32" />
+                  <div className="pt-4 space-y-2">
+                    <Skeleton className="h-8 w-40" />
+                    <Skeleton className="h-4 w-36" />
+                  </div>
                 </div>
               ) : (
                 <>
@@ -198,8 +207,18 @@ export default function DashboardPage() {
             </Button>
           </div>
           {projectsLoading ? (
-            <div className="flex items-center justify-center p-8">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 w-full">
+              {[1, 2, 3, 4].map((i) => (
+                <div
+                  key={i}
+                  className="aspect-square relative overflow-hidden rounded-lg border"
+                >
+                  <Skeleton className="h-full w-full" />
+                  <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/60 to-transparent">
+                    <Skeleton className="h-4 w-3/4 bg-white/20" />
+                  </div>
+                </div>
+              ))}
             </div>
           ) : activeProjects.length === 0 ? (
             <Card>
@@ -284,8 +303,18 @@ export default function DashboardPage() {
             </Button>
           </div>
           {projectsLoading ? (
-            <div className="flex items-center justify-center p-8">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 w-full">
+              {[1, 2, 3, 4].map((i) => (
+                <div
+                  key={i}
+                  className="aspect-square relative overflow-hidden rounded-lg border"
+                >
+                  <Skeleton className="h-full w-full" />
+                  <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/60 to-transparent">
+                    <Skeleton className="h-4 w-3/4 bg-white/20" />
+                  </div>
+                </div>
+              ))}
             </div>
           ) : fundedProjects.length === 0 ? (
             <Card>

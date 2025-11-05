@@ -11,6 +11,7 @@ import { projectCategories } from "@/lib/data";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
 import { Loader2, Wallet, DollarSign, Heart } from "lucide-react";
+import { ProjectGridSkeleton } from "@/components/loading-skeletons";
 import HeartButton from "@/components/ui/heart-button";
 import {
   useVoteForProject,
@@ -279,11 +280,34 @@ export default function ProjectsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-background">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
-        <p className="mt-4 text-muted-foreground">
-          Loading projects from blockchain...
-        </p>
+      <div className="w-full bg-background text-foreground">
+        <header className="sticky top-0 z-10 flex items-center justify-between bg-background p-4 pb-2">
+          <Button variant="ghost" size="icon" asChild>
+            <Link href="/dashboard">
+              <span className="material-symbols-outlined">arrow_back</span>
+            </Link>
+          </Button>
+          <h1 className="flex-1 text-center text-lg font-bold">
+            Donate to Projects
+          </h1>
+          <div className="w-10" />
+        </header>
+
+        <main className="p-4 space-y-6">
+          <NetworkChecker />
+
+          {/* Category skeleton */}
+          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div
+                key={i}
+                className="px-4 py-2 rounded-full bg-muted animate-pulse h-9 w-24"
+              />
+            ))}
+          </div>
+
+          <ProjectGridSkeleton count={6} />
+        </main>
       </div>
     );
   }
